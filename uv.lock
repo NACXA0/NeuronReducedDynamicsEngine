@@ -528,6 +528,68 @@ wheels = [
 ]
 
 [[package]]
+name = "neuron-reduced-dynamics-engine"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
+    { name = "numpy", version = "2.5.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+    { name = "pyarrow" },
+    { name = "pyyaml" },
+    { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
+    { name = "scipy", version = "1.18.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+]
+
+[package.optional-dependencies]
+demo-assets = [
+    { name = "imageio" },
+]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "ruff" },
+]
+docs = [
+    { name = "mkdocs" },
+    { name = "mkdocs-material" },
+]
+fly = [
+    { name = "flygym", marker = "python_full_version >= '3.12' and python_full_version < '3.15'" },
+]
+flygym = [
+    { name = "flygym", marker = "python_full_version >= '3.12' and python_full_version < '3.15'" },
+]
+jax = [
+    { name = "jax", version = "0.6.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "jax", version = "0.10.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
+    { name = "jax", version = "0.11.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+]
+pysr = [
+    { name = "pysr" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "flygym", marker = "python_full_version >= '3.12' and python_full_version < '3.15' and extra == 'fly'", specifier = ">=2.1" },
+    { name = "flygym", marker = "python_full_version >= '3.12' and python_full_version < '3.15' and extra == 'flygym'", specifier = ">=2.1" },
+    { name = "imageio", marker = "extra == 'demo-assets'", specifier = ">=2.31" },
+    { name = "jax", marker = "extra == 'jax'", specifier = ">=0.4.20" },
+    { name = "mkdocs", marker = "extra == 'docs'", specifier = ">=1.5" },
+    { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.0" },
+    { name = "numpy", specifier = ">=1.24" },
+    { name = "pyarrow", specifier = ">=14.0" },
+    { name = "pysr", marker = "extra == 'pysr'", specifier = ">=0.18" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.4" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.1" },
+    { name = "pyyaml", specifier = ">=6.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.5" },
+    { name = "scipy", specifier = ">=1.11" },
+]
+provides-extras = ["jax", "flygym", "fly", "pysr", "dev", "docs", "demo-assets"]
+
+[[package]]
 name = "flygym"
 version = "2.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -625,60 +687,6 @@ wheels = [
 ]
 
 [[package]]
-name = "fre-neuron-engine"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
-    { name = "numpy", version = "2.5.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
-    { name = "pyarrow" },
-    { name = "pyyaml" },
-    { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
-    { name = "scipy", version = "1.18.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "pytest" },
-    { name = "pytest-cov" },
-    { name = "ruff" },
-]
-docs = [
-    { name = "mkdocs" },
-    { name = "mkdocs-material" },
-]
-flygym = [
-    { name = "flygym", marker = "python_full_version >= '3.12' and python_full_version < '3.15'" },
-]
-jax = [
-    { name = "jax", version = "0.6.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "jax", version = "0.10.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
-    { name = "jax", version = "0.11.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
-]
-pysr = [
-    { name = "pysr" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "flygym", marker = "python_full_version >= '3.12' and python_full_version < '3.15' and extra == 'flygym'", specifier = ">=2.1" },
-    { name = "jax", marker = "extra == 'jax'", specifier = ">=0.4.20" },
-    { name = "mkdocs", marker = "extra == 'docs'", specifier = ">=1.5" },
-    { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.0" },
-    { name = "numpy", specifier = ">=1.24" },
-    { name = "pyarrow", specifier = ">=14.0" },
-    { name = "pysr", marker = "extra == 'pysr'", specifier = ">=0.18" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.4" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.1" },
-    { name = "pyyaml", specifier = ">=6.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.5" },
-    { name = "scipy", specifier = ">=1.11" },
-]
-provides-extras = ["jax", "flygym", "pysr", "dev", "docs"]
-
-[[package]]
 name = "fsspec"
 version = "2026.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -729,7 +737,9 @@ name = "imageio"
 version = "2.37.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "numpy", version = "2.5.3", source = { registry = "https://pypi.org/simple" } },
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
+    { name = "numpy", version = "2.5.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "pillow" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/48/62/aa770a9307508d2a2a2c62d536a49347bffe9e55322db27838d3c93d0b07/imageio-2.37.4.tar.gz", hash = "sha256:e45cbc5e83502047fb138f7f585f7f105a136a57eea5f4b3cfc6ce1b52720bd3", size = 390173, upload-time = "2026-07-20T05:26:11.369Z" }

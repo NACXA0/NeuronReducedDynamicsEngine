@@ -5,9 +5,9 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from fre.models import get_model, list_models
-from fre.models.lif import LIFParams, analytic_rate
-from fre.sim import firing_rate, simulate_spikes
+from nrde.models import get_model, list_models
+from nrde.models.lif import LIFParams, analytic_rate
+from nrde.sim import firing_rate, simulate_spikes
 
 
 def test_tc_2_1_builtin_models_registered():

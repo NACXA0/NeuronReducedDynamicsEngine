@@ -1,7 +1,7 @@
 # M1 — Chirp \|Z(ω)\|
 
 **状态**：骨架  
-**对应**：RFC-001 FR-3.6 / FR-3.9；`fre.offline.chirp`
+**对应**：RFC-001 FR-3.6 / FR-3.9；`nrde.fitting.chirp`
 
 ## 协议
 

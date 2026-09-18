@@ -8,7 +8,7 @@ import pyarrow as pa
 import pyarrow.feather as feather
 import pyarrow.parquet as pq
 
-from fre.io.connectome import erdos_renyi_graph, load_alpha_table, load_connectome
+from nrde.io.connectome import erdos_renyi_graph, load_alpha_table, load_connectome
 
 
 def _write_csv(path: Path) -> None:

@@ -6,6 +6,22 @@ on:
   pull_request:
 
 jobs:
+  bare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Bare install (no extras)
+        run: pip install -e .
+      - name: Public API + demo smoke
+        run: |
+          python -c "import nrde; assert set(nrde.__all__)=={'ModelSpec','demo','make','offline','run','__version__'}"
+          nrde demo flygym --steps 10 --headless
+          nrde fetch fly --tier smoke
+          nrde offline fit --model lif --type-id bare --n-I 4 --t-total 200 --window 120 --I-max 0.5 --force
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -18,4 +34,19 @@ jobs:
       - name: Lint
         run: ruff check src tests examples scripts
       - name: Test (core lane)
-        run: pytest --cov=fre --cov-report=term-missing --cov-fail-under=70 -m "not pysr and not flygym"
+        run: pytest --cov=nrde --cov-report=term-missing --cov-fail-under=70 -m "not pysr and not flygym"
+
+  py314:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - name: Install (allow failure on missing wheels)
+        run: pip install -e ".[dev]" || exit 0
+      - name: Smoke on 3.14 (D13 allow-failure)
+        run: |
+          python -c "import nrde; print(nrde.__version__)" || exit 0
+          nrde demo flygym --steps 5 --headless || exit 0

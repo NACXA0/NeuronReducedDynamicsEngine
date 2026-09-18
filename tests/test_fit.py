@@ -6,8 +6,8 @@ from pathlib import Path
 
 import numpy as np
 
-from fre.offline.fit import attach_lut, fit_fi, fit_spike_lut, load_fit, save_fit
-from fre.types import NPZ_SCHEMA_VERSION
+from nrde.fitting.fit import attach_lut, fit_fi, fit_spike_lut, load_fit, save_fit
+from nrde.types import NPZ_SCHEMA_VERSION
 
 
 def _fast_kwargs(**extra):

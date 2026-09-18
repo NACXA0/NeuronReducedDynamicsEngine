@@ -1,21 +1,33 @@
-site_name: FRE
+site_name: NRDE
 docs_dir: docs
 theme:
   name: material
 nav:
   - 首页: index.md
-  - 追溯表: traceability.md
-  - RFC-001: rfcs/RFC-001.md
-  - 数据源: data_sources.md
-  - 不适用清单: known-inapproximable.md
-  - PySR 准入: pysr_admission.md
-  - 失败列表: failure_list.md
-  - API: api.md
-  - 验证报告:
-      - 索引: reports/README.md
-      - M1 AdExp 拟合: reports/M1_adexp_fit.md
-      - M1 在线 vs 降阶: reports/M1_online_vs_reduced.md
-      - M1 chirp: reports/M1_chirp_impedance.md
+  - 快速开始:
+      - 跑果蝇 Demo（A1 Colab / A2 pip）: quickstart/demo.md
+      - 跑一次连接组仿真: quickstart/engine.md
+      - 拟合你自己的模型: quickstart/pipeline.md
+      - 从源码构建 / 完整开发环境: from_source.md
+  - 用户指南:
+      - ModelSpec 协议: model_spec_protocol.md
+      - 数据源 / fetch: data_sources.md
+      - A1 资产管线: asset_pipeline.md
+
+      - 不适用清单: known-inapproximable.md
+      - PySR 准入: pysr_admission.md
+      - 失败列表: failure_list.md
+  - 参考:
+      - API: api.md
+      - 追溯表: traceability.md
+  - 深入:
+      - RFC-001: rfcs/RFC-001.md
+      - RFC-002: rfcs/RFC-002.md
+      - 验证报告:
+          - 索引: reports/README.md
+          - M1 AdExp 拟合: reports/M1_adexp_fit.md
+          - M1 在线 vs 降阶: reports/M1_online_vs_reduced.md
+          - M1 chirp: reports/M1_chirp_impedance.md
   - 中文规格:
       - 需求文档: 需求文档.md
       - 项目计划书: 项目计划书.md

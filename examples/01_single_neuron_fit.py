@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from fre.offline.chirp import chirp_impedance
-from fre.offline.fit import attach_lut, fit_fi, fit_spike_lut, save_fit
-from fre.offline.pysr_backend import admission_exam
-from fre.offline.srm import attach_srm, fit_srm_kernels
-from fre.validation import validate_single
+from nrde.fitting.chirp import chirp_impedance
+from nrde.fitting.fit import attach_lut, fit_fi, fit_spike_lut, save_fit
+from nrde.fitting.pysr_backend import admission_exam
+from nrde.fitting.srm import attach_srm, fit_srm_kernels
+from nrde.validation import validate_single
 
 
 def main() -> None:
@@ -32,10 +32,10 @@ def main() -> None:
     lut = fit_spike_lut("adexp", I_min=0.0, I_max=0.8, n_I=8, n_dt=8)
     adexp = attach_lut(adexp, lut)
     Path("artifacts").mkdir(exist_ok=True)
-    save_fit(adexp, "artifacts/adexp.npz")
+    save_fit(adexp, "artifacts/aCC.npz")
     exam = admission_exam()
     print(f"PySR admission: {exam.status} ({exam.reason})")
-    print("wrote artifacts/adexp.npz")
+    print("wrote artifacts/aCC.npz")
 
 
 if __name__ == "__main__":

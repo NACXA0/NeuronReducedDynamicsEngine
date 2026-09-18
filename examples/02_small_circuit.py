@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import numpy as np
 
-from fre.binding import tables_for_graph
-from fre.calibration import apply_alpha_scale, apply_shiu_weights, calibrate_alpha
-from fre.engine.rate import run_rate
-from fre.io.connectome import erdos_renyi_graph
-from fre.offline.fit import fit_fi
-from fre.validation import uniform_lif_ablation
+from nrde.binding import tables_for_graph
+from nrde.calibration import apply_alpha_scale, apply_shiu_weights, calibrate_alpha
+from nrde.engine.rate import run_rate
+from nrde.fitting.fit import fit_fi
+from nrde.io.connectome import erdos_renyi_graph
+from nrde.validation import uniform_lif_ablation
 
 
 def main() -> None:

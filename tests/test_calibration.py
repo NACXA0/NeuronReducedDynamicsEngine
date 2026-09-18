@@ -4,16 +4,16 @@ from __future__ import annotations
 
 import numpy as np
 
-from fre.calibration import (
+from nrde.calibration import (
     apply_alpha_scale,
     apply_shiu_weights,
     calibrate_alpha,
     relative_rate_error,
     shiu_alpha_na,
 )
-from fre.io.connectome import erdos_renyi_graph
-from fre.offline.fit import fit_fi
-from fre.types import SHIU_ALPHA_NA, SHIU_W_SYN_MV
+from nrde.fitting.fit import fit_fi
+from nrde.io.connectome import erdos_renyi_graph
+from nrde.types import SHIU_ALPHA_NA, SHIU_W_SYN_MV
 
 
 def test_shiu_alpha_matches_published_w_syn():

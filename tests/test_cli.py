@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from fre.cli import main
+from nrde.cli import main
 
 
 def test_cli_fit_and_validate(tmp_path: Path):

@@ -1,14 +1,14 @@
 cff-version: 1.2.0
-message: If you use FRE, please cite this software and the primary references listed in README / RFC-001.
-title: "FRE — Fly Reduced-dynamics Engine"
+message: If you use NRDE, please cite this software and the primary references listed in README / RFC-001.
+title: "NRDE — Neuron Reduced-Dynamics Engine"
 type: software
 version: 0.1.0
 date-released: "2026-09-18"
 license: MIT
-repository-code: "https://github.com/NACXA0/StateApproxNeur"
-url: "https://github.com/NACXA0/StateApproxNeur"
+repository-code: "https://github.com/NACXA0/NeuronReducedDynamicsEngine"
+url: "https://github.com/NACXA0/NeuronReducedDynamicsEngine"
 authors:
-  - name: "FRE contributors"
+  - name: "NRDE contributors"
 keywords:
   - connectome
   - drosophila

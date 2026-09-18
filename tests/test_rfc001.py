@@ -5,18 +5,23 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from fre.engine.hybrid import step_rate_mixed
-from fre.engine.rate import init_rate_state
-from fre.io.connectome import erdos_renyi_graph
-from fre.offline.chirp import chirp_impedance, decide_layer, detect_resonance
-from fre.offline.fit import attach_lut, fit_fi, fit_spike_lut, load_fit, save_fit
-from fre.offline.pysr_backend import PySRUnavailable, admission_exam, pysr_available, refine_fi_pysr
-from fre.offline.srm import attach_srm, fit_srm_kernels, init_srm_state, step_srm
-from fre.types import ImpedanceReport
+from nrde.engine.hybrid import step_rate_mixed
+from nrde.engine.rate import init_rate_state
+from nrde.fitting.chirp import chirp_impedance, decide_layer, detect_resonance
+from nrde.fitting.fit import attach_lut, fit_fi, fit_spike_lut, load_fit, save_fit
+from nrde.fitting.pysr_backend import (
+    PySRUnavailable,
+    admission_exam,
+    pysr_available,
+    refine_fi_pysr,
+)
+from nrde.fitting.srm import attach_srm, fit_srm_kernels, init_srm_state, step_srm
+from nrde.io.connectome import erdos_renyi_graph
+from nrde.types import ImpedanceReport
 
 
 def test_adexp_is_v0_1_primary():
-    from fre.models import get_model
+    from nrde.models import get_model
 
     assert get_model("adexp").reduction_benefit == "v0.1_primary"
     assert get_model("lif").reduction_benefit == "control"
@@ -134,7 +139,7 @@ def test_schema_v1_still_loads(tmp_path):
 def test_nfr12_srm_iir_cost_vs_lut():
     import time
 
-    from fre.engine.spike import init_spike_state, step_spike_lut
+    from nrde.engine.spike import init_spike_state, step_spike_lut
 
     kernels = fit_srm_kernels("lif", t_kernel=15.0, dt=0.1)
     fit = fit_fi("lif", n_I=6, t_total=200.0, window=120.0, n_validate=2, I_max=0.6)
@@ -201,8 +206,8 @@ def test_schema_too_old_rejected(tmp_path):
 
 
 def test_shiu_explicit_synapse_counts():
-    from fre.calibration import apply_shiu_weights
-    from fre.types import SHIU_ALPHA_NA
+    from nrde.calibration import apply_shiu_weights
+    from nrde.types import SHIU_ALPHA_NA
 
     g = erdos_renyi_graph(4, p=1.0, n_types=1, seed=0, weight=1.0)
     counts = np.full(g.edge_weight.shape, 2.0)

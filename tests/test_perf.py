@@ -9,9 +9,9 @@ import pyarrow as pa
 import pyarrow.feather as feather
 import pytest
 
-from fre.engine.rate import run_rate
-from fre.io.connectome import load_connectome
-from fre.offline.fit import fit_fi
+from nrde.engine.rate import run_rate
+from nrde.fitting.fit import fit_fi
+from nrde.io.connectome import load_connectome
 
 
 @pytest.mark.slow
@@ -22,7 +22,7 @@ def test_nfr1_10k_rate_runs():
     n_edges = 40_000
     pre = rng.integers(0, n, size=n_edges)
     post = rng.integers(0, n, size=n_edges)
-    from fre.types import GraphData
+    from nrde.types import GraphData
 
     g = GraphData(
         n_nodes=n,

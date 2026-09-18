@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import numpy as np
 
-from fre.engine.rate import run_rate
-from fre.engine.spike import run_spike
-from fre.io.connectome import erdos_renyi_graph
-from fre.offline.fit import attach_lut, fit_fi, fit_spike_lut
-from fre.validation import relative_vp
+from nrde.engine.rate import run_rate
+from nrde.engine.spike import run_spike
+from nrde.fitting.fit import attach_lut, fit_fi, fit_spike_lut
+from nrde.io.connectome import erdos_renyi_graph
+from nrde.validation import relative_vp
 
 
 def _lif_fit():
@@ -69,8 +69,8 @@ def test_tc_4_2_spike_lut_vs_ode_vp():
     fit = _lif_fit()
     lut = fit_spike_lut("lif", I_min=0.0, I_max=0.8, n_I=12, n_dt=16, dt=1.0, t_ref_max=40.0)
     fit = attach_lut(fit, lut)
-    from fre.sim import simulate_spikes
-    from fre.types import GraphData
+    from nrde.sim import simulate_spikes
+    from nrde.types import GraphData
 
     I0 = 0.45
     ref = simulate_spikes("lif", {}, I0, t_total=1000.0, dt=0.05)

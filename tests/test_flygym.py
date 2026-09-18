@@ -5,10 +5,10 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from fre.adapters.embodied import OpenLoopStimEnv
-from fre.adapters.flygym import FREFlyGymEnv, MockFlyGymSim, maybe_make_flygym_sim
-from fre.io.connectome import erdos_renyi_graph
-from fre.offline.fit import fit_fi
+from nrde.adapters.embodied import OpenLoopStimEnv
+from nrde.adapters.flygym import MockFlyGymSim, NRDEFlyGymEnv, maybe_make_flygym_sim
+from nrde.fitting.fit import fit_fi
+from nrde.io.connectome import erdos_renyi_graph
 
 
 @pytest.fixture(scope="module")
@@ -31,7 +31,7 @@ def small_ready():
 def test_tc_5_1_sense_to_current(small_ready):
     g, tables = small_ready
     sim = MockFlyGymSim(n_actuators=4)
-    env = FREFlyGymEnv(
+    env = NRDEFlyGymEnv(
         sim,
         g,
         tables,
@@ -49,7 +49,7 @@ def test_tc_5_1_sense_to_current(small_ready):
 def test_tc_5_2_motor_decode_finite(small_ready):
     g, tables = small_ready
     sim = MockFlyGymSim(n_actuators=4)
-    env = FREFlyGymEnv(
+    env = NRDEFlyGymEnv(
         sim,
         g,
         tables,
@@ -68,7 +68,7 @@ def test_tc_5_2_motor_decode_finite(small_ready):
 def test_tc_5_3_closed_loop_100_steps(small_ready):
     g, tables = small_ready
     sim = MockFlyGymSim(n_actuators=6)
-    env = FREFlyGymEnv(
+    env = NRDEFlyGymEnv(
         sim,
         g,
         tables,
@@ -108,7 +108,7 @@ def test_open_loop_scalar_current():
 
 
 def test_core_does_not_import_flygym():
-    import fre.engine.rate as rate
+    import nrde.engine.rate as rate
 
     assert "flygym" not in rate.__dict__
     assert maybe_make_flygym_sim() is MockFlyGymSim or callable(maybe_make_flygym_sim)

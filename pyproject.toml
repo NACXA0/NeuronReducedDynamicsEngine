@@ -3,14 +3,14 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "fre-neuron-engine"
+name = "neuron-reduced-dynamics-engine"
 version = "0.1.0"
-description = "Connectome-driven fly neuron engine with type-bound reduced activation functions."
+description = "Connectome-driven neuron engine with type-bound reduced activation functions."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "FRE contributors" }]
-keywords = ["connectome", "drosophila", "spiking", "neuron", "flygym"]
+authors = [{ name = "NRDE contributors" }]
+keywords = ["connectome", "reduced-dynamics", "spiking", "neuron", "drosophila", "flygym"]
 dependencies = [
     "numpy>=1.24",
     "scipy>=1.11",
@@ -21,6 +21,8 @@ dependencies = [
 [project.optional-dependencies]
 jax = ["jax>=0.4.20"]
 flygym = ["flygym>=2.1; python_version >= '3.12' and python_version < '3.15'"]
+# A2 aggregate extra (D20): currently aliases flygym; extend with preset helpers later
+fly = ["flygym>=2.1; python_version >= '3.12' and python_version < '3.15'"]
 pysr = ["pysr>=0.18"]
 dev = [
     "pytest>=7.4",
@@ -28,18 +30,19 @@ dev = [
     "ruff>=0.5",
 ]
 docs = ["mkdocs>=1.5", "mkdocs-material>=9.0"]
+demo-assets = ["imageio>=2.31"]
 
 [project.scripts]
-fre = "fre.cli:main"
+nrde = "nrde.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/nacxa/StateApproxNeur"
+Homepage = "https://github.com/NACXA0/NeuronReducedDynamicsEngine"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-fre = ["py.typed"]
+nrde = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -60,9 +63,9 @@ select = ["E", "F", "I", "W"]
 ignore = ["E501", "E741"]
 
 [tool.coverage.run]
-source = ["fre"]
+source = ["nrde"]
 branch = true
-omit = ["src/fre/cli.py"]
+omit = ["src/nrde/cli.py"]
 
 [tool.coverage.report]
 fail_under = 70

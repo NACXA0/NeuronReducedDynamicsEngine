@@ -1,0 +1,33 @@
+preset: fly
+version: 0.1.0
+tiers:
+  smoke:
+    description: Verify tracked seed artifact hashes only
+    artifacts:
+    - path: artifacts/type_0.npz
+      sha256: 6b5436f07bb7f9ba4e98dcca11a6d81dafdead9610f132941846d3289f2af3f0
+    - path: artifacts/aCC.npz
+      sha256: f152b2111cc91961bc3fe37500d10a28d5aa2b920059915a2ae5bf2d6716f922
+    - path: artifacts/hh_demo.npz
+      sha256: a2a2d8cd4ca417d4f8813f47e1a9c991da4c43869794685d33296a1ba1872624
+  seed:
+    description: Type-keyed L0/L1 seed fits (may already be in git)
+    artifacts:
+    - path: artifacts/type_0.npz
+      sha256: 6b5436f07bb7f9ba4e98dcca11a6d81dafdead9610f132941846d3289f2af3f0
+    - path: artifacts/aCC.npz
+      sha256: f152b2111cc91961bc3fe37500d10a28d5aa2b920059915a2ae5bf2d6716f922
+    - path: artifacts/hh_demo.npz
+      sha256: a2a2d8cd4ca417d4f8813f47e1a9c991da4c43869794685d33296a1ba1872624
+  full:
+    description: Seeds + MaleCNS Feather (weights optional / large)
+    artifacts:
+    - path: artifacts/type_0.npz
+      sha256: 6b5436f07bb7f9ba4e98dcca11a6d81dafdead9610f132941846d3289f2af3f0
+    - path: artifacts/aCC.npz
+      sha256: f152b2111cc91961bc3fe37500d10a28d5aa2b920059915a2ae5bf2d6716f922
+    connectome:
+      script: scripts/download_malecns.py
+      args:
+      - --skip-weights
+      out_dir: data/malecns

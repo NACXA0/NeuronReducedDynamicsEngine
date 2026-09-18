@@ -1,0 +1,24 @@
+{
+  "schema_version": 2,
+  "type_id": "type_0",
+  "type_ids": [
+    "type_0"
+  ],
+  "model": "explif",
+  "params": {},
+  "method": "pchip",
+  "quality": "ok",
+  "r2": 0.9998244097878405,
+  "mse": 0.639463885922949,
+  "notes": "CubicSpline overshoot or Type-II gap; using PCHIP",
+  "layer": "L0",
+  "level_decision": "steady f-I sufficient",
+  "lut_hit_rate": null,
+  "pysr_expr": null,
+  "fallback_ode": false,
+  "git_commit": "661dffc118ba1f344f8d00820578a936ec571e2e",
+  "config_hash": "1e94adc956eec92f",
+  "created_utc": "2026-09-18T06:35:31.644076+00:00",
+  "naming": "type_key",
+  "legacy_stem": "explif"
+}

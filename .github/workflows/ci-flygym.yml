@@ -6,7 +6,7 @@ on:
     - cron: "0 6 * * 1"
   pull_request:
     paths:
-      - "src/fre/adapters/**"
+      - "src/nrde/adapters/**"
       - "tests/test_flygym.py"
       - "examples/03_flygym_interface_demo.py"
       - "pyproject.toml"

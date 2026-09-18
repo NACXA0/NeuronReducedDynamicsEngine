@@ -1,29 +1,38 @@
 # 贡献指南
 
-感谢参与 FRE（Fly Reduced-dynamics Engine）开发。
+感谢参与 NRDE（Neuron Reduced-Dynamics Engine）开发。
 
 ## 命名约定
 
 | 角色 | 名称 |
 |---|---|
-| Git 仓库 | `StateApproxNeur` |
-| PyPI / 发行名 | `fre-neuron-engine` |
-| Python import | `fre` |
+| Git 仓库 | `NeuronReducedDynamicsEngine` |
+| 宣传全称 | Neuron Reduced-Dynamics Engine（NRDE） |
+| 中文全称 | 神经元降阶动力学引擎 |
+| PyPI / 发行名 | `neuron-reduced-dynamics-engine` |
+| Python import / CLI | `nrde` |
+| 方法术语 | state approximation / 状态近似 |
 
-三者可以不同，但请勿再引入第四个名字。本地 `*.egg-info` 由 setuptools 生成，**不要提交**。
+三者可以不同，但请勿再引入第四个品牌名。本地 `*.egg-info` 由 setuptools 生成，**不要提交**。
 
 ## 环境
 
-- 推荐 Python **3.11–3.14**（开发环境可跟进最新稳定版；CI 主 lane 使用 3.11 以保证可选依赖 wheel 可用）。
+- 推荐 Python **3.11–3.14**（开发可跟进最新稳定版；CI 主 lane 使用 3.11）。
 - 安装：`pip install -e ".[dev]"` 或 `uv sync --extra dev`
-- 可选：`.[pysr]`、`.[flygym]`、`.[docs]`
+- 可选：`.[pysr]`、`.[fly]` / `.[flygym]`、`.[docs]`、`.[demo-assets]`
+
+**完整清单**（系统依赖、全部 extras、种子 / MaleCNS 数据、A1 构建）：见 [docs/from_source.md](docs/from_source.md)。请勿把大体积 Feather 提交进 Git。
+
+公共 import 面仅五符号：`make` / `demo` / `run` / `offline` / `ModelSpec`（RFC-002）。深度 API 从子模块导入。
+
+产品面：**A1** 奇观（Colab/GIF/Release）· **A2** 预设（`nrde[fly]` + `nrde fetch`）· **B** 引擎 · **C** 管线。A1 资产脚本见 `docs/asset_pipeline.md`。
 
 ## 开发流程
 
 ```bash
 pre-commit install
 ruff check src tests examples
-pytest --cov=fre --cov-fail-under=70 -m "not pysr and not flygym"
+pytest --cov=nrde --cov-fail-under=70 -m "not pysr and not flygym"
 ```
 
 - 核心测试默认不装 FlyGym / Julia。
@@ -40,4 +49,4 @@ pytest --cov=fre --cov-fail-under=70 -m "not pysr and not flygym"
 
 - [ ] 测试与 ruff 通过（或说明为何失败）
 - [ ] 未提交 `__pycache__` / `*.egg-info` / 大型 Feather / 大型 npz
-- [ ] 新增 extras 依赖时同步更新 CI marker 与 README
+- [ ] 新增 extras 依赖时同步更新 CI marker、README 与 `docs/from_source.md`

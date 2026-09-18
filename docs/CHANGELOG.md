@@ -1,28 +1,25 @@
 # Changelog
 
-## 0.1.0 — 工程结构补齐
+本文件遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号语义化。决策编号见 [RFC-002](rfcs/RFC-002.md)。
 
-- 开源文件：`CONTRIBUTING.md`、`CITATION.cff`；README 写清仓库 / PyPI / import 三名映射。
-- 数据平面：`data/` 路径约定 + `scripts/download_malecns.py` / `make_figures.py`。
-- 验证报告落点：`docs/reports/`；mkdocs nav 覆盖中文规格与 reports。
-- CI 三 lane：`ci.yml`（核心）/ `ci-pysr.yml` / `ci-flygym.yml`；`tests/conftest.py` 共享 fixture。
-- 产物 meta 增加 `type_ids`、`git_commit`、`config_hash`；示例更名为 `03_flygym_interface_demo.py`。
-- 可复现：`uv.lock`；开发可跟进 Python 3.14，CI 主 lane 仍为 3.11。
+## [Unreleased]
 
-## 0.1.0 — RFC-001
+### Added
+- A1/A2 产品面拆分；`nrde[fly]` extras；`nrde fetch` + `configs/manifests/fly.yaml`
+- A1 资产管线骨架：`scripts/render_demo.py` / `make_colab.py` / `make_release.py`；`docs/asset_pipeline.md`；`ci-demo-assets.yml`
+- CI：Python 3.14 allow-failure lane（D13）
+- 从源码构建清单：`docs/from_source.md`（extras / 系统依赖 / 数据集）；README 短链
 
-- L0–L2 fitting: AdExp is the M1 primary object; chirp |Z(ω)|; SRM IIR; PySR optional extra (retired without Julia).
-- α starts at Shiu W_syn = 0.275 mV (`SHIU_ALPHA_NA`).
-- `EmbodiedEnv` + FlyGym / OpenLoop backends; 100-step interface demo.
-- Local ODE fallback + `docs/known-inapproximable.md`.
-- NPZ schema v2 (backward compatible with v1).
+### Changed
+- README / docs 安装矩阵改为 A1/A2/B/C 四行；历史中文规格加 RFC 横幅（D23）
+- 品牌锁定为 NRDE / `nrde` / `neuron-reduced-dynamics-engine` / `NeuronReducedDynamicsEngine`（果蝇仅为实例预设；方法术语为 state approximation）
+- 品牌守卫：`scripts/assert_nrde_brand.py` + `tests/test_brand_naming.py`
 
+## [0.1.0] — 2026-09-18
 
-## 0.1.0 — M0–M5 scaffold
+### Added
+- RFC-001 / RFC-002 基线：L0–L2、EmbodiedEnv、类型键 artifacts、公共五符号 API
+- D13–D23（节选）：`fitting/` 改名、CI 三 lane、config_hash 幂等、migrate 脚本、命名映射
 
-- M0: Feather as MaleCNS primary format; FR↔DD↔TC table; FlyGym v2 hooks; VP `q = 1/10 ms`.
-- M1: ExpLIF + AdExp/HH offline f-I with PCHIP gate (NFR-4).
-- M2: Sparse rate engine, α calibration, uniform-LIF ablation.
-- M3: 2D spike LUT, circuit vs Euler ODE, Izhikevich 2D fallback (R3).
-- M4: `FREFlyGymEnv` 100-step closed loop (mock or FlyGym v2).
-- M5: MaleCNS-like Feather load-and-step, MkDocs, coverage ≥70%.
+### Notes
+- PyPI 名 `neuron-reduced-dynamics-engine`（Q9 发布前查重）；开发可用 Python 3.14，CI 主 lane 3.11

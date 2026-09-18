@@ -2,13 +2,17 @@
 
 | 约定 | 说明 |
 |---|---|
-| M1（当前） | 文件名可以是**模型键**：`adexp.npz` / `explif.npz` / `hh.npz`（验证对象是模型本身） |
-| M2 起 | 迁移为**类型键**：`{type_id}.npz`，meta 含 `layer` / `type_ids` / `git_commit` / `config_hash` |
-| 入库策略 | 小体积 L0 种子产物可入库；全类型 / L2 核族走 Release 附件或下载脚本 |
-| 元数据 | 每个 `*.npz` 旁有 `*.meta.json`（schema_version ≥ 2） |
-
-二进制 `*.npz` 默认 gitignore；需要种子产物时用：
+| **类型键（现行）** | `{type_id}.npz`，例如 `aCC.npz`、`type_0.npz`（`artifact_stem_for_type`） |
+| 可选层级后缀 | `{type_id}_{layer}.npz`（`migrate --include-layer`） |
+| 遗留模型键 | `adexp.npz` / `explif.npz` / `hh.npz` — `resolve_artifact_path` 仍可回退，但会 `DeprecationWarning` |
+| 元数据 | `*.meta.json` 含 `type_ids` / `layer` / `git_commit` / `config_hash` / `naming=type_key` |
 
 ```bash
-fre fit --model adexp --out artifacts/adexp.npz
+# 新拟合默认写类型键
+nrde offline fit --model adexp --type-id aCC
+# → artifacts/aCC.npz
+
+# 一次性迁移目录
+python scripts/migrate_artifacts_to_type_keys.py --dry-run
+python scripts/migrate_artifacts_to_type_keys.py --keep-legacy
 ```

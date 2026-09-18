@@ -5,8 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from fre.io.connectome import erdos_renyi_graph
-from fre.offline.fit import fit_fi
+from nrde.fitting.fit import fit_fi
+from nrde.io.connectome import erdos_renyi_graph
 
 
 @pytest.fixture

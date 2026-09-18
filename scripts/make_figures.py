@@ -8,9 +8,9 @@ from pathlib import Path
 
 import numpy as np
 
-from fre.offline.chirp import chirp_impedance
-from fre.offline.fit import fit_fi
-from fre.sim import firing_rate
+from nrde.fitting.chirp import chirp_impedance
+from nrde.fitting.fit import fit_fi
+from nrde.sim import firing_rate
 
 
 def _save_csv(path: Path, header: str, rows: np.ndarray) -> None:

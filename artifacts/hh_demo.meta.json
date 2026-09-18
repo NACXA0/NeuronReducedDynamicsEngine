@@ -1,0 +1,24 @@
+{
+  "schema_version": 2,
+  "type_id": "hh_demo",
+  "type_ids": [
+    "hh_demo"
+  ],
+  "model": "hh",
+  "params": {},
+  "method": "pchip",
+  "quality": "poor",
+  "r2": 0.53067273892957,
+  "mse": 458.89776637997613,
+  "notes": "CubicSpline overshoot or Type-II gap; using PCHIP; R2=0.531 below gate 0.98",
+  "layer": "L1",
+  "level_decision": "adaptation/state LUT for hh",
+  "lut_hit_rate": null,
+  "pysr_expr": null,
+  "fallback_ode": false,
+  "git_commit": "661dffc118ba1f344f8d00820578a936ec571e2e",
+  "config_hash": "6418c5269ff571d9",
+  "created_utc": "2026-09-18T06:35:35.141450+00:00",
+  "naming": "type_key",
+  "legacy_stem": "hh"
+}

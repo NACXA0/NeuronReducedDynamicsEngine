@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from fre.binding import load_type_map, tables_for_graph
-from fre.io.connectome import erdos_renyi_graph
-from fre.offline.fit import fit_fi
+from nrde.binding import load_type_map, tables_for_graph
+from nrde.fitting.fit import fit_fi
+from nrde.io.connectome import erdos_renyi_graph
 
 
 def test_load_type_map():

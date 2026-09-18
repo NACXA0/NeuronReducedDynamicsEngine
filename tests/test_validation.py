@@ -4,17 +4,17 @@ from __future__ import annotations
 
 import numpy as np
 
-from fre.binding import tables_for_graph
-from fre.calibration import (
+from nrde.binding import tables_for_graph
+from nrde.calibration import (
     apply_alpha_scale,
     apply_shiu_weights,
     calibrate_alpha,
     relative_rate_error,
 )
-from fre.io.connectome import erdos_renyi_graph
-from fre.offline.fit import fit_fi
-from fre.types import SHIU_W_SYN_MV
-from fre.validation import (
+from nrde.fitting.fit import fit_fi
+from nrde.io.connectome import erdos_renyi_graph
+from nrde.types import SHIU_W_SYN_MV
+from nrde.validation import (
     relative_vp,
     uniform_lif_ablation,
     validate_circuit,

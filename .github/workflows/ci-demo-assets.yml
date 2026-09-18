@@ -1,0 +1,33 @@
+name: ci-demo-assets
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 8 * * 1"
+  release:
+    types: [published]
+
+jobs:
+  assets:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: pip install -e ".[dev]"
+      - name: Render demo (headless placeholder)
+        run: python scripts/render_demo.py --steps 20 --seed 0 --out assets/demo/
+      - name: Build Colab notebook
+        run: python scripts/make_colab.py --out assets/demo/demo.ipynb
+      - name: Assemble offline zip
+        run: python scripts/make_release.py --out dist/nrde-fly-offline.zip
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nrde-demo-assets
+          path: |
+            assets/demo/
+            dist/nrde-fly-offline.zip

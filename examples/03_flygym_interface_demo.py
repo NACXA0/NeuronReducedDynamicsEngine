@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import numpy as np
 
-from fre.adapters.flygym import FREFlyGymEnv, MockFlyGymSim, maybe_make_flygym_sim
-from fre.io.connectome import erdos_renyi_graph
-from fre.offline.fit import fit_fi
+from nrde.adapters.flygym import MockFlyGymSim, NRDEFlyGymEnv, maybe_make_flygym_sim
+from nrde.fitting.fit import fit_fi
+from nrde.io.connectome import erdos_renyi_graph
 
 
 def main() -> None:
@@ -13,7 +13,7 @@ def main() -> None:
     n_act = 6
     Factory = maybe_make_flygym_sim()
     sim = Factory(n_actuators=n_act) if Factory is MockFlyGymSim else MockFlyGymSim(n_actuators=n_act)
-    env = FREFlyGymEnv(
+    env = NRDEFlyGymEnv(
         sim,
         g,
         [fit, fit],
