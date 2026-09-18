@@ -28,7 +28,7 @@
 | 可选：MuJoCo / 显示 | 仅真 FlyGym 可视化 | A2 `--headless` 与 A1 Mock **不**依赖 X server |
 | 可选：ffmpeg | 仅真机位视频导出 | 当前 `render_demo.py` 默认 headless 帧/GIF，不强制 |
 
-无 GPU 要求。JAX 为实验性 extra，**核心路径不依赖**。
+无 GPU 要求。JAX / Numba / Torch 均为 extras，**核心路径不依赖**。在线 GPU 稀疏走 `nrde[torch]`（cuSPARSE），不是 JAX sparse。
 
 ## 3. 克隆与可编辑安装
 
@@ -68,7 +68,9 @@ pre-commit install
 | `pysr` | `".[pysr]"` | + pysr | C 可选符号回归精化 | 需系统 Julia；失败则退场 |
 | `docs` | `".[docs]"` | + mkdocs、mkdocs-material | 本地文档站 | `mkdocs serve` |
 | `demo-assets` | `".[demo-assets]"` | + imageio（及 pillow） | A1 `render_demo` 写出 GIF | 无则写 NPZ/TXT 占位 |
-| `jax` | `".[jax]"` | + jax | 实验加速；非默认路径 | 可选 |
+| `jax` | `".[jax]"` | + jax | 离线 f-I `vmap`/`scan`；**非** GPU 稀疏主路径 | 可选 |
+| `numba` | `".[numba]"` | + numba | 离线 Euler/LUT 可选 JIT（AVX-512 由 LLVM 发出）；缺省走同一标量核 | 可选；3.14 可能尚未支持 |
+| `torch` | `".[torch]"` | + torch | 在线 CSR SpMV；CUDA 走 cuSPARSE（官方 CUDA wheel 自备） | 可选；无 GPU 时 CPU 对拍 |
 
 一次装齐「开发 + 文档 + GIF + 果蝇」（在支持的 Python 上）：
 

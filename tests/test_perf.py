@@ -14,6 +14,14 @@ from nrde.fitting.fit import fit_fi
 from nrde.io.connectome import load_connectome
 
 
+def _cpu_flags() -> str:
+    try:
+        with open("/proc/cpuinfo", encoding="utf-8") as handle:
+            return handle.read().lower()
+    except OSError:
+        return ""
+
+
 @pytest.mark.slow
 def test_nfr1_10k_rate_runs():
     fit = fit_fi("lif", n_I=6, t_total=250.0, window=150.0, n_validate=2, I_max=0.6)
@@ -35,11 +43,13 @@ def test_nfr1_10k_rate_runs():
     import time
 
     t0 = time.perf_counter()
-    state, _ = run_rate(g, [fit, fit], n_steps=20, I_ext=np.full(n, 0.25))
+    state, _ = run_rate(g, [fit, fit], n_steps=20, I_ext=np.full(n, 0.25), record_trace=False)
     elapsed = time.perf_counter() - t0
     assert np.all(np.isfinite(state.r))
     sim_ms = 20.0
     print(f"10k x 20 steps: {elapsed:.3f}s wall, {sim_ms:.0f} ms sim")
+    flags = _cpu_flags()
+    print(f"cpu avx512: {'avx512' in flags}")
 
 
 def test_nfr3_malecns_like_feather_load_and_step(tmp_path: Path):

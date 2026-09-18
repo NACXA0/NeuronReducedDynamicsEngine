@@ -53,7 +53,7 @@ def calibrate_alpha(
 
     def mse(scale: float) -> float:
         graph.edge_weight = (base_w * float(scale)).astype(np.float32)
-        state, _ = run_rate(graph, tables, n_steps=n_steps, I_ext=I_ext)
+        state, _ = run_rate(graph, tables, n_steps=n_steps, I_ext=I_ext, record_trace=False)
         return float(np.mean((state.r - target) ** 2))
 
     result = minimize_scalar(mse, bounds=alpha_bounds, method="bounded", options={"xatol": 1e-3})

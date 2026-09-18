@@ -54,3 +54,13 @@ def test_tc_2_6_izhikevich_fires():
     spikes = simulate_spikes("izhikevich", {}, I=10.0, t_total=200.0, dt=0.5)
     assert spikes.size >= 1
     assert np.all(np.diff(spikes) > 0)
+
+
+def test_builtin_rhs_protocol_finite():
+    for name in list_models():
+        spec = get_model(name)
+        p = spec.Params()
+        y = spec.y0(p)
+        dy = spec.rhs(0.0, y, 0.1, p)
+        assert dy.shape == y.shape
+        assert np.all(np.isfinite(dy))

@@ -67,7 +67,7 @@ def _cmd_simulate(args: argparse.Namespace) -> int:
     tables = [fit for _ in graph.type_names]
     I_ext = np.zeros(graph.n_nodes)
     I_ext[: max(1, graph.n_nodes // 10)] = args.I_ext
-    state, _ = run_rate(graph, tables, n_steps=args.steps, I_ext=I_ext)
+    state, _ = run_rate(graph, tables, n_steps=args.steps, I_ext=I_ext, record_trace=False)
     print(json.dumps({"mean_rate": float(np.mean(state.r)), "n_nodes": graph.n_nodes}))
     return 0
 

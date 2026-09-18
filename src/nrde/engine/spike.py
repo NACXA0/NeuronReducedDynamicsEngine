@@ -6,7 +6,7 @@ from dataclasses import replace
 
 import numpy as np
 
-from nrde.engine.sparse import sparse_matvec
+from nrde.engine.sparse import get_csr, get_type_indices, prepare_graph, sparse_matvec
 from nrde.sim import resolve
 from nrde.types import FittedActivation, GraphData, SpikeState
 
@@ -51,12 +51,15 @@ def init_spike_state(
 ) -> SpikeState:
     n = graph.n_nodes
     V0 = np.full(n, -70.0, dtype=np.float64)
+    indices = get_type_indices(graph, len(tables))
     for t, table in enumerate(tables):
-        mask = graph.node_type == t
+        idx = indices[t]
+        if idx.size == 0:
+            continue
         if table.lut_V is not None:
-            V0[mask] = float(np.mean(table.lut_V))
+            V0[idx] = float(np.mean(table.lut_V))
         elif table.model == "izhikevich":
-            V0[mask] = -65.0
+            V0[idx] = -65.0
     u = np.zeros(n, dtype=np.float64) if use_izhikevich else None
     return SpikeState(
         V=V0,
@@ -75,13 +78,15 @@ def step_spike_lut(
     I_ext: np.ndarray,
     dt: float = 1.0,
     tau_syn: float = 2.0,
+    type_indices: list[np.ndarray] | None = None,
 ) -> SpikeState:
     decay = float(np.exp(-dt / tau_syn))
     pulse = sparse_matvec(
         graph.edge_index,
         graph.edge_weight,
-        state.spikes.astype(np.float64),
+        state.spikes,
         graph.n_nodes,
+        csr=get_csr(graph),
     )
     I_syn = state.I_syn * decay + pulse
     I_total = I_syn + np.asarray(I_ext, dtype=np.float64)
@@ -89,24 +94,25 @@ def step_spike_lut(
     V = state.V.copy()
     t_since = state.t_since + dt
     oor = 0
+    indices = type_indices if type_indices is not None else get_type_indices(graph, len(tables))
     for t, table in enumerate(tables):
-        mask = graph.node_type == t
-        if not np.any(mask):
+        idx = indices[t]
+        if idx.size == 0:
             continue
         if table.lut_I is None or table.lut_spike is None or table.lut_V is None or table.lut_dt is None:
             raise ValueError(f"Type {table.type_id} has no spike LUT")
         sp, v_new, n_oor = _bilinear_lookup(
-            I_total[mask],
-            state.t_since[mask],
+            I_total[idx],
+            state.t_since[idx],
             table.lut_I,
             table.lut_dt,
             table.lut_spike,
             table.lut_V,
         )
-        spikes[mask] = sp
-        V[mask] = v_new
+        spikes[idx] = sp
+        V[idx] = v_new
         oor += n_oor
-        t_since[mask] = np.where(sp, 0.0, state.t_since[mask] + dt)
+        t_since[idx] = np.where(sp, 0.0, state.t_since[idx] + dt)
     return replace(
         state,
         V=V,
@@ -125,6 +131,7 @@ def step_spike_izhikevich(
     dt: float = 1.0,
     tau_syn: float = 2.0,
     substeps: int = 2,
+    type_indices: list[np.ndarray] | None = None,
 ) -> SpikeState:
     """R3 fallback: explicit 2D Izhikevich, never a 3D LUT."""
     if state.u is None:
@@ -133,8 +140,9 @@ def step_spike_izhikevich(
     pulse = sparse_matvec(
         graph.edge_index,
         graph.edge_weight,
-        state.spikes.astype(np.float64),
+        state.spikes,
         graph.n_nodes,
+        csr=get_csr(graph),
     )
     I_syn = state.I_syn * decay + pulse
     I_total = I_syn + np.asarray(I_ext, dtype=np.float64)
@@ -142,14 +150,15 @@ def step_spike_izhikevich(
     u = state.u.copy()
     spikes = np.zeros(graph.n_nodes, dtype=bool)
     h = dt / substeps
+    indices = type_indices if type_indices is not None else get_type_indices(graph, len(tables))
     for t, table in enumerate(tables):
-        mask = graph.node_type == t
-        if not np.any(mask):
+        idx = indices[t]
+        if idx.size == 0:
             continue
-        spec, p = resolve("izhikevich", table.params if table.model == "izhikevich" else {})
-        vv = v[mask]
-        uu = u[mask]
-        I = I_total[mask]
+        _, p = resolve("izhikevich", table.params if table.model == "izhikevich" else {})
+        vv = v[idx]
+        uu = u[idx]
+        I = I_total[idx]
         spiked = np.zeros(vv.shape[0], dtype=bool)
         for _ in range(substeps):
             dv = 0.04 * vv * vv + 5.0 * vv + 140.0 - uu + I
@@ -161,9 +170,9 @@ def step_spike_izhikevich(
                 spiked |= hit
                 vv = np.where(hit, p.c, vv)
                 uu = np.where(hit, uu + p.d, uu)
-        v[mask] = vv
-        u[mask] = uu
-        spikes[mask] = spiked
+        v[idx] = vv
+        u[idx] = uu
+        spikes[idx] = spiked
     t_since = np.where(spikes, 0.0, state.t_since + dt)
     return replace(
         state,
@@ -182,13 +191,17 @@ def run_spike(
     I_ext: np.ndarray | None = None,
     dt: float = 1.0,
     mode: str = "lut",
+    record_trace: bool = True,
 ) -> tuple[SpikeState, np.ndarray]:
-    I_ext = np.zeros(graph.n_nodes) if I_ext is None else np.asarray(I_ext, dtype=np.float64)
+    I_ext = np.zeros(graph.n_nodes, dtype=np.float64) if I_ext is None else np.asarray(I_ext, dtype=np.float64)
+    prepare_graph(graph, n_types=len(tables))
+    type_indices = get_type_indices(graph, len(tables))
     use_izh = mode == "izhikevich"
     state = init_spike_state(graph, tables, use_izhikevich=use_izh)
-    trace = np.zeros((n_steps, graph.n_nodes), dtype=bool)
+    trace = np.zeros((n_steps if record_trace else 0, graph.n_nodes), dtype=bool)
     step = step_spike_izhikevich if use_izh else step_spike_lut
     for t in range(n_steps):
-        state = step(state, graph, tables, I_ext, dt=dt)
-        trace[t] = state.spikes
+        state = step(state, graph, tables, I_ext, dt=dt, type_indices=type_indices)
+        if record_trace:
+            trace[t] = state.spikes
     return state, trace

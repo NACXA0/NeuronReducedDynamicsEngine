@@ -117,6 +117,12 @@ class GraphData:
     region: np.ndarray | None = None
     meta: dict[str, Any] = field(default_factory=dict)
     fallback_mask: np.ndarray | None = None
+    # Runtime caches for CSR SpMV and per-type indexing (not serialized).
+    _csr: Any = field(default=None, repr=False, compare=False)
+    _csr_token: tuple[int, ...] | None = field(default=None, repr=False, compare=False)
+    _type_indices: list[np.ndarray] | None = field(default=None, repr=False, compare=False)
+    _type_token: tuple[int, ...] | None = field(default=None, repr=False, compare=False)
+    _torch: Any = field(default=None, repr=False, compare=False)
 
     def type_name_of(self, index: int) -> str:
         return self.type_names[int(self.node_type[index])]

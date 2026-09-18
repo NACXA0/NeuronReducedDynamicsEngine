@@ -7,7 +7,7 @@ from dataclasses import replace
 import numpy as np
 from scipy.optimize import curve_fit
 
-from nrde.engine.sparse import sparse_matvec
+from nrde.engine.sparse import get_csr, sparse_matvec
 from nrde.sim import resolve, simulate_voltage
 from nrde.types import ExpKernel, FittedActivation, GraphData, SpikeState, SRMKernels
 
@@ -109,8 +109,9 @@ def step_srm(
     pulse = sparse_matvec(
         graph.edge_index,
         graph.edge_weight,
-        state.spikes.astype(np.float64),
+        state.spikes,
         graph.n_nodes,
+        csr=get_csr(graph),
     )
     I_syn = state.I_syn * decay + pulse
     I_total = I_syn + np.asarray(I_ext, dtype=np.float64)

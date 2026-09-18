@@ -20,6 +20,8 @@ dependencies = [
 
 [project.optional-dependencies]
 jax = ["jax>=0.4.20"]
+numba = ["numba>=0.59"]
+torch = ["torch>=2.1"]
 flygym = ["flygym>=2.1; python_version >= '3.12' and python_version < '3.15'"]
 # A2 aggregate extra (D20): currently aliases flygym; extend with preset helpers later
 fly = ["flygym>=2.1; python_version >= '3.12' and python_version < '3.15'"]
@@ -51,6 +53,8 @@ markers = [
     "flygym: tests that need the optional flygym package or a mock closed loop",
     "slow: longer integration or performance tests",
     "pysr: requires optional Julia/PySR extra (NFR-11)",
+    "jax: optional JAX offline Euler backend",
+    "torch: optional PyTorch CSR engine (CPU or CUDA/cuSPARSE)",
 ]
 
 [tool.ruff]

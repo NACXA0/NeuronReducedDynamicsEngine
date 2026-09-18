@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import subprocess
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -16,6 +16,7 @@ from scipy.interpolate import CubicSpline, PchipInterpolator
 from nrde import models as _models  # noqa: F401
 from nrde.fitting.chirp import chirp_impedance, decide_layer
 from nrde.sim import firing_rate, resolve
+from nrde.sim_kernels import fill_spike_lut_packed, firing_rates_packed, pack_model
 from nrde.types import NPZ_SCHEMA_VERSION, ExpKernel, FittedActivation, SRMKernels
 
 
@@ -92,6 +93,41 @@ def _spline_overshoots(I_grid: np.ndarray, r_grid: np.ndarray) -> bool:
     return False
 
 
+def _fi_worker(job: tuple[Any, ...]) -> float:
+    model, params, I, t_total, dt, window = job
+    return firing_rate(model, params, float(I), t_total=t_total, dt=dt, window=window)
+
+
+def _scan_fi_batch(
+    model: str,
+    params: dict[str, float] | None,
+    I_grid: np.ndarray,
+    t_total: float,
+    window: float,
+    dt: float,
+    backend: str,
+) -> np.ndarray:
+    spec, p = resolve(model, params)
+    packed = pack_model(spec.name, p)
+    if packed is None:
+        return np.array(
+            [
+                firing_rate(model, params, float(I), t_total=t_total, dt=dt, window=window)
+                for I in I_grid.tolist()
+            ],
+            dtype=np.float64,
+        )
+    if backend == "jax":
+        from nrde.sim_jax import firing_rates_jax, jax_available
+
+        if not jax_available():
+            raise ImportError("backend='jax' requires pip install 'neuron-reduced-dynamics-engine[jax]'")
+        return firing_rates_jax(packed, I_grid, t_total, dt, window)
+    if backend not in {"numba", "numpy", "auto"}:
+        raise ValueError(f"Unknown f-I backend {backend!r}. Use 'numba', 'numpy', or 'jax'.")
+    return firing_rates_packed(packed, I_grid, t_total, dt, window)
+
+
 def scan_fi_curve(
     model: str,
     params: dict[str, float] | None = None,
@@ -102,19 +138,18 @@ def scan_fi_curve(
     window: float = 2000.0,
     dt: float = 0.05,
     n_jobs: int = 1,
+    backend: str | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     I_grid = np.linspace(I_min, I_max, n_I)
-
-    def _one(I: float) -> float:
-        return firing_rate(model, params, float(I), t_total=t_total, dt=dt, window=window)
-
+    be = (backend or "auto").strip().lower()
+    if be == "auto":
+        be = "numba"
     if n_jobs and n_jobs > 1:
-        with ThreadPoolExecutor(max_workers=n_jobs) as pool:
-            rates = list(pool.map(_one, I_grid.tolist()))
-        r_grid = np.asarray(rates, dtype=np.float64)
-    else:
-        r_grid = np.array([_one(I) for I in I_grid], dtype=np.float64)
-    return I_grid, r_grid
+        jobs = [(model, params, float(I), t_total, dt, window) for I in I_grid.tolist()]
+        with ProcessPoolExecutor(max_workers=int(n_jobs)) as pool:
+            rates = list(pool.map(_fi_worker, jobs))
+        return I_grid, np.asarray(rates, dtype=np.float64)
+    return I_grid, _scan_fi_batch(model, params, I_grid, t_total, window, dt, be)
 
 
 def fit_fi(
@@ -130,7 +165,11 @@ def fit_fi(
     n_jobs: int = 1,
     n_validate: int = 8,
     chirp: bool = False,
+    backend: str | None = None,
 ) -> FittedActivation:
+    be = (backend or "auto").strip().lower()
+    if be == "auto":
+        be = "numba"
     I_grid, r_grid = scan_fi_curve(
         model,
         params=params,
@@ -141,6 +180,7 @@ def fit_fi(
         window=window,
         dt=dt,
         n_jobs=n_jobs,
+        backend=backend,
     )
     notes = []
     if _spline_overshoots(I_grid, r_grid):
@@ -154,12 +194,7 @@ def fit_fi(
     interp = PchipInterpolator(I_grid, r_grid, extrapolate=False)
     rng = np.random.default_rng(0)
     I_val = rng.uniform(I_min, I_max, size=n_validate)
-    r_true = np.array(
-        [
-            firing_rate(model, params, float(I), t_total=t_total, dt=dt, window=window)
-            for I in I_val
-        ]
-    )
+    r_true = _scan_fi_batch(model, params, I_val, t_total, window, dt, be if n_jobs <= 1 else "numba")
     r_pred = np.array(interp(np.clip(I_val, I_grid[0], I_grid[-1])))
     r_pred = np.where(I_val < I_onset, 0.0, r_pred)
     r_pred = np.clip(r_pred, 0.0, float(np.max(r_grid)) if r_grid.size else 0.0)
@@ -208,13 +243,26 @@ def fit_spike_lut(
     t_span = float(t_ref_max if t_ref_max is not None else max(t_ref * 15.0, 40.0))
     I_axis = np.linspace(I_min, I_max, n_I)
     dt_axis = np.linspace(0.0, t_span, n_dt)
+    sub = min(dt, 0.1)
+    packed = pack_model(spec.name, p)
+    if packed is not None:
+        spike_mask, V_next, hits = fill_spike_lut_packed(packed, I_axis, dt_axis, dt, sub)
+        total = int(n_I * n_dt)
+        hit_rate = hits / max(total, 1)
+        return {
+            "lut_I": I_axis,
+            "lut_dt": dt_axis,
+            "lut_spike": spike_mask,
+            "lut_V": V_next,
+            "lut_hit_rate": float(hit_rate),
+            "quality": "ok" if hit_rate > 0.0 else "poor",
+        }
     spike_mask = np.zeros((n_I, n_dt), dtype=np.float32)
     V_next = np.zeros((n_I, n_dt), dtype=np.float32)
     vth = spec.spike_threshold(p)
     hybrid = spec.hybrid_reset()
     hits = 0
     total = 0
-    sub = min(dt, 0.1)
     for i, I_val in enumerate(I_axis):
         for j, t_since in enumerate(dt_axis):
             y = spec.y0(p).astype(np.float64)

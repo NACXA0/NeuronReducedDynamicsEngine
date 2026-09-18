@@ -7,7 +7,7 @@ from dataclasses import replace
 import numpy as np
 
 from nrde.engine.rate import batched_apply
-from nrde.engine.sparse import sparse_matvec
+from nrde.engine.sparse import get_csr, get_type_indices, sparse_matvec
 from nrde.sim import euler_step, resolve
 from nrde.types import FittedActivation, GraphData, RateState
 
@@ -31,26 +31,36 @@ def step_rate_mixed(
     fallback_types: set[str] | None = None,
 ) -> RateState:
     """Reduced F everywhere except listed types, which Euler-step their ODE."""
-    I_syn = sparse_matvec(graph.edge_index, graph.edge_weight, state.r, graph.n_nodes)
+    I_syn = sparse_matvec(
+        graph.edge_index,
+        graph.edge_weight,
+        state.r,
+        graph.n_nodes,
+        csr=get_csr(graph),
+    )
     I_total = I_syn + np.asarray(I_ext, dtype=np.float64)
-    r_new, n_oor = batched_apply(tables, I_total, graph.node_type)
+    type_indices = get_type_indices(graph, len(tables))
+    r_new, n_oor = batched_apply(tables, I_total, graph.node_type, type_indices=type_indices)
     mask = fallback_mask(graph, fallback_types)
     if not np.any(mask):
         return replace(state, r=r_new, out_of_range=state.out_of_range + n_oor)
+    resolved = [resolve(table.model, table.params) for table in tables]
     y = state.y_ode
     if y is None:
         y = np.zeros((graph.n_nodes, 4), dtype=np.float64)
-        for t, table in enumerate(tables):
-            spec, p = resolve(table.model, table.params)
-            m = (graph.node_type == t) & mask
-            if np.any(m):
-                y0 = spec.y0(p)
-                y[m, : y0.size] = y0
+        for t, (spec, p) in enumerate(resolved):
+            idx = type_indices[t]
+            if idx.size == 0:
+                continue
+            take = mask[idx]
+            if not np.any(take):
+                continue
+            y0 = spec.y0(p)
+            y[idx[take], : y0.size] = y0
     idx = np.where(mask)[0]
     spikes = np.zeros(graph.n_nodes, dtype=bool)
     for i in idx.tolist():
-        table = tables[int(graph.node_type[i])]
-        spec, p = resolve(table.model, table.params)
+        spec, p = resolved[int(graph.node_type[i])]
         n = spec.y0(p).size
         yi = y[i, :n]
         vth = spec.spike_threshold(p)
