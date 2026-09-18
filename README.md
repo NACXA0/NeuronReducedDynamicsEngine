@@ -3,6 +3,16 @@
 
 v0.1版本达成目标：*拟合同AdExp类函数F，输出相对于常微分方程（ODE）的可量化误差；基于Shiu论文的突触权重`W_syn = 0.275 mV`完成α参数标定；运行子神经图；在具身仿真环境`EmbodiedEnv`执行100个有限时间步。* 本版本**并不代表**完整中枢神经系统生物物理重建，也不实现有实际意义的运动行走仿真。
 
+## 命名与仓库布局
+
+| 角色 | 名称 |
+|---|---|
+| Git 仓库 | `StateApproxNeur` |
+| PyPI 包 | `fre-neuron-engine` |
+| Import | `fre` |
+
+发布耦合分层（单仓 + extras）：核心 `fre` 必装；`fre[pysr]` / `fre[flygym]` 可选；`artifacts/`+`configs/` 为数据平面；`docs/`、`examples/`、`tests/`、CI/脚本为基础设施。静态介绍页 = README + MkDocs（GitHub Pages），v0.1 不另做 landing。
+
 ## 关于 PySR？
 PySR仅用作**可选的后处理优化器**，不作为默认训练器（项目仓库：[MilesCranmer/PySR]([https://github.com/MilesCranmer/PySR](https://github.com/MilesCranmer/PySR))，参考RFC‑001 D9）：
 - 适用安全区间：维度 ≤ 2，采样点 ≤ 10⁴，`maxsize ≤ 20`，**仅限离线使用**。
@@ -27,7 +37,11 @@ PySR仅用作**可选的后处理优化器**，不作为默认训练器（项目
 ```bash
 pip install -e ".[dev]"          # 不包含Julia依赖
 # pip install -e ".[pysr]"       # 可选依赖；CI流水线允许该模块测试失败
+# pip install -e ".[flygym]"     # 可选具身后端
+# uv sync --extra dev            # 可复现锁文件见 uv.lock
 ```
+
+Python：开发可用 **3.14.x**；CI 主 lane 固定 **3.11**（保证 JAX/FlyGym/PySR wheel）。详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ## 快速上手
 ```bash
@@ -35,7 +49,8 @@ fre fit --model adexp --out artifacts/adexp.npz
 fre validate --pysr-exam
 python examples/01_single_neuron_fit.py
 python examples/02_small_circuit.py
-python examples/03_flygym_closed_loop.py
+python examples/03_flygym_interface_demo.py   # 需要 fre[flygym] 或使用内置 Mock
+python scripts/download_malecns.py --skip-weights   # 连接组三件套路径约定
 ```
 
 ## 层级架构（DD‑3）

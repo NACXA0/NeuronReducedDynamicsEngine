@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "type_id": "hh_demo",
+  "model": "hh",
+  "params": {},
+  "method": "pchip",
+  "quality": "ok",
+  "r2": 0.9924810094522573,
+  "mse": 7.480554349919623,
+  "notes": "CubicSpline overshoot or Type-II gap; using PCHIP",
+  "lut_hit_rate": null,
+  "created_utc": "2026-09-18T03:43:20.990604+00:00"
+}

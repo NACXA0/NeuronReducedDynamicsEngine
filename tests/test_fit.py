@@ -57,6 +57,8 @@ def test_tc_3_3_roundtrip_npz(tmp_path: Path):
     loaded = load_fit(path)
     assert loaded.schema_version >= NPZ_SCHEMA_VERSION - 1
     assert loaded.type_id == "lif0"
+    assert loaded.type_ids == ("lif0",)
+    assert loaded.config_hash
     assert loaded.lut_I is not None
     r, oor = loaded.eval_rate(np.array([-1.0, 0.3, 9.0]))
     assert oor == 2

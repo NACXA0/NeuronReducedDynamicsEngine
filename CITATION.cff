@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: If you use FRE, please cite this software and the primary references listed in README / RFC-001.
+title: "FRE — Fly Reduced-dynamics Engine"
+type: software
+version: 0.1.0
+date-released: "2026-09-18"
+license: MIT
+repository-code: "https://github.com/NACXA0/StateApproxNeur"
+url: "https://github.com/NACXA0/StateApproxNeur"
+authors:
+  - name: "FRE contributors"
+keywords:
+  - connectome
+  - drosophila
+  - reduced dynamics
+  - flygym
+  - AdExp
+references:
+  - type: article
+    title: "The connectome of an insect brain"
+    authors:
+      - family-names: Shiu
+        given-names: P. K.
+    year: 2024
+    notes: W_syn = 0.275 mV baseline for α calibration

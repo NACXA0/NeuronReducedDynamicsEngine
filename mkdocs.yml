@@ -3,11 +3,22 @@ docs_dir: docs
 theme:
   name: material
 nav:
-  - Home: index.md
-  - Traceability: traceability.md
+  - 首页: index.md
+  - 追溯表: traceability.md
   - RFC-001: rfcs/RFC-001.md
-  - Data sources: data_sources.md
-  - Inapproximable: known-inapproximable.md
-  - PySR exam: pysr_admission.md
-  - Failure list: failure_list.md
+  - 数据源: data_sources.md
+  - 不适用清单: known-inapproximable.md
+  - PySR 准入: pysr_admission.md
+  - 失败列表: failure_list.md
   - API: api.md
+  - 验证报告:
+      - 索引: reports/README.md
+      - M1 AdExp 拟合: reports/M1_adexp_fit.md
+      - M1 在线 vs 降阶: reports/M1_online_vs_reduced.md
+      - M1 chirp: reports/M1_chirp_impedance.md
+  - 中文规格:
+      - 需求文档: 需求文档.md
+      - 项目计划书: 项目计划书.md
+      - 系统设计说明书: 系统设计说明书.md
+      - 初始设想: 初始设想.md
+  - Changelog: CHANGELOG.md

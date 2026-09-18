@@ -16,20 +16,6 @@ jobs:
       - name: Install
         run: pip install -e ".[dev]"
       - name: Lint
-        run: ruff check src tests examples
-      - name: Test
-        run: pytest --cov=fre --cov-report=term-missing --cov-fail-under=70 -m "not pysr"
-
-  pysr:
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - name: PySR extra (optional; may fail on Julia)
-        run: |
-          pip install -e ".[dev,pysr]" || echo "pysr extra unavailable"
-          pytest -m pysr || echo "PySR lane retired (RFC-001 D9.5)"
-
+        run: ruff check src tests examples scripts
+      - name: Test (core lane)
+        run: pytest --cov=fre --cov-report=term-missing --cov-fail-under=70 -m "not pysr and not flygym"

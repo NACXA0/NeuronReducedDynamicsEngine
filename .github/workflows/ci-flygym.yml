@@ -1,0 +1,29 @@
+name: ci-flygym
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+  pull_request:
+    paths:
+      - "src/fre/adapters/**"
+      - "tests/test_flygym.py"
+      - "examples/03_flygym_interface_demo.py"
+      - "pyproject.toml"
+      - ".github/workflows/ci-flygym.yml"
+
+jobs:
+  flygym:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install core + flygym extra
+        run: |
+          pip install -e ".[dev]"
+          pip install -e ".[flygym]" || echo "flygym extra unavailable on this Python"
+      - name: FlyGym lane
+        run: pytest -m flygym || echo "FlyGym lane skipped/failed (optional dependency)"

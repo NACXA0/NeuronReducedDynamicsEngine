@@ -90,6 +90,10 @@ class FittedActivation:
     z_abs: np.ndarray | None = None
     pysr_expr: str | None = None
     fallback_ode: bool = False
+    # Provenance (optional; filled on save). M2+ prefers type-keyed filenames.
+    type_ids: tuple[str, ...] = ()
+    git_commit: str | None = None
+    config_hash: str | None = None
 
     def eval_rate(self, I: np.ndarray) -> tuple[np.ndarray, int]:
         I = np.asarray(I, dtype=np.float64)

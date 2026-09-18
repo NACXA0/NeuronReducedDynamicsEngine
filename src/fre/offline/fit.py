@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
+import subprocess
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,6 +17,39 @@ from fre import models as _models  # noqa: F401
 from fre.offline.chirp import chirp_impedance, decide_layer
 from fre.sim import firing_rate, resolve
 from fre.types import NPZ_SCHEMA_VERSION, ExpKernel, FittedActivation, SRMKernels
+
+
+def _git_commit() -> str | None:
+    try:
+        out = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            stderr=subprocess.DEVNULL,
+            text=True,
+        )
+        return out.strip() or None
+    except (OSError, subprocess.CalledProcessError):
+        return None
+
+
+def _config_hash(fit: FittedActivation) -> str:
+    payload = {
+        "type_id": fit.type_id,
+        "model": fit.model,
+        "params": fit.params,
+        "method": fit.method,
+        "layer": fit.layer,
+        "I_grid": fit.I_grid.tolist(),
+        "r_grid": fit.r_grid.tolist(),
+    }
+    blob = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(blob).hexdigest()[:16]
+
+
+def artifact_stem_for_type(type_id: str, layer: str | None = None) -> str:
+    """Preferred M2+ filename stem: type key (+ optional layer tag)."""
+    safe = "".join(c if c.isalnum() or c in "-_" else "_" for c in type_id)
+    return f"{safe}_{layer}" if layer else safe
+
 
 R2_GATE = 0.98
 
@@ -261,9 +296,16 @@ def save_fit(fit: FittedActivation, path: str | Path) -> Path:
         payload["theta_taus"] = fit.srm.theta.taus
         payload["srm_vrh"] = np.array([fit.srm.v_rh])
     np.savez_compressed(path, **payload)
+    type_ids = fit.type_ids or ((fit.type_id,) if fit.type_id else ())
+    git_commit = fit.git_commit if fit.git_commit is not None else _git_commit()
+    config_hash = fit.config_hash if fit.config_hash is not None else _config_hash(fit)
+    fit.type_ids = tuple(type_ids)
+    fit.git_commit = git_commit
+    fit.config_hash = config_hash
     meta = {
         "schema_version": fit.schema_version,
         "type_id": fit.type_id,
+        "type_ids": list(type_ids),
         "model": fit.model,
         "params": fit.params,
         "method": fit.method,
@@ -276,6 +318,8 @@ def save_fit(fit: FittedActivation, path: str | Path) -> Path:
         "lut_hit_rate": fit.lut_hit_rate,
         "pysr_expr": fit.pysr_expr,
         "fallback_ode": fit.fallback_ode,
+        "git_commit": git_commit,
+        "config_hash": config_hash,
         "created_utc": datetime.now(timezone.utc).isoformat(),
     }
     meta_path = path.with_suffix(".meta.json")
@@ -310,9 +354,14 @@ def load_fit(path: str | Path) -> FittedActivation:
             theta=ExpKernel(np.asarray(data["theta_amps"]), np.asarray(data["theta_taus"])),
             v_rh=float(np.asarray(data["srm_vrh"]).reshape(-1)[0]) if "srm_vrh" in data.files else -50.0,
         )
+    raw_type_ids = meta.get("type_ids") or ()
+    type_ids = tuple(str(x) for x in raw_type_ids) if raw_type_ids else ()
+    type_id = str(meta.get("type_id", type_ids[0] if type_ids else "unknown"))
+    if not type_ids and type_id != "unknown":
+        type_ids = (type_id,)
     return FittedActivation(
         schema_version=schema,
-        type_id=str(meta.get("type_id", "unknown")),
+        type_id=type_id,
         model=str(meta.get("model", "lif")),
         params={k: float(v) for k, v in dict(meta.get("params") or {}).items()},
         method=str(meta.get("method", "linear")),
@@ -335,4 +384,7 @@ def load_fit(path: str | Path) -> FittedActivation:
         z_abs=None if "z_abs" not in data.files else np.asarray(data["z_abs"]),
         pysr_expr=meta.get("pysr_expr"),
         fallback_ode=bool(meta.get("fallback_ode", False)),
+        type_ids=type_ids,
+        git_commit=meta.get("git_commit"),
+        config_hash=meta.get("config_hash"),
     )

@@ -20,7 +20,7 @@ dependencies = [
 
 [project.optional-dependencies]
 jax = ["jax>=0.4.20"]
-flygym = ["flygym>=2.0"]
+flygym = ["flygym>=2.1; python_version >= '3.12' and python_version < '3.15'"]
 pysr = ["pysr>=0.18"]
 dev = [
     "pytest>=7.4",
