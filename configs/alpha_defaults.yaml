@@ -1,0 +1,16 @@
+# Shiu et al. 2024 W_syn = 0.275 mV/synapse. α in nA = 0.275 * C_nF / dt_ms.
+shiu_w_syn_mv: 0.275
+C_nF: 0.1
+dt_ms: 1.0
+default: 0.0275
+nt_sign:
+  acetylcholine: 1.0
+  ach: 1.0
+  gaba: -1.0
+  glutamate: -1.0
+  histamine: -1.0
+  dopamine: 1.0
+  serotonin: 1.0
+  octopamine: 1.0
+  unknown: 1.0
+overrides: {}

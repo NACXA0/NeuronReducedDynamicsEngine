@@ -1,0 +1,23 @@
+seed: 0
+dt_ms: 1.0
+connectome:
+  synapses: null
+  annotations: null
+  neurotransmitters: null
+subset:
+  types: null
+  regions: null
+fit:
+  I_min: 0.0
+  I_max: 0.8
+  n_I: 32
+  t_total_ms: 1500
+  window_ms: 800
+  dt_ms: 0.05
+simulation:
+  n_steps: 1000
+  mode: rate
+flygym:
+  fly_name: fly
+  actuator_type: joints
+  closed_loop_steps: 100

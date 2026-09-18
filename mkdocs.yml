@@ -1,0 +1,13 @@
+site_name: FRE
+docs_dir: docs
+theme:
+  name: material
+nav:
+  - Home: index.md
+  - Traceability: traceability.md
+  - RFC-001: rfcs/RFC-001.md
+  - Data sources: data_sources.md
+  - Inapproximable: known-inapproximable.md
+  - PySR exam: pysr_admission.md
+  - Failure list: failure_list.md
+  - API: api.md

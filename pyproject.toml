@@ -1,0 +1,69 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fre-neuron-engine"
+version = "0.1.0"
+description = "Connectome-driven fly neuron engine with type-bound reduced activation functions."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "FRE contributors" }]
+keywords = ["connectome", "drosophila", "spiking", "neuron", "flygym"]
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.11",
+    "pyyaml>=6.0",
+    "pyarrow>=14.0",
+]
+
+[project.optional-dependencies]
+jax = ["jax>=0.4.20"]
+flygym = ["flygym>=2.0"]
+pysr = ["pysr>=0.18"]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "ruff>=0.5",
+]
+docs = ["mkdocs>=1.5", "mkdocs-material>=9.0"]
+
+[project.scripts]
+fre = "fre.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/nacxa/StateApproxNeur"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+fre = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = [
+    "flygym: tests that need the optional flygym package or a mock closed loop",
+    "slow: longer integration or performance tests",
+    "pysr: requires optional Julia/PySR extra (NFR-11)",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests", "examples"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E501", "E741"]
+
+[tool.coverage.run]
+source = ["fre"]
+branch = true
+omit = ["src/fre/cli.py"]
+
+[tool.coverage.report]
+fail_under = 70
+show_missing = true

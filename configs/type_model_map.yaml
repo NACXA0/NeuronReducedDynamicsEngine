@@ -1,0 +1,37 @@
+# Type → model map. Tiers: default | literature | reserved (FR-2.2 / RFC-001 D7).
+# Public wording: "types may bind different F" — never "N reconstructed biophysics".
+- type_id: default excitatory
+  model: explif
+  tier: default
+  reduction_benefit: control
+  params: {}
+- type_id: default inhibitory
+  model: lif
+  tier: default
+  reduction_benefit: control
+  params:
+    Vth: -48.0
+- type_id: T4
+  model: adexp
+  tier: literature
+  reduction_benefit: v0.1_primary
+  ref: "Drosophila T4/T5 motion detector; AdExp stand-in pending ModelDB params"
+  params: {}
+- type_id: aCC
+  model: adexp
+  tier: literature
+  reduction_benefit: v0.1_primary
+  ref: "Drosophila aCC motoneuron; AdExp stand-in pending ModelDB params"
+  params: {}
+- type_id: hh_demo
+  model: hh
+  tier: reserved
+  reduction_benefit: v0.2
+  params: {}
+  ref: "Hodgkin-Huxley 1952 point-neuron scaling"
+- type_id: adexp_demo
+  model: adexp
+  tier: default
+  reduction_benefit: v0.1_primary
+  params: {}
+  ref: "Brette-Gerstner 2005 AdExp"
