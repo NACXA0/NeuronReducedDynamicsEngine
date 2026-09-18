@@ -42,6 +42,7 @@ def _interp1d(x, xp, fp):
 
 
 def _eval_rate_torch(I, I_grid, r_grid, I_onset):
+    """Match ``FittedActivation.eval_rate`` (float64 onset / interp semantics)."""
     torch = _require_torch()
     oor = ((I < I_grid[0]) | (I > I_grid[-1])).sum()
     I_clip = I.clamp(I_grid[0], I_grid[-1])
@@ -59,6 +60,7 @@ def _csr_to_torch(graph: GraphData, device):
     n = int(graph.n_nodes)
     crow = torch.as_tensor(np.ascontiguousarray(csr.indptr, dtype=np.int64), device=device)
     col = torch.as_tensor(np.ascontiguousarray(csr.indices, dtype=np.int64), device=device)
+    # SpMV stays float32 (cuSPARSE); activation tables use float64 below for numpy parity.
     val = torch.as_tensor(np.ascontiguousarray(csr.data, dtype=np.float32), device=device)
     return torch.sparse_csr_tensor(crow, col, val, size=(n, n), device=device, dtype=torch.float32)
 
@@ -70,7 +72,7 @@ def prepare_torch_graph(
 ) -> dict[str, Any]:
     torch = _require_torch()
     dev = _device(torch, device)
-    token = (id(graph.edge_index), id(graph.edge_weight), graph.n_nodes, str(dev))
+    token = (id(graph.edge_index), id(graph.edge_weight), graph.n_nodes, str(dev), "f64-act")
     cached = graph._torch
     if isinstance(cached, dict) and cached.get("token") == token:
         return cached
@@ -86,13 +88,14 @@ def prepare_torch_graph(
         "I_onset": [],
     }
     for table in tables:
+        # float64: float32 I_onset rounding breaks ``I < I_onset`` vs numpy at grid knots.
         bundle["I_grid"].append(
-            torch.as_tensor(np.ascontiguousarray(table.I_grid, dtype=np.float32), device=dev)
+            torch.as_tensor(np.ascontiguousarray(table.I_grid, dtype=np.float64), device=dev)
         )
         bundle["r_grid"].append(
-            torch.as_tensor(np.ascontiguousarray(table.r_grid, dtype=np.float32), device=dev)
+            torch.as_tensor(np.ascontiguousarray(table.r_grid, dtype=np.float64), device=dev)
         )
-        bundle["I_onset"].append(torch.tensor(float(table.I_onset), dtype=torch.float32, device=dev))
+        bundle["I_onset"].append(torch.tensor(float(table.I_onset), dtype=torch.float64, device=dev))
     graph._torch = bundle
     return bundle
 
@@ -105,9 +108,10 @@ def step_rate_torch(
 ) -> tuple[Any, Any]:
     torch = _require_torch()
     csr = bundle["csr"]
-    I_syn = torch.sparse.mm(csr, r.unsqueeze(1)).squeeze(1)
-    I_total = I_syn + I_ext
-    r_new = torch.zeros_like(r)
+    # SpMV in float32; promote before F so onset/interp match numpy float64.
+    I_syn = torch.sparse.mm(csr, r.to(dtype=torch.float32).unsqueeze(1)).squeeze(1).to(dtype=torch.float64)
+    I_total = I_syn + I_ext.to(dtype=torch.float64)
+    r_new = torch.zeros(r.shape, dtype=torch.float64, device=r.device)
     for t, idx in enumerate(bundle["idx"]):
         if idx.numel() == 0:
             continue
@@ -136,9 +140,9 @@ def run_rate_torch(
     torch = _require_torch()
     bundle = prepare_torch_graph(graph, tables, device=device)
     dev = bundle["device"]
-    I_np = np.zeros(graph.n_nodes, dtype=np.float32) if I_ext is None else np.asarray(I_ext, dtype=np.float32)
+    I_np = np.zeros(graph.n_nodes, dtype=np.float64) if I_ext is None else np.asarray(I_ext, dtype=np.float64)
     I_t = torch.as_tensor(np.ascontiguousarray(I_np), device=dev)
-    r = torch.full((graph.n_nodes,), float(r0), dtype=torch.float32, device=dev)
+    r = torch.full((graph.n_nodes,), float(r0), dtype=torch.float64, device=dev)
     oor = torch.zeros((), dtype=torch.int64, device=dev)
     trace_np = np.zeros((n_steps if record_trace else 0, graph.n_nodes), dtype=np.float64)
     for t in range(n_steps):

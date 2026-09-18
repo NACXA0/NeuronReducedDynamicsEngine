@@ -44,3 +44,4 @@ assets/demo/*
 !assets/demo/WATERMARK.txt
 !assets/demo/*.gif
 data/fetch_report.json
+vendor/
