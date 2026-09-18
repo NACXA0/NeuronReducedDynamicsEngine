@@ -60,6 +60,8 @@ def test_tc_3_3_roundtrip_npz(tmp_path: Path):
     assert loaded.type_ids == ("lif0",)
     assert loaded.config_hash
     assert loaded.lut_I is not None
+    assert loaded.lut_sched_t is not None
+    assert loaded.lut_sched_t.shape[0] == loaded.lut_sched_I.shape[0]
     r, oor = loaded.eval_rate(np.array([-1.0, 0.3, 9.0]))
     assert oor == 2
     assert np.all(r >= 0.0)

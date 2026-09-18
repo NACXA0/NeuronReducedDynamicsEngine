@@ -85,6 +85,9 @@ class FittedActivation:
     lut_spike: np.ndarray | None = None
     lut_V: np.ndarray | None = None
     lut_hit_rate: float | None = None
+    # Constant-current spike times (n_I, k), NaN-padded. Used for NFR-5.
+    lut_sched_I: np.ndarray | None = None
+    lut_sched_t: np.ndarray | None = None
     srm: SRMKernels | None = None
     z_freqs: np.ndarray | None = None
     z_abs: np.ndarray | None = None

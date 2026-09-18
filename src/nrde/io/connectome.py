@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import Iterable, Mapping
 
 import numpy as np
 import yaml
@@ -13,8 +13,16 @@ from nrde.types import SHIU_ALPHA_NA, GraphData
 PRE_ALIASES = ("pre_id", "body_pre", "bodyId_pre", "pre", "source", "i")
 POST_ALIASES = ("post_id", "body_post", "bodyId_post", "post", "target", "j")
 WEIGHT_ALIASES = ("synapse_count", "weight", "n_synapses", "syn_count", "roiWeight", "n")
-NT_ALIASES = ("nt_type", "nt", "neurotransmitter", "consensus_nt", "pred_nt", "top_nt")
-ID_ALIASES = ("bodyId", "body_id", "node_id", "id", "root_id")
+NT_ALIASES = (
+    "nt_type",
+    "nt",
+    "neurotransmitter",
+    "consensus_nt",
+    "pred_nt",
+    "predicted_nt",
+    "top_nt",
+)
+ID_ALIASES = ("bodyId", "body_id", "node_id", "id", "root_id", "body")
 TYPE_ALIASES = ("cell_type", "type", "cellType", "instance", "type_id")
 REGION_ALIASES = ("region", "roi", "superclass", "super_class", "neuropil")
 
@@ -41,40 +49,172 @@ def _pick_column(columns: Iterable[str], aliases: tuple[str, ...]) -> str | None
     return None
 
 
-def _read_table(path: str | Path) -> dict[str, np.ndarray]:
-    path = Path(path)
+def _column_names(path: Path) -> list[str]:
     suffix = path.suffix.lower()
     if suffix in {".feather", ".arrow"}:
-        import pyarrow.feather as feather
+        import pyarrow as pa
 
-        table = feather.read_table(path)
-        return {name: table.column(name).to_numpy() for name in table.column_names}
+        with pa.memory_map(str(path), "r") as source:
+            return list(pa.ipc.open_file(source).schema.names)
     if suffix in {".parquet", ".pq"}:
         import pyarrow.parquet as pq
 
-        table = pq.read_table(path)
-        return {name: table.column(name).to_numpy() for name in table.column_names}
+        return list(pq.read_schema(path).names)
     if suffix in {".csv", ".txt"}:
         import csv
 
         with path.open(newline="", encoding="utf-8") as handle:
-            reader = csv.DictReader(handle)
-            if reader.fieldnames is None:
-                raise ValueError(f"CSV has no header: {path}")
-            cols: dict[str, list[Any]] = {name: [] for name in reader.fieldnames}
-            for row in reader:
-                for name in reader.fieldnames:
-                    cols[name].append(row[name])
-        return {k: np.asarray(v) for k, v in cols.items()}
+            reader = csv.reader(handle)
+            try:
+                header = next(reader)
+            except StopIteration as exc:
+                raise ValueError(f"CSV has no header: {path}") from exc
+        return [name.strip() for name in header]
+    raise ValueError(f"Unsupported connectome format: {path.suffix}")
+
+
+def _read_csv(path: Path) -> dict[str, np.ndarray]:
+    import pandas as pd
+
+    frame = pd.read_csv(path)
+    if frame.columns.empty:
+        raise ValueError(f"CSV has no header: {path}")
+    return {str(name): frame[name].to_numpy() for name in frame.columns}
+
+
+def _read_columns(path: str | Path, names: list[str]) -> dict[str, np.ndarray]:
+    """Read only ``names``. Feather/Parquet stay columnar; no full-table copy."""
+    path = Path(path)
+    if not names:
+        return {}
+    suffix = path.suffix.lower()
+    if suffix in {".feather", ".arrow"}:
+        import pyarrow.feather as feather
+
+        table = feather.read_table(path, columns=names)
+        return {name: table.column(name).to_numpy(zero_copy_only=False) for name in names}
+    if suffix in {".parquet", ".pq"}:
+        import pyarrow.parquet as pq
+
+        table = pq.read_table(path, columns=names)
+        return {name: table.column(name).to_numpy(zero_copy_only=False) for name in names}
+    if suffix in {".csv", ".txt"}:
+        full = _read_csv(path)
+        return {name: full[name] for name in names}
     raise ValueError(f"Unsupported connectome format: {path.suffix}")
 
 
 def _as_int(values: np.ndarray) -> np.ndarray:
-    return np.asarray(values, dtype=np.int64)
+    arr = np.asarray(values)
+    if arr.dtype == np.int64:
+        return arr
+    return arr.astype(np.int64, copy=False)
 
 
-def _as_float(values: np.ndarray) -> np.ndarray:
-    return np.asarray(values, dtype=np.float64)
+def _in_sorted(sorted_ids: np.ndarray, query: np.ndarray) -> np.ndarray:
+    if sorted_ids.size == 0:
+        return np.zeros(query.shape, dtype=bool)
+    pos = np.searchsorted(sorted_ids, query)
+    valid = pos < sorted_ids.size
+    pos = np.minimum(pos, sorted_ids.size - 1)
+    return valid & (sorted_ids[pos] == query)
+
+
+def _last_wins_sorted(ids: np.ndarray, *columns: np.ndarray) -> tuple[np.ndarray, ...]:
+    """Unique ids, sorted, keeping the last row (same as a dict comprehension)."""
+    ids = _as_int(ids)
+    if ids.size == 0:
+        return (ids, *tuple(np.asarray(col)[:0] for col in columns))
+    _uniq, first_rev = np.unique(ids[::-1], return_index=True)
+    keep = ids.size - 1 - first_rev
+    return (_uniq, *(np.asarray(col)[keep] for col in columns))
+
+
+def _labels_for(
+    query: np.ndarray,
+    sorted_ids: np.ndarray,
+    labels: np.ndarray,
+    default: str,
+) -> np.ndarray:
+    out = np.empty(query.shape, dtype=object)
+    out.fill(default)
+    if query.size == 0 or sorted_ids.size == 0:
+        return out
+    pos = np.searchsorted(sorted_ids, query)
+    valid = pos < sorted_ids.size
+    pos = np.minimum(pos, sorted_ids.size - 1)
+    hit = valid & (sorted_ids[pos] == query)
+    out[hit] = labels[pos[hit]]
+    return out
+
+
+def _factorize(labels: np.ndarray) -> tuple[tuple[str, ...], np.ndarray]:
+    if labels.size == 0:
+        return ("unknown",), np.zeros(0, dtype=np.int32)
+    import pandas as pd
+
+    codes, uniques = pd.factorize(np.asarray(labels, dtype=object), sort=True)
+    return tuple(str(item) for item in uniques), np.asarray(codes, dtype=np.int32)
+
+
+def _codes_to_objects(codes: np.ndarray, names: list[str]) -> np.ndarray:
+    """Index into shared strings. Avoids a ``<U`` array, which blows up at 1e8 edges."""
+    if codes.size == 0:
+        return np.zeros(0, dtype=object)
+    return np.asarray(names, dtype=object)[np.asarray(codes)]
+
+
+def _ids_where(ids: np.ndarray, labels: np.ndarray, allowed: set[str]) -> np.ndarray:
+    if ids.size == 0:
+        return ids
+    keep = np.isin(np.asarray(labels, dtype=str), np.asarray(sorted(allowed), dtype=str))
+    return np.asarray(ids)[keep]
+
+
+def _encode_labels(labels: np.ndarray) -> tuple[list[str], np.ndarray]:
+    """Map strings to codes with ``numpy`` search. ``unknown`` is always a category."""
+    text = np.asarray(labels, dtype=str)
+    names = np.unique(text) if text.size else np.array([], dtype=str)
+    insert = int(np.searchsorted(names, "unknown"))
+    if insert == names.size or names[insert] != "unknown":
+        names = np.insert(names, insert, "unknown")
+    codes = np.searchsorted(names, text).astype(np.int32, copy=False)
+    return [str(name) for name in names], codes
+
+
+def _edge_scale(
+    nt_codes: np.ndarray,
+    nt_names: list[str],
+    pre_type_codes: np.ndarray,
+    type_names: tuple[str, ...],
+    alphas: Mapping[str, float],
+) -> np.ndarray | float:
+    base = float(alphas.get("default", SHIU_ALPHA_NA))
+    unknown_sign = float(alphas.get("sign:unknown", 1.0))
+    per_nt = np.array(
+        [base * float(alphas.get(f"sign:{name.lower()}", unknown_sign)) for name in nt_names],
+        dtype=np.float64,
+    )
+    nt_index = {name: i for i, name in enumerate(nt_names)}
+    type_index = {name: i for i, name in enumerate(type_names)}
+    overrides: list[tuple[int, int, float]] = []
+    for key, val in alphas.items():
+        if not isinstance(key, str) or "|" not in key:
+            continue
+        nt_s, ty_s = key.split("|", 1)
+        ni = nt_index.get(nt_s)
+        ti = type_index.get(ty_s)
+        if ni is None or ti is None:
+            continue
+        overrides.append((ni, ti, float(val)))
+    if nt_codes.size == 0:
+        return float(per_nt[0]) if per_nt.size else base
+    if not overrides and (per_nt.size == 1 or int(nt_codes.min()) == int(nt_codes.max())):
+        return float(per_nt[int(nt_codes[0])])
+    scale = per_nt[nt_codes]
+    for ni, ti, val in overrides:
+        scale[(nt_codes == ni) & (pre_type_codes == ti)] = val
+    return scale
 
 
 def load_alpha_table(path: str | Path | None = None) -> dict[str, float]:
@@ -112,105 +252,159 @@ def load_connectome(
     include_regions: Iterable[str] | None = None,
     include_ids: Iterable[int] | None = None,
 ) -> GraphData:
-    syn = _read_table(synapses_path)
-    pre_col = _pick_column(syn, PRE_ALIASES)
-    post_col = _pick_column(syn, POST_ALIASES)
-    w_col = _pick_column(syn, WEIGHT_ALIASES)
-    nt_col = _pick_column(syn, NT_ALIASES)
+    """Load a connectome without building a Python object per edge.
+
+    Filters and id remaps use sorted arrays and ``searchsorted``. Neurotransmitter
+    labels stay as integer codes until the final shared-string column.
+    """
+    syn_path = Path(synapses_path)
+    syn_names = _column_names(syn_path)
+    pre_col = _pick_column(syn_names, PRE_ALIASES)
+    post_col = _pick_column(syn_names, POST_ALIASES)
+    w_col = _pick_column(syn_names, WEIGHT_ALIASES)
+    nt_col = _pick_column(syn_names, NT_ALIASES)
     if pre_col is None or post_col is None:
-        raise ValueError(f"Cannot find pre/post columns in {list(syn)}")
-    pre = _as_int(syn[pre_col])
-    post = _as_int(syn[post_col])
-    weight = _as_float(syn[w_col]) if w_col is not None else np.ones(pre.shape[0])
-    nt_edge = (
-        np.asarray(syn[nt_col]).astype(str)
-        if nt_col is not None
-        else np.full(pre.shape[0], "unknown", dtype=object)
-    )
+        raise ValueError(f"Cannot find pre/post columns in {syn_names}")
+    wanted = [pre_col, post_col]
+    if w_col is not None:
+        wanted.append(w_col)
+    if nt_col is not None:
+        wanted.append(nt_col)
+    syn = _read_columns(syn_path, wanted)
+    pre = _as_int(syn.pop(pre_col))
+    post = _as_int(syn.pop(post_col))
+    weight = np.asarray(syn.pop(w_col)) if w_col is not None else np.ones(pre.shape[0], dtype=np.float64)
+    raw_nt = np.asarray(syn.pop(nt_col)).astype(str) if nt_col is not None else None
+    del syn
 
-    node_ids = np.unique(np.concatenate([pre, post]))
-    type_of: dict[int, str] = {int(i): "unknown" for i in node_ids}
-    region_of: dict[int, str] = {int(i): "" for i in node_ids}
-
+    ann_ids = np.zeros(0, dtype=np.int64)
+    ann_types = np.zeros(0, dtype=object)
+    ann_regions = np.zeros(0, dtype=object)
     if annotations_path is not None:
-        ann = _read_table(annotations_path)
-        id_col = _pick_column(ann, ID_ALIASES)
-        type_col = _pick_column(ann, TYPE_ALIASES)
-        region_col = _pick_column(ann, REGION_ALIASES)
+        ann_path = Path(annotations_path)
+        ann_names = _column_names(ann_path)
+        id_col = _pick_column(ann_names, ID_ALIASES)
+        type_col = _pick_column(ann_names, TYPE_ALIASES)
+        region_col = _pick_column(ann_names, REGION_ALIASES)
         if id_col is None:
-            raise ValueError(f"Cannot find id column in annotations {list(ann)}")
-        ids = _as_int(ann[id_col])
-        types = np.asarray(ann[type_col]).astype(str) if type_col else np.full(ids.size, "unknown")
-        regions = np.asarray(ann[region_col]).astype(str) if region_col else np.full(ids.size, "")
-        for i, t, r in zip(ids.tolist(), types.tolist(), regions.tolist()):
-            type_of[int(i)] = str(t)
-            region_of[int(i)] = str(r)
+            raise ValueError(f"Cannot find id column in annotations {ann_names}")
+        ann_wanted = [id_col]
+        if type_col is not None:
+            ann_wanted.append(type_col)
+        if region_col is not None:
+            ann_wanted.append(region_col)
+        ann = _read_columns(ann_path, ann_wanted)
+        ann_ids, ann_types, ann_regions = _last_wins_sorted(
+            ann[id_col],
+            np.asarray(ann[type_col]).astype(str) if type_col else np.full(len(ann[id_col]), "unknown"),
+            np.asarray(ann[region_col]).astype(str) if region_col else np.full(len(ann[id_col]), ""),
+        )
+        del ann
 
-    if nt_path is not None:
-        nt_tab = _read_table(nt_path)
-        id_col = _pick_column(nt_tab, ID_ALIASES)
-        nt_n_col = _pick_column(nt_tab, NT_ALIASES)
-        if id_col is not None and nt_n_col is not None:
-            by_id = {
-                int(i): str(n)
-                for i, n in zip(_as_int(nt_tab[id_col]).tolist(), np.asarray(nt_tab[nt_n_col]).astype(str))
-            }
-            nt_edge = np.array(
-                [by_id.get(int(p), str(n)) for p, n in zip(pre.tolist(), nt_edge.tolist())],
-                dtype=object,
-            )
-
-    keep_nodes = set(int(i) for i in node_ids.tolist())
+    mask = np.ones(pre.shape[0], dtype=bool)
+    filtered = False
     if include_ids is not None:
-        keep_nodes &= set(int(i) for i in include_ids)
+        keep_ids = np.unique(np.asarray(list(include_ids), dtype=np.int64))
+        mask &= _in_sorted(keep_ids, pre) & _in_sorted(keep_ids, post)
+        filtered = True
     if include_types is not None:
-        allowed = set(include_types)
-        keep_nodes = {i for i in keep_nodes if type_of.get(i, "unknown") in allowed}
+        allowed = {str(name) for name in include_types}
+        allowed_ids = _ids_where(ann_ids, ann_types, allowed)
+        unknown_ok = "unknown" in allowed
+        pre_ok = _in_sorted(allowed_ids, pre)
+        post_ok = _in_sorted(allowed_ids, post)
+        if unknown_ok:
+            pre_ok = pre_ok | ~_in_sorted(ann_ids, pre)
+            post_ok = post_ok | ~_in_sorted(ann_ids, post)
+        mask &= pre_ok & post_ok
+        filtered = True
     if include_regions is not None:
-        allowed_r = set(include_regions)
-        keep_nodes = {i for i in keep_nodes if region_of.get(i, "") in allowed_r}
+        allowed_r = {str(name) for name in include_regions}
+        allowed_ids = _ids_where(ann_ids, ann_regions, allowed_r)
+        unknown_ok = "" in allowed_r
+        pre_ok = _in_sorted(allowed_ids, pre)
+        post_ok = _in_sorted(allowed_ids, post)
+        if unknown_ok:
+            pre_ok = pre_ok | ~_in_sorted(ann_ids, pre)
+            post_ok = post_ok | ~_in_sorted(ann_ids, post)
+        mask &= pre_ok & post_ok
+        filtered = True
+    if filtered and not mask.all():
+        pre, post, weight = pre[mask], post[mask], weight[mask]
+        if raw_nt is not None:
+            raw_nt = raw_nt[mask]
+    del mask
 
-    mask = np.array([int(a) in keep_nodes and int(b) in keep_nodes for a, b in zip(pre, post)])
-    pre, post, weight, nt_edge = pre[mask], post[mask], weight[mask], nt_edge[mask]
-    node_ids = np.unique(np.concatenate([pre, post])) if pre.size else np.array([], dtype=np.int64)
-    index_of = {int(i): k for k, i in enumerate(node_ids.tolist())}
+    if pre.size == 0:
+        return GraphData(
+            n_nodes=0,
+            node_ids=np.zeros(0, dtype=np.int64),
+            edge_index=np.zeros((2, 0), dtype=np.int64),
+            edge_weight=np.zeros(0, dtype=np.float32),
+            node_type=np.zeros(0, dtype=np.int32),
+            type_names=("unknown",),
+            nt_type=np.zeros(0, dtype=object),
+            region=np.zeros(0, dtype=object),
+            meta={"synapses_path": str(syn_path)},
+        )
 
-    type_names = tuple(sorted({type_of.get(int(i), "unknown") for i in node_ids.tolist()} or {"unknown"}))
-    type_index = {name: k for k, name in enumerate(type_names)}
-    node_type = np.array(
-        [type_index[type_of.get(int(i), "unknown")] for i in node_ids.tolist()],
-        dtype=np.int32,
-    )
-    region = np.array([region_of.get(int(i), "") for i in node_ids.tolist()], dtype=object)
+    node_ids = np.union1d(pre, post)
+    pre_i = np.searchsorted(node_ids, pre)
+    type_labels = _labels_for(node_ids, ann_ids, ann_types, "unknown")
+    region = _labels_for(node_ids, ann_ids, ann_regions, "")
+    type_names, node_type = _factorize(type_labels)
+    del type_labels
+
+    if raw_nt is not None:
+        nt_names_arr, nt_codes = np.unique(raw_nt, return_inverse=True)
+        nt_names = [str(name) for name in nt_names_arr]
+        nt_codes = nt_codes.astype(np.int32, copy=False)
+        del raw_nt
+    elif nt_path is not None:
+        nt_file = Path(nt_path)
+        nt_names_hdr = _column_names(nt_file)
+        id_col = _pick_column(nt_names_hdr, ID_ALIASES)
+        nt_n_col = _pick_column(nt_names_hdr, NT_ALIASES)
+        if id_col is None or nt_n_col is None:
+            nt_names = ["unknown"]
+            nt_codes = np.zeros(pre.shape[0], dtype=np.int32)
+        else:
+            nt_tab = _read_columns(nt_file, [id_col, nt_n_col])
+            nt_ids, nt_labels = _last_wins_sorted(nt_tab[id_col], np.asarray(nt_tab[nt_n_col]))
+            del nt_tab
+            nt_names, small_codes = _encode_labels(nt_labels)
+            nt_codes = np.full(pre.shape[0], nt_names.index("unknown"), dtype=np.int32)
+            pos = np.searchsorted(nt_ids, pre)
+            valid = pos < nt_ids.size
+            pos_c = np.minimum(pos, max(nt_ids.size - 1, 0))
+            hit = valid & (nt_ids[pos_c] == pre)
+            nt_codes[hit] = small_codes[pos_c[hit]]
+            del nt_ids, nt_labels, small_codes
+    else:
+        nt_names = ["unknown"]
+        nt_codes = np.zeros(pre.shape[0], dtype=np.int32)
 
     alphas = dict(alpha_table) if alpha_table is not None else load_alpha_table(alpha_path)
-    pre_types = np.array(
-        [type_of.get(int(i), "unknown") for i in pre.tolist()],
-        dtype=object,
-    )
-    edge_weight = np.array(
-        [
-            float(w) * _alpha_for(str(nt), str(pt), alphas)
-            for w, nt, pt in zip(weight.tolist(), nt_edge.tolist(), pre_types.tolist())
-        ],
-        dtype=np.float32,
-    )
-    edge_index = np.vstack(
-        [
-            np.array([index_of[int(i)] for i in pre.tolist()], dtype=np.int64),
-            np.array([index_of[int(i)] for i in post.tolist()], dtype=np.int64),
-        ]
-    )
+    scale = _edge_scale(nt_codes, nt_names, node_type[pre_i], type_names, alphas)
+    edge_weight = (np.asarray(weight, dtype=np.float64) * scale).astype(np.float32)
+    del weight, scale
+
+    post_i = np.searchsorted(node_ids, post)
+    edge_index = np.empty((2, pre_i.shape[0]), dtype=np.int64)
+    edge_index[0] = pre_i
+    edge_index[1] = post_i
+    del pre, post, pre_i, post_i
+
     return GraphData(
         n_nodes=int(node_ids.size),
-        node_ids=node_ids.astype(np.int64),
+        node_ids=node_ids,
         edge_index=edge_index,
         edge_weight=edge_weight,
         node_type=node_type,
         type_names=type_names,
-        nt_type=np.asarray(nt_edge).astype(str),
+        nt_type=_codes_to_objects(nt_codes, nt_names),
         region=region,
-        meta={"synapses_path": str(synapses_path)},
+        meta={"synapses_path": str(syn_path)},
     )
 
 

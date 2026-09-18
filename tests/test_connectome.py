@@ -94,6 +94,15 @@ def test_tc_1_2_type_grouping(tmp_path: Path):
     assert g.node_type.shape == (3,)
 
 
+def test_include_ids_keeps_induced_edges(tmp_path: Path):
+    syn = tmp_path / "syn.csv"
+    _write_csv(syn)
+    g = load_connectome(syn, include_ids=[1, 2])
+    assert g.n_nodes == 2
+    assert g.edge_index.shape[1] == 1
+    assert set(g.node_ids.tolist()) == {1, 2}
+
+
 def test_tc_1_4_subgraph_by_type(tmp_path: Path):
     syn = tmp_path / "syn.csv"
     ann = tmp_path / "ann.csv"

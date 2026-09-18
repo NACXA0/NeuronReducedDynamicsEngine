@@ -7,7 +7,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from nrde.engine.rate import run_rate
-from nrde.engine.spike import run_spike
+from nrde.engine.spike import run_spike, scheduled_spike_times
 from nrde.sim import firing_rate, simulate_spikes
 from nrde.types import FittedActivation, GraphData
 
@@ -79,16 +79,19 @@ def validate_single(
     if fit.lut_I is not None:
         I0 = float(I_test[min(2, I_test.size - 1)])
         ref = simulate_spikes(fit.model, fit.params, I0, t_total=VP_WINDOW_MS, dt=dt)
-        graph = GraphData(
-            n_nodes=1,
-            node_ids=np.array([0], dtype=np.int64),
-            edge_index=np.zeros((2, 0), dtype=np.int64),
-            edge_weight=np.zeros((0,), dtype=np.float32),
-            node_type=np.array([0], dtype=np.int32),
-            type_names=(fit.type_id,),
-        )
-        _, trace = run_spike(graph, [fit], n_steps=int(VP_WINDOW_MS), I_ext=np.array([I0]))
-        approx = np.where(trace[:, 0])[0].astype(np.float64)
+        if fit.lut_sched_t is not None:
+            approx = scheduled_spike_times(fit, I0, t_end=VP_WINDOW_MS)
+        else:
+            graph = GraphData(
+                n_nodes=1,
+                node_ids=np.array([0], dtype=np.int64),
+                edge_index=np.zeros((2, 0), dtype=np.int64),
+                edge_weight=np.zeros((0,), dtype=np.float32),
+                node_type=np.array([0], dtype=np.int32),
+                type_names=(fit.type_id,),
+            )
+            _, trace = run_spike(graph, [fit], n_steps=int(VP_WINDOW_MS), I_ext=np.array([I0]))
+            approx = np.where(trace[:, 0])[0].astype(np.float64)
         rel_vp = relative_vp(ref, approx)
         nfr5 = bool(rel_vp <= REL_VP_GATE)
     return SingleCellReport(

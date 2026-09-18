@@ -205,3 +205,56 @@ def run_spike(
         if record_trace:
             trace[t] = state.spikes
     return state, trace
+
+
+def _column_query(axis: np.ndarray, column: np.ndarray, current: float) -> float:
+    """PCHIP along currents that actually have this interval; NaN outside the hull."""
+    mask = np.isfinite(column)
+    if int(np.count_nonzero(mask)) < 2:
+        return float("nan")
+    x = axis[mask]
+    y = column[mask]
+    if current < x[0] or current > x[-1]:
+        return float("nan")
+    if x.size < 3:
+        return float(np.interp(current, x, y))
+    from scipy.interpolate import PchipInterpolator
+
+    return float(PchipInterpolator(x, y)(current))
+
+
+def scheduled_spike_times(table: FittedActivation, current: float, t_end: float = 1000.0) -> np.ndarray:
+    """Constant-current L1 spike times (ms) from the fitted schedule.
+
+    Intervals are interpolated across the current axis, then accumulated.
+    On a grid node this returns the stored ODE spike times inside the window.
+    """
+    if table.lut_sched_I is None or table.lut_sched_t is None:
+        return np.zeros(0, dtype=np.float64)
+    axis = np.asarray(table.lut_sched_I, dtype=np.float64)
+    times = np.asarray(table.lut_sched_t, dtype=np.float64)
+    I = float(current)
+    on_grid = np.flatnonzero(np.isclose(axis, I, rtol=0.0, atol=1e-9))
+    if on_grid.size:
+        col = times[int(on_grid[0])]
+        col = col[np.isfinite(col)]
+        return col[col <= t_end + 1e-9]
+    t_first = _column_query(axis, times[:, 0], I)
+    if not np.isfinite(t_first) or t_first > t_end:
+        return np.zeros(0, dtype=np.float64)
+    intervals = np.diff(times, axis=1)
+    out = [t_first]
+    cursor = t_first
+    for k in range(intervals.shape[1]):
+        step = _column_query(axis, intervals[:, k], I)
+        if not np.isfinite(step) or step <= 0.0:
+            if k == 0:
+                break
+            step = _column_query(axis, intervals[:, k - 1], I)
+            if not np.isfinite(step) or step <= 0.0:
+                break
+        cursor = cursor + step
+        if cursor > t_end:
+            break
+        out.append(cursor)
+    return np.asarray(out, dtype=np.float64)

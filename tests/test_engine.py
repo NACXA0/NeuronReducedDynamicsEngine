@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 
 from nrde.engine.rate import run_rate
-from nrde.engine.spike import run_spike
+from nrde.engine.spike import run_spike, scheduled_spike_times
 from nrde.fitting.fit import attach_lut, fit_fi, fit_spike_lut
 from nrde.io.connectome import erdos_renyi_graph
 from nrde.validation import relative_vp
@@ -83,11 +83,13 @@ def test_tc_4_2_spike_lut_vs_ode_vp():
         type_names=("lif",),
     )
     _, trace = run_spike(graph, [fit], n_steps=1000, I_ext=np.array([I0]))
-    approx = np.where(trace[:, 0])[0].astype(np.float64)
+    approx = scheduled_spike_times(fit, I0, t_end=1000.0)
     rel = relative_vp(ref, approx)
     assert ref.size > 0
     assert approx.size > 0
-    assert rel <= 0.10 or abs(ref.size - approx.size) / max(ref.size, 1) <= 0.2
+    assert rel <= 0.10
+    # The 1 ms raster is still a spike train; it is not the NFR-5 clock.
+    assert trace.shape == (1000, 1)
 
 
 def test_tc_4_3_refractory_prevents_double_spike():

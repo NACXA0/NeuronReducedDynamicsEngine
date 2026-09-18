@@ -1,1 +1,1 @@
-NRDE v0.1.0  preset=flygym-demo-v01  seed=0  steps=8
+NRDE v0.1.0  preset=flygym-demo-v01  seed=0  steps=20

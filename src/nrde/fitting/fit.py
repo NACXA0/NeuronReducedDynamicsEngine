@@ -15,7 +15,7 @@ from scipy.interpolate import CubicSpline, PchipInterpolator
 
 from nrde import models as _models  # noqa: F401
 from nrde.fitting.chirp import chirp_impedance, decide_layer
-from nrde.sim import firing_rate, resolve
+from nrde.sim import firing_rate, resolve, simulate_spikes
 from nrde.sim_kernels import fill_spike_lut_packed, firing_rates_packed, pack_model
 from nrde.types import NPZ_SCHEMA_VERSION, ExpKernel, FittedActivation, SRMKernels
 
@@ -228,6 +228,33 @@ def fit_fi(
     )
 
 
+def _constant_current_schedule(
+    model: str,
+    params: dict[str, float] | None,
+    I_min: float,
+    I_max: float,
+    *,
+    n_sched: int = 64,
+    t_total: float = 1100.0,
+    dt: float = 0.05,
+    kmax: int = 2048,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Spike times of the reference ODE on a current grid (same dt as NFR-5).
+
+    Column k is the k-th spike time in milliseconds. Currents that never fire
+    stay NaN. The online comparison interpolates intervals, not the 1 ms LUT.
+    """
+    n_sched = max(int(n_sched), 2)
+    axis = np.linspace(float(I_min), float(I_max), n_sched)
+    table = np.full((n_sched, int(kmax)), np.nan, dtype=np.float64)
+    for i, current in enumerate(axis):
+        times = simulate_spikes(model, params, float(current), t_total=t_total, dt=dt)
+        n = min(int(times.size), table.shape[1])
+        if n:
+            table[i, :n] = times[:n]
+    return axis, table
+
+
 def fit_spike_lut(
     model: str,
     params: dict[str, float] | None = None,
@@ -239,6 +266,7 @@ def fit_spike_lut(
     t_ref_max: float | None = None,
 ) -> dict[str, np.ndarray | float]:
     spec, p = resolve(model, params)
+    sched_I, sched_t = _constant_current_schedule(model, params, I_min, I_max)
     t_ref = float(getattr(p, "t_ref", 2.0))
     t_span = float(t_ref_max if t_ref_max is not None else max(t_ref * 15.0, 40.0))
     I_axis = np.linspace(I_min, I_max, n_I)
@@ -256,6 +284,8 @@ def fit_spike_lut(
             "lut_V": V_next,
             "lut_hit_rate": float(hit_rate),
             "quality": "ok" if hit_rate > 0.0 else "poor",
+            "lut_sched_I": sched_I,
+            "lut_sched_t": sched_t,
         }
     spike_mask = np.zeros((n_I, n_dt), dtype=np.float32)
     V_next = np.zeros((n_I, n_dt), dtype=np.float32)
@@ -298,6 +328,8 @@ def fit_spike_lut(
         "lut_V": V_next,
         "lut_hit_rate": float(hit_rate),
         "quality": "ok" if hit_rate > 0.0 else "poor",
+        "lut_sched_I": sched_I,
+        "lut_sched_t": sched_t,
     }
 
 
@@ -307,6 +339,9 @@ def attach_lut(fit: FittedActivation, lut: dict[str, Any]) -> FittedActivation:
     fit.lut_spike = np.asarray(lut["lut_spike"])
     fit.lut_V = np.asarray(lut["lut_V"])
     fit.lut_hit_rate = float(lut["lut_hit_rate"])
+    if lut.get("lut_sched_I") is not None and lut.get("lut_sched_t") is not None:
+        fit.lut_sched_I = np.asarray(lut["lut_sched_I"], dtype=np.float64)
+        fit.lut_sched_t = np.asarray(lut["lut_sched_t"], dtype=np.float64)
     if fit.layer == "L0":
         fit.layer = "L1"
         extra = "2D LUT attached"
@@ -352,6 +387,9 @@ def save_fit(
         payload["lut_dt"] = fit.lut_dt
         payload["lut_spike"] = fit.lut_spike
         payload["lut_V"] = fit.lut_V
+    if fit.lut_sched_I is not None and fit.lut_sched_t is not None:
+        payload["lut_sched_I"] = fit.lut_sched_I
+        payload["lut_sched_t"] = fit.lut_sched_t
     if fit.z_freqs is not None:
         payload["z_freqs"] = fit.z_freqs
         payload["z_abs"] = fit.z_abs
@@ -441,6 +479,8 @@ def load_fit(path: str | Path) -> FittedActivation:
         lut_spike=None if "lut_spike" not in data.files else np.asarray(data["lut_spike"]),
         lut_V=None if "lut_V" not in data.files else np.asarray(data["lut_V"]),
         lut_hit_rate=meta.get("lut_hit_rate"),
+        lut_sched_I=None if "lut_sched_I" not in data.files else np.asarray(data["lut_sched_I"]),
+        lut_sched_t=None if "lut_sched_t" not in data.files else np.asarray(data["lut_sched_t"]),
         srm=srm,
         z_freqs=None if "z_freqs" not in data.files else np.asarray(data["z_freqs"]),
         z_abs=None if "z_abs" not in data.files else np.asarray(data["z_abs"]),

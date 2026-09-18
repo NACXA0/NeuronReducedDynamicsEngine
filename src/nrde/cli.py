@@ -94,6 +94,7 @@ def _cmd_validate(args: argparse.Namespace) -> int:
                 "mse": report.mse,
                 "nfr4_pass": report.nfr4_pass,
                 "relative_vp": report.relative_vp,
+                "nfr5_pass": report.nfr5_pass,
             }
         )
     )

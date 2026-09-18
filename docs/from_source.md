@@ -118,10 +118,13 @@ python scripts/download_malecns.py                  # 含 ~1.1 GB 权重
 
 ```bash
 pip install -e ".[dev]"
-nrde offline fit --model adexp --type-id aCC
-nrde run simulate --fit artifacts/aCC.npz --n 80 --steps 50
+nrde offline fit --model adexp --type-id aCC_local --lut --chirp --out /tmp/nrde_fit/aCC_local.npz
+nrde offline validate --fit /tmp/nrde_fit/aCC_local.npz
+nrde run simulate --fit /tmp/nrde_fit/aCC_local.npz --n 80 --steps 50
 python examples/04_custom_model_pipeline.py
 ```
+
+怎么从零开始这条拟合管线，见 [拟合管线](quickstart/pipeline.md)。不要把结果写回 `artifacts/aCC.npz`。
 
 ### A2（果蝇预设）
 
