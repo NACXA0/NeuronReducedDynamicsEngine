@@ -8,7 +8,8 @@ version = "0.1.0"
 description = "Connectome-driven neuron engine with type-bound reduced activation functions."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
+license = { text = "Apache-2.0" }
+classifiers = ["License :: OSI Approved :: Apache Software License"]
 authors = [{ name = "NRDE contributors" }]
 keywords = ["connectome", "reduced-dynamics", "spiking", "neuron", "drosophila", "flygym"]
 dependencies = [
@@ -40,6 +41,9 @@ nrde = "nrde.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/NACXA0/NeuronReducedDynamicsEngine"
+
+[tool.setuptools]
+license-files = ["LICENSE"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

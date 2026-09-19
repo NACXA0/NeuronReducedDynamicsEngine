@@ -27,6 +27,12 @@
 
 产品面：**A1** 奇观（Colab/GIF/Release）· **A2** 预设（`nrde[fly]` + `nrde fetch`）· **B** 引擎 · **C** 管线。A1 资产脚本见 `docs/asset_pipeline.md`。
 
+## 许可证与贡献条款
+
+本仓库采用 Apache License 2.0。完整文本见 [LICENSE](LICENSE)。
+
+任何对本项目的贡献，除非提交者另有书面声明，否则应按 Apache 2.0 许可条款分发。请在提交 PR 前确认你有权提交这些内容，并确保不引入与本仓库许可不兼容的第三方代码。
+
 ## 开发流程
 
 安装：

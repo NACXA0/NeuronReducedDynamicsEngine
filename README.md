@@ -35,6 +35,12 @@ egg-info 目录名由 setuptools 从 PyPI 名派生，**勿提交**。
 
 旅程：[Demo A1/A2](docs/quickstart/demo.md) · [稀疏传播](docs/quickstart/engine.md) · [拟合 F](docs/quickstart/pipeline.md) · [ModelSpec](docs/model_spec_protocol.md)
 
+### 许可证
+
+本项目采用 Apache License 2.0 开源协议。完整内容见 [LICENSE](LICENSE)。
+
+使用、复制、修改或分发本仓库代码时，均应遵守 Apache 2.0 条款。对本项目的贡献，默认视为在 Apache 2.0 许可下提交，除非另有单独书面约定。
+
 ### 安装
 
 ```bash
