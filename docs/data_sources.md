@@ -10,7 +10,7 @@
 ## 本地路径
 
 - 约定见 [`data/README.md`](../data/README.md)
-- 下载脚本：`python scripts/download_malecns.py`（官方 GCS：`flyem-male-cns/v1.0/...`，CC-BY）
+- 下载脚本：`uv run python scripts/download_malecns.py`（官方 GCS：`flyem-male-cns/v1.0/...`，CC-BY）
 - 三件套：`connectome-weights-*.feather`、`body-annotations-*.feather`、`body-neurotransmitters-*.feather`
 
 ## fetch 与 manifest（RFC-002 D20）
@@ -18,10 +18,10 @@
 A2 用户用统一入口拉预设数据，而不手抄 URL：
 
 ```bash
-nrde fetch fly --tier smoke   # 仅校验本地种子 artifacts 哈希
-nrde fetch fly --tier seed    # 种子 npz（默认；可离线若已入库）
-nrde fetch fly --tier full    # + MaleCNS 注释/递质（可 --skip-weights）
-nrde fetch fly --refresh      # 强制重下
+uv run nrde fetch fly --tier smoke
+uv run nrde fetch fly --tier seed
+uv run nrde fetch fly --tier full
+uv run nrde fetch fly --refresh
 ```
 
 | 档 | 内容 | 体积量级 |

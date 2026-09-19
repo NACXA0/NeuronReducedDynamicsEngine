@@ -19,8 +19,8 @@
 | 方法 | pchip / cubic | |
 
 ```bash
-nrde offline fit --model adexp --type-id aCC
-python scripts/make_figures.py --models adexp
+uv run nrde offline fit --model adexp --type-id aCC_local --out /tmp/nrde_fit/aCC_local.npz
+uv run python scripts/make_figures.py --models adexp
 ```
 
 ## 图

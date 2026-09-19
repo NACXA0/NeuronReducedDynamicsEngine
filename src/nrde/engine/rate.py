@@ -7,8 +7,40 @@ from dataclasses import replace
 import numpy as np
 
 from nrde.engine.backends import resolve_engine_backend
-from nrde.engine.sparse import get_csr, get_type_indices, prepare_graph, sparse_matvec
+from nrde.engine.sparse import (
+    get_csr,
+    get_type_indices,
+    indices_for_codes,
+    prepare_graph,
+    sparse_matvec,
+)
+from nrde.progress import get_progress
 from nrde.types import FittedActivation, GraphData, RateState
+
+
+def coalesce_type_tables(
+    tables: list[FittedActivation],
+    indices: list[np.ndarray],
+) -> list[tuple[FittedActivation, np.ndarray]]:
+    """Merge types that share one f-I table into a single index array."""
+    buckets: dict[tuple[int, int, float], list[np.ndarray]] = {}
+    reps: dict[tuple[int, int, float], FittedActivation] = {}
+    order: list[tuple[int, int, float]] = []
+    for table, idx in zip(tables, indices, strict=True):
+        if idx.size == 0:
+            continue
+        key = (id(table.I_grid), id(table.r_grid), float(table.I_onset))
+        if key not in buckets:
+            buckets[key] = []
+            reps[key] = table
+            order.append(key)
+        buckets[key].append(idx)
+    groups: list[tuple[FittedActivation, np.ndarray]] = []
+    for key in order:
+        parts = buckets[key]
+        merged = parts[0] if len(parts) == 1 else np.concatenate(parts)
+        groups.append((reps[key], merged))
+    return groups
 
 
 def batched_apply(
@@ -19,14 +51,8 @@ def batched_apply(
 ) -> tuple[np.ndarray, int]:
     r = np.zeros_like(I, dtype=np.float64)
     oor = 0
-    indices = type_indices
-    if indices is None:
-        nt = np.asarray(node_type)
-        indices = [np.flatnonzero(nt == t) for t in range(len(tables))]
-    for t, table in enumerate(tables):
-        idx = indices[t]
-        if idx.size == 0:
-            continue
+    indices = type_indices if type_indices is not None else indices_for_codes(node_type, len(tables))
+    for table, idx in coalesce_type_tables(tables, indices):
         rt, n = table.eval_rate(I[idx])
         r[idx] = rt
         oor += n
@@ -83,8 +109,10 @@ def run_rate(
     type_indices = get_type_indices(graph, len(tables))
     state = init_rate_state(graph.n_nodes, r0=r0)
     trace = np.zeros((n_steps if record_trace else 0, graph.n_nodes), dtype=np.float64)
+    progress = get_progress()
     for t in range(n_steps):
         state = step_rate(state, graph, tables, I_ext, dt=dt, type_indices=type_indices)
         if record_trace:
             trace[t] = state.r
+        progress.tick(t + 1, n_steps, "rate steps", "steps")
     return state, trace

@@ -31,9 +31,8 @@ spec.register()
 ## 管线入口
 
 ```bash
-nrde offline fit --model mine --type-id mine --out artifacts/mine.npz
-# 或
-python examples/04_custom_model_pipeline.py
+uv run nrde offline fit --model mine --type-id mine --out artifacts/mine.npz
+uv run python examples/04_custom_model_pipeline.py
 ```
 
 产物 meta 含 `config_hash`：重复拟合且哈希相同则跳过写入（幂等）。

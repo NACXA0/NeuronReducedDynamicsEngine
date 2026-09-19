@@ -11,5 +11,5 @@ M1 交付物三件套落点（RFC-001 §4）：
 生成数值曲线（CSV）：
 
 ```bash
-python scripts/make_figures.py --out docs/reports/figures
+uv run python scripts/make_figures.py --out docs/reports/figures
 ```

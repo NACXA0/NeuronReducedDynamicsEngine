@@ -19,5 +19,5 @@
 ## 复现
 
 ```bash
-pytest tests/test_validation.py -q
+uv run --extra dev pytest tests/test_validation.py -q
 ```

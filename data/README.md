@@ -13,10 +13,11 @@ data/
 
 下载：
 
+下载。第一行只要注释和递质（约 55 MB）；第二行带上约 1.1 GB 的权重。
+
 ```bash
-python scripts/download_malecns.py
-# 仅小文件（注释 + 递质，约 55 MB）：
-python scripts/download_malecns.py --skip-weights
+uv run python scripts/download_malecns.py --skip-weights
+uv run python scripts/download_malecns.py
 ```
 
 来源：https://male-cns.janelia.org/download/（CC-BY）。拟合用的电生理曲线**不**来自连接组，见 `docs/data_sources.md`。

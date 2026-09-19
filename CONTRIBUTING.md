@@ -18,8 +18,8 @@
 ## 环境
 
 - 推荐 Python **3.11–3.14**（开发可跟进最新稳定版；CI 主 lane 使用 3.11）。
-- 安装：`pip install -e ".[dev]"` 或 `uv sync --extra dev`
-- 可选：`.[pysr]`、`.[fly]` / `.[flygym]`、`.[docs]`、`.[demo-assets]`
+- 安装：`uv sync --extra dev`
+- 可选再加：`--extra pysr`、`--extra fly`、`--extra docs`、`--extra demo-assets`
 
 **完整清单**（系统依赖、全部 extras、种子 / MaleCNS 数据、A1 构建）：见 [docs/from_source.md](docs/from_source.md)。请勿把大体积 Feather 提交进 Git。
 
@@ -29,10 +29,17 @@
 
 ## 开发流程
 
+安装：
+
 ```bash
-pre-commit install
-ruff check src tests examples
-pytest --cov=nrde --cov-fail-under=70 -m "not pysr and not flygym"
+uv sync --extra dev
+```
+
+测试：
+
+```bash
+uv run --extra dev ruff check src tests examples
+uv run --extra dev pytest --cov=nrde --cov-fail-under=70 -m "not pysr and not flygym"
 ```
 
 - 核心测试默认不装 FlyGym / Julia。

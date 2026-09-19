@@ -21,25 +21,54 @@ egg-info 目录名由 setuptools 从 PyPI 名派生，**勿提交**。
 | | 🪰 A1 果蝇奇观 | 🧪 A2 果蝇预设 | 🔬 B 引擎 | 🏭 C 管线 |
 |---|---|---|---|---|
 | 给谁 | 想看果蝇跑起来的观众 | Python 果蝇研究者 / RL 快速开工 | 连接组研究者（v0.1 主用户） | 自有 ODE 的外部研究者 |
-| 装什么 | 无需本地装（Colab / GIF / Release zip） | `pip install "neuron-reduced-dynamics-engine[fly]"` | `pip install neuron-reduced-dynamics-engine` | 同左（可选 `[pysr]`） |
-| 5 分钟 | [Open in Colab](#) · GIF（M4） | `nrde fetch fly` → `nrde demo flygym` | `nrde run simulate …` | `nrde offline fit` / `ModelSpec` |
+| 装什么 | 无需本地装（Colab / GIF / Release zip） | 仓库内 `uv sync --extra fly` | 仓库内 `uv sync` | 同左（可选 `--extra pysr`） |
+| 5 分钟 | [Open in Colab](#) · GIF（M4） | `uv run nrde fetch fly` → `uv run nrde demo flygym` | `uv run nrde run simulate …` | `uv run nrde offline fit` |
 
 > Demo 卡资产（GIF / Colab / 离线包）由 [A1 管线](docs/asset_pipeline.md) 随版本刷新（D21）；当前仓库以 **A2 路径** 为默认可跑入口，A1 链接在 M4 挂满。
 
-### 5 分钟入口（A2 / B / C）
+本地开发**不要** `pip install` 进系统 Python。uv 把包装进仓库下的 `.venv`。命令一律 `uv run`，这样不必激活环境，也不会去系统 `PATH` 里找 `nrde`。
+
+预训练是两步，不是一条命令。第一步拟合降阶函数 F，第二步用这张表做稀疏传播。传播不是再训练。
+
+- **拟合 F**（L0、L1、L2，以及 L1+L2）：[怎么开始](docs/quickstart/pipeline.md)
+- **稀疏传播**（`I = W r`，再查 F）：[怎么开始](docs/quickstart/engine.md)
+
+旅程：[Demo A1/A2](docs/quickstart/demo.md) · [稀疏传播](docs/quickstart/engine.md) · [拟合 F](docs/quickstart/pipeline.md) · [ModelSpec](docs/model_spec_protocol.md)
+
+### 安装
 
 ```bash
-# A2 — 果蝇实例预设（Python）
-pip install "neuron-reduced-dynamics-engine[fly]"
-nrde fetch fly --tier seed
-nrde demo flygym --steps 100 --headless
+git clone https://github.com/NACXA0/NeuronReducedDynamicsEngine.git
+cd NeuronReducedDynamicsEngine
+uv sync --extra dev
+```
 
-# B — 引擎
-nrde offline fit --model adexp --type-id aCC
-nrde run simulate --fit artifacts/aCC.npz --n 80 --steps 50
+### 运行
 
-# C — 自己的模型
-python examples/04_custom_model_pipeline.py
+```bash
+uv run nrde fetch fly --tier seed
+uv run nrde demo flygym --steps 100 --headless
+```
+
+四种示例拟合（L0、L1、L2、L1+L2）的完整命令在 [拟合 F](docs/quickstart/pipeline.md)。下面只跑 L0，再用它做一次小图上的稀疏传播。不要写入 `artifacts/aCC.npz`。
+
+```bash
+mkdir -p /tmp/nrde_fit
+uv run nrde offline fit \
+  --model lif \
+  --type-id lif_l0 \
+  --I-min 0 \
+  --I-max 0.8 \
+  --n-I 16 \
+  --out /tmp/nrde_fit/lif_l0.npz
+```
+
+```bash
+uv run nrde run simulate --fit /tmp/nrde_fit/lif_l0.npz --n 80 --steps 50
+```
+
+```bash
+uv run python examples/04_custom_model_pipeline.py
 ```
 
 ```python
@@ -48,16 +77,23 @@ env = nrde.make("flygym-demo-v01")  # A2
 nrde.offline(["fit", "--model", "lif", "--type-id", "demo"])  # C；内部包名 nrde.fitting
 ```
 
-旅程：[Demo A1/A2](docs/quickstart/demo.md) · [引擎](docs/quickstart/engine.md) · [管线](docs/quickstart/pipeline.md) · [ModelSpec](docs/model_spec_protocol.md)
+上面这段 Python 用 `uv run python` 执行，解释器仍是项目虚拟环境。
+
+### 测试
+
+```bash
+uv run --extra dev pytest --cov=nrde --cov-fail-under=70 -m "not pysr and not flygym"
+uv run --extra dev ruff check src tests examples scripts
+```
 
 ## 安装矩阵（终稿四行）
 
 | 身份 | 安装 | 面 |
 |---|---|---|
 | 只想看一眼（A1） | Colab / GIF / [Release 离线包](https://github.com/NACXA0/NeuronReducedDynamicsEngine/releases) | A1 |
-| 果蝇预设开工（A2） | `"neuron-reduced-dynamics-engine[fly]"` + `nrde fetch fly` | A2 |
-| 连接组 / 自有模型（B/C） | `neuron-reduced-dynamics-engine`（C 可选 `[pysr]`） | B、C |
-| 贡献者 | `".[dev]"` + `uv sync` | — |
+| 果蝇预设开工（A2） | `uv sync --extra fly`，再 `uv run nrde fetch fly` | A2 |
+| 连接组 / 自有模型（B/C） | `uv sync`（C 可选 `--extra pysr`） | B、C |
+| 贡献者 | `uv sync --extra dev` | — |
 
 Python：CI 主 lane **3.11**；开发可跟进 **3.14**（allow-failure lane，D13）。核心不强制 JAX/Julia。`--headless` 为 A1 渲染管线依赖（Q6 已决 / D21）。
 
@@ -67,12 +103,7 @@ Python：CI 主 lane **3.11**；开发可跟进 **3.14**（allow-failure lane，
 
 → **[从源码构建与完整开发环境](docs/from_source.md)**
 
-```bash
-git clone https://github.com/NACXA0/NeuronReducedDynamicsEngine.git
-cd NeuronReducedDynamicsEngine
-pip install -e ".[dev]"   # 或: uv sync --extra dev
-pytest --cov=nrde --cov-fail-under=70 -m "not pysr and not flygym"
-```
+安装、运行、测试的可复制命令见上面三节，以及 [从源码构建](docs/from_source.md)。
 
 ## 对比（定位）
 
@@ -85,19 +116,16 @@ pytest --cov=nrde --cov-fail-under=70 -m "not pysr and not flygym"
 
 ## L0–L3
 
-| 层 | 产物 | 运行时 |
-|---|---|---|
-| L0 | r(I) | O(1) |
-| L1 | LUT (I, Δt) | O(1) |
-| L2 | SRM κ,η,θ | O(1)/核 |
-| L3 | FNO / Volterra | → v0.2 |
+| 层 | 产物 | 运行时 | 示例 |
+|---|---|---|---|
+| L0 | r(I) | O(1) | [只拟合 f–I](docs/quickstart/pipeline.md#l0) |
+| L1 | LUT (I, Δt) | O(1) | [加上 `--lut`](docs/quickstart/pipeline.md#l1) |
+| L2 | SRM κ,η,θ | O(1)/核 | [加上 `--srm`](docs/quickstart/pipeline.md#l2) |
+| L1+L2 | LUT 与 SRM 都在 | O(1)/核 | [两个开关一起](docs/quickstart/pipeline.md#l1l2) |
+| L3 | FNO / Volterra | → v0.2 | 本版没有 |
 
-PySR 仅为可选精化器：`pip install 'neuron-reduced-dynamics-engine[pysr]'`（禁止随主包装 Julia）。
+PySR 仅为可选精化器：`uv sync --extra pysr`（禁止随主包装 Julia）。
 
 ## 结构说明
 
-对用户呈现 **A1/A2/B/C**；开发者内部为八大块（[RFC-002](docs/rfcs/RFC-002.md)）。单仓 + extras，不拆仓。
-
-```bash
-pytest --cov=nrde --cov-fail-under=70 -m "not pysr and not flygym"
-```
+对用户呈现 **A1/A2/B/C**；开发者内部为八大块（[RFC-002](docs/rfcs/RFC-002.md)）。单仓 + extras，不拆仓。测试命令在上面的「测试」一节。

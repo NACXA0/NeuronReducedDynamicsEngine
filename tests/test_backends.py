@@ -94,6 +94,71 @@ def test_torch_cpu_rate_parity():
     np.testing.assert_allclose(th_state.r, np_state.r, rtol=2e-4, atol=2e-4)
 
 
+def test_plan_gpu_rows_fills_budget_not_the_card():
+    from nrde.engine.torch_rate import gpu_resident_bytes, plan_gpu_rows
+
+    indptr = np.array([0, 1, 2, 5, 9], dtype=np.int64)
+    n = 4
+    assert plan_gpu_rows(indptr, n, 0) == 0
+    full = gpu_resident_bytes(n, int(indptr[n]), n)
+    assert plan_gpu_rows(indptr, n, full) == n
+    assert plan_gpu_rows(indptr, n, full - 1) < n
+    one = gpu_resident_bytes(1, int(indptr[1]), n)
+    assert plan_gpu_rows(indptr, n, one) == 1
+    assert plan_gpu_rows(indptr, n, one - 1) == 0
+
+
+@pytest.mark.torch
+def test_split_rows_match_single_device():
+    if not torch_available():
+        pytest.skip("torch extra not installed")
+    import torch
+
+    from nrde.engine.rate import coalesce_type_tables
+    from nrde.engine.sparse import get_type_indices, prepare_graph
+    from nrde.engine.torch_rate import _prepare_split, _step_split, run_rate_torch
+    from nrde.fitting.fit import fit_fi
+
+    fit = fit_fi("lif", n_I=6, t_total=200.0, window=120.0, n_validate=2, I_max=0.5)
+    g = erdos_renyi_graph(36, p=0.2, seed=3, n_types=2)
+    drive = np.linspace(0.05, 0.45, g.n_nodes)
+    single, _ = run_rate_torch(g, [fit, fit], n_steps=6, I_ext=drive, record_trace=False, device="cpu")
+    k = 11
+    prepare_graph(g, n_types=2)
+    groups = coalesce_type_tables([fit, fit], get_type_indices(g, 2))
+    bundle = _prepare_split(g, groups, torch.device("cpu"), k, ("split-test",))
+    r_fast = torch.zeros(g.n_nodes, dtype=torch.float64)
+    r_slow = torch.zeros(g.n_nodes, dtype=torch.float64)
+    i_fast = torch.as_tensor(drive[:k], dtype=torch.float64)
+    i_slow = torch.as_tensor(drive[k:], dtype=torch.float64)
+    oor = 0
+    for _ in range(6):
+        r_fast, r_slow, oor = _step_split(r_fast, r_slow, i_fast, i_slow, bundle, oor)
+    np.testing.assert_allclose(r_slow.numpy(), single.r, rtol=2e-4, atol=2e-4)
+
+
+@pytest.mark.torch
+def test_cuda_vram_budget_spills_to_ram():
+    if not torch_cuda_available():
+        pytest.skip("CUDA not available")
+    from nrde.engine.sparse import get_csr
+    from nrde.engine.torch_rate import gpu_resident_bytes, plan_gpu_rows, run_rate_torch
+    from nrde.fitting.fit import fit_fi
+
+    fit = fit_fi("lif", n_I=6, t_total=200.0, window=120.0, n_validate=2, I_max=0.5)
+    g = erdos_renyi_graph(40, p=0.15, seed=5, n_types=2)
+    drive = np.full(g.n_nodes, 0.3)
+    csr = get_csr(g)
+    k = g.n_nodes // 2
+    budget = gpu_resident_bytes(k, int(np.asarray(csr.indptr)[k]), g.n_nodes)
+    assert 0 < plan_gpu_rows(csr.indptr, g.n_nodes, budget) < g.n_nodes
+    spilled, _ = run_rate_torch(
+        g, [fit, fit], n_steps=4, I_ext=drive, record_trace=False, device="cuda", vram_budget=budget
+    )
+    cpu, _ = run_rate_torch(g, [fit, fit], n_steps=4, I_ext=drive, record_trace=False, device="cpu")
+    np.testing.assert_allclose(spilled.r, cpu.r, rtol=2e-4, atol=2e-4)
+
+
 @pytest.mark.torch
 def test_nfr1_torch_cuda_report():
     if not torch_cuda_available():

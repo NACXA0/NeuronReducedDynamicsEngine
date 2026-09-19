@@ -10,10 +10,18 @@ Demo 卡（GIF / Colab / 离线包）是门面资产，必须像代码一样可�
 | `scripts/make_colab.py` | `examples/colab_src/demo.md` → `assets/demo/demo.ipynb` | 标准库生成 ipynb；可选 papermill 执行校验 |
 | `scripts/make_release.py` | 聚合种子 artifacts + `manifest.json` → zip | 无重依赖 |
 
+安装（要写出 GIF 时）：
+
 ```bash
-python scripts/render_demo.py --preset flygym-demo-v01 --steps 40 --seed 0 --out assets/demo/
-python scripts/make_colab.py --out assets/demo/demo.ipynb
-python scripts/make_release.py --out dist/nrde-fly-offline.zip
+uv sync --extra demo-assets
+```
+
+运行：
+
+```bash
+uv run python scripts/render_demo.py --preset flygym-demo-v01 --steps 40 --seed 0 --out assets/demo/
+uv run python scripts/make_colab.py --out assets/demo/demo.ipynb
+uv run python scripts/make_release.py --out dist/nrde-fly-offline.zip
 ```
 
 ## 硬约束

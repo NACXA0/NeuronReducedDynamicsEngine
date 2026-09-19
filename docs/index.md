@@ -9,7 +9,7 @@
 | B 引擎 | `neuron-reduced-dynamics-engine` | 连接组研究者 |
 | C 管线 | 同左（可选 `[pysr]`） | 自有 ModelSpec |
 
-快速开始：[Demo（A1/A2）](quickstart/demo.md) · [引擎](quickstart/engine.md) · [管线](quickstart/pipeline.md) · [从源码构建](from_source.md) · [A1 资产管线](asset_pipeline.md)
+快速开始：[Demo（A1/A2）](quickstart/demo.md) · [拟合 F（L0 / L1 / L2）](quickstart/pipeline.md) · [稀疏传播](quickstart/engine.md) · [从源码构建](from_source.md)
 
 Connectome in, type-bound reduced **F** (L0–L2) out. See the repository [README](https://github.com/NACXA0/NeuronReducedDynamicsEngine).
 

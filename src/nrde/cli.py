@@ -58,16 +58,18 @@ def _cmd_simulate(args: argparse.Namespace) -> int:
     from nrde.engine.rate import run_rate
     from nrde.fitting.fit import load_fit
     from nrde.io.connectome import erdos_renyi_graph, load_connectome
+    from nrde.progress import progress_session
 
-    if args.graph:
-        graph = load_connectome(args.graph, annotations_path=args.annotations)
-    else:
-        graph = erdos_renyi_graph(args.n, p=args.p, n_types=2, seed=args.seed)
-    fit = load_fit(args.fit)
-    tables = [fit for _ in graph.type_names]
-    I_ext = np.zeros(graph.n_nodes)
-    I_ext[: max(1, graph.n_nodes // 10)] = args.I_ext
-    state, _ = run_rate(graph, tables, n_steps=args.steps, I_ext=I_ext, record_trace=False)
+    with progress_session():
+        if args.graph:
+            graph = load_connectome(args.graph, annotations_path=args.annotations)
+        else:
+            graph = erdos_renyi_graph(args.n, p=args.p, n_types=2, seed=args.seed)
+        fit = load_fit(args.fit)
+        tables = [fit for _ in graph.type_names]
+        I_ext = np.zeros(graph.n_nodes)
+        I_ext[: max(1, graph.n_nodes // 10)] = args.I_ext
+        state, _ = run_rate(graph, tables, n_steps=args.steps, I_ext=I_ext, record_trace=False)
     print(json.dumps({"mean_rate": float(np.mean(state.r)), "n_nodes": graph.n_nodes}))
     return 0
 
@@ -248,7 +250,11 @@ def offline(argv: list[str] | None = None) -> int:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
-    return int(args.func(args))
+    try:
+        return int(args.func(args))
+    except KeyboardInterrupt:
+        print("interrupted", file=sys.stderr)
+        return 130
 
 
 if __name__ == "__main__":

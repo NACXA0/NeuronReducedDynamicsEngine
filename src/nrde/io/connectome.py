@@ -8,6 +8,7 @@ from typing import Iterable, Mapping
 import numpy as np
 import yaml
 
+from nrde.progress import get_progress, iter_progress
 from nrde.types import SHIU_ALPHA_NA, GraphData
 
 PRE_ALIASES = ("pre_id", "body_pre", "bodyId_pre", "pre", "source", "i")
@@ -102,6 +103,200 @@ def _read_columns(path: str | Path, names: list[str]) -> dict[str, np.ndarray]:
         full = _read_csv(path)
         return {name: full[name] for name in names}
     raise ValueError(f"Unsupported connectome format: {path.suffix}")
+
+
+def _read_ipc_columns(path: Path, names: list[str], label: str, unit: str) -> dict[str, np.ndarray]:
+    """Stream Feather/Arrow batches. The batch count is known before the body is read."""
+    import pyarrow as pa
+
+    progress = get_progress()
+    with pa.memory_map(str(path), "r") as source:
+        reader = pa.ipc.open_file(source)
+        n_batches = int(reader.num_record_batches)
+        if n_batches == 0 or not names:
+            return {name: np.array([]) for name in names}
+        first = reader.get_batch(0)
+        stride = int(first.num_rows)
+        total = stride * n_batches
+        cols: dict[str, np.ndarray] = {}
+        for name in names:
+            sample = first.column(name).to_numpy(zero_copy_only=False)
+            cols[name] = np.empty(total, dtype=sample.dtype)
+            cols[name][: sample.shape[0]] = sample
+        offset = stride
+        progress.tick(0, max(total, 1), label, unit)
+        progress.tick(min(offset, total), max(total, 1), label, unit)
+        for index in range(1, n_batches):
+            batch = reader.get_batch(index)
+            n = int(batch.num_rows)
+            end = offset + n
+            if end > cols[names[0]].shape[0]:
+                total = end
+                for name in names:
+                    grown = np.empty(total, dtype=cols[name].dtype)
+                    grown[:offset] = cols[name][:offset]
+                    cols[name] = grown
+            for name in names:
+                cols[name][offset:end] = batch.column(name).to_numpy(zero_copy_only=False)
+            offset = end
+            progress.tick(offset, max(total, offset), label, unit)
+        if offset != cols[names[0]].shape[0]:
+            for name in names:
+                cols[name] = cols[name][:offset]
+            progress.tick(offset, offset, label, unit)
+        return cols
+
+
+def _read_parquet_columns(path: Path, names: list[str], label: str, unit: str) -> dict[str, np.ndarray]:
+    import pyarrow.parquet as pq
+
+    progress = get_progress()
+    pf = pq.ParquetFile(path)
+    total = int(pf.metadata.num_rows)
+    if total == 0 or not names:
+        return {name: np.array([]) for name in names}
+    parts: dict[str, list[np.ndarray]] = {name: [] for name in names}
+    seen = 0
+    progress.tick(0, total, label, unit)
+    for batch in pf.iter_batches(columns=names, batch_size=65_536):
+        n = int(batch.num_rows)
+        for name in names:
+            parts[name].append(batch.column(name).to_numpy(zero_copy_only=False))
+        seen += n
+        progress.tick(seen, total, label, unit)
+    return {
+        name: np.concatenate(chunks) if len(chunks) > 1 else chunks[0] for name, chunks in parts.items()
+    }
+
+
+def _read_showing(path: Path, names: list[str], label: str, unit: str) -> dict[str, np.ndarray]:
+    progress = get_progress()
+    if not progress.enabled:
+        return _read_columns(path, names)
+    suffix = path.suffix.lower()
+    if suffix in {".feather", ".arrow"}:
+        return _read_ipc_columns(path, names, label, unit)
+    if suffix in {".parquet", ".pq"}:
+        return _read_parquet_columns(path, names, label, unit)
+    data = _read_columns(path, names)
+    n = int(next(iter(data.values())).shape[0]) if data else 0
+    if n:
+        progress.tick(n, n, label, unit)
+    return data
+
+
+def _union_endpoints(pre: np.ndarray, post: np.ndarray) -> np.ndarray:
+    progress = get_progress()
+    if not progress.enabled or pre.size <= progress.chunk:
+        return np.union1d(pre, post)
+    parts: list[np.ndarray] = []
+    total = int(pre.shape[0])
+    seen = 0
+    progress.tick(0, total, "indexing nodes", "edges")
+    for arr in (pre, post):
+        for start in range(0, int(arr.shape[0]), progress.chunk):
+            end = min(start + progress.chunk, int(arr.shape[0]))
+            parts.append(np.unique(arr[start:end]))
+            seen += end - start
+            progress.tick(min(total - 1, seen // 2), total, "indexing nodes", "edges")
+    if total > 1:
+        progress.tick(total - 1, total, "indexing nodes", "edges")
+    merged = np.unique(np.concatenate(parts)) if parts else np.zeros(0, dtype=np.int64)
+    progress.tick(total, total, "indexing nodes", "edges")
+    return merged
+
+
+def _assign_nodes(
+    node_ids: np.ndarray,
+    ann_ids: np.ndarray,
+    ann_types: np.ndarray,
+    ann_regions: np.ndarray,
+) -> tuple[tuple[str, ...], np.ndarray, np.ndarray]:
+    """Match ``_labels_for`` + ``_factorize``, ticking once per node chunk."""
+    progress = get_progress()
+    n = int(node_ids.size)
+    if not progress.enabled or n <= progress.chunk:
+        type_labels = _labels_for(node_ids, ann_ids, ann_types, "unknown")
+        region = _labels_for(node_ids, ann_ids, ann_regions, "")
+        type_names, node_type = _factorize(type_labels)
+        return type_names, node_type, region
+    raw = np.unique(np.asarray(ann_types, dtype=str)) if ann_types.size else np.array([], dtype=str)
+    names_list = [str(item) for item in raw]
+    if "unknown" not in names_list:
+        names_list.append("unknown")
+    names = np.array(sorted(set(names_list)), dtype=object)
+    unknown = int(np.searchsorted(names, "unknown"))
+    ann_codes = (
+        np.searchsorted(names, np.asarray(ann_types, dtype=object)).astype(np.int32)
+        if ann_types.size
+        else np.zeros(0, dtype=np.int32)
+    )
+    node_type = np.empty(n, dtype=np.int32)
+    region = np.empty(n, dtype=object)
+    used = np.zeros(names.size, dtype=bool)
+    label = f"assigning types ({int(raw.size)} annotation types)"
+    for start, end in iter_progress(n, label, "nodes", progress.chunk):
+        query = node_ids[start:end]
+        width = end - start
+        codes = np.full(width, unknown, dtype=np.int32)
+        reg = np.empty(width, dtype=object)
+        reg.fill("")
+        if ann_ids.size:
+            pos = np.searchsorted(ann_ids, query)
+            valid = pos < ann_ids.size
+            pos_c = np.minimum(pos, max(ann_ids.size - 1, 0))
+            hit = valid & (ann_ids[pos_c] == query)
+            codes[hit] = ann_codes[pos_c[hit]]
+            if ann_regions.size:
+                reg[hit] = ann_regions[pos_c[hit]]
+        node_type[start:end] = codes
+        region[start:end] = reg
+        used[np.unique(codes)] = True
+    keep = np.flatnonzero(used)
+    if keep.size != names.size:
+        remap = np.full(names.size, -1, dtype=np.int32)
+        remap[keep] = np.arange(keep.size, dtype=np.int32)
+        node_type = remap[node_type]
+        names = names[keep]
+    return tuple(str(item) for item in names), node_type, region
+
+
+def _scale_weights(weight: np.ndarray, scale: np.ndarray | float) -> np.ndarray:
+    progress = get_progress()
+    values = np.asarray(weight, dtype=np.float64)
+    if not progress.enabled or values.size <= progress.chunk:
+        return (values * scale).astype(np.float32)
+    out = np.empty(values.shape[0], dtype=np.float32)
+    factor = np.asarray(scale, dtype=np.float64)
+    scalar = factor.ndim == 0 or factor.size == 1
+    for start, end in iter_progress(int(values.shape[0]), "scaling edges", "edges", progress.chunk):
+        piece = float(factor) if scalar else factor[start:end]
+        out[start:end] = (values[start:end] * piece).astype(np.float32, copy=False)
+    return out
+
+
+def _pack_edges(node_ids: np.ndarray, pre_i: np.ndarray, post: np.ndarray) -> np.ndarray:
+    progress = get_progress()
+    n = int(pre_i.shape[0])
+    edge_index = np.empty((2, n), dtype=np.int64)
+    if not progress.enabled or n <= progress.chunk:
+        edge_index[0] = pre_i
+        edge_index[1] = np.searchsorted(node_ids, post)
+        return edge_index
+    for start, end in iter_progress(n, "packing edges", "edges", progress.chunk):
+        edge_index[0, start:end] = pre_i[start:end]
+        edge_index[1, start:end] = np.searchsorted(node_ids, post[start:end])
+    return edge_index
+
+
+def _searchsorted_edges(node_ids: np.ndarray, query: np.ndarray) -> np.ndarray:
+    progress = get_progress()
+    if not progress.enabled or query.size <= progress.chunk:
+        return np.searchsorted(node_ids, query)
+    out = np.empty(query.shape[0], dtype=np.intp)
+    for start, end in iter_progress(int(query.shape[0]), "mapping edges", "edges", progress.chunk):
+        out[start:end] = np.searchsorted(node_ids, query[start:end])
+    return out
 
 
 def _as_int(values: np.ndarray) -> np.ndarray:
@@ -270,7 +465,7 @@ def load_connectome(
         wanted.append(w_col)
     if nt_col is not None:
         wanted.append(nt_col)
-    syn = _read_columns(syn_path, wanted)
+    syn = _read_showing(syn_path, wanted, "reading synapses", "edges")
     pre = _as_int(syn.pop(pre_col))
     post = _as_int(syn.pop(post_col))
     weight = np.asarray(syn.pop(w_col)) if w_col is not None else np.ones(pre.shape[0], dtype=np.float64)
@@ -293,7 +488,7 @@ def load_connectome(
             ann_wanted.append(type_col)
         if region_col is not None:
             ann_wanted.append(region_col)
-        ann = _read_columns(ann_path, ann_wanted)
+        ann = _read_showing(ann_path, ann_wanted, "reading annotations", "bodies")
         ann_ids, ann_types, ann_regions = _last_wins_sorted(
             ann[id_col],
             np.asarray(ann[type_col]).astype(str) if type_col else np.full(len(ann[id_col]), "unknown"),
@@ -348,13 +543,9 @@ def load_connectome(
             meta={"synapses_path": str(syn_path)},
         )
 
-    node_ids = np.union1d(pre, post)
-    pre_i = np.searchsorted(node_ids, pre)
-    type_labels = _labels_for(node_ids, ann_ids, ann_types, "unknown")
-    region = _labels_for(node_ids, ann_ids, ann_regions, "")
-    type_names, node_type = _factorize(type_labels)
-    del type_labels
-
+    node_ids = _union_endpoints(pre, post)
+    pre_i = _searchsorted_edges(node_ids, pre)
+    type_names, node_type, region = _assign_nodes(node_ids, ann_ids, ann_types, ann_regions)
     if raw_nt is not None:
         nt_names_arr, nt_codes = np.unique(raw_nt, return_inverse=True)
         nt_names = [str(name) for name in nt_names_arr]
@@ -369,7 +560,7 @@ def load_connectome(
             nt_names = ["unknown"]
             nt_codes = np.zeros(pre.shape[0], dtype=np.int32)
         else:
-            nt_tab = _read_columns(nt_file, [id_col, nt_n_col])
+            nt_tab = _read_showing(nt_file, [id_col, nt_n_col], "reading neurotransmitters", "bodies")
             nt_ids, nt_labels = _last_wins_sorted(nt_tab[id_col], np.asarray(nt_tab[nt_n_col]))
             del nt_tab
             nt_names, small_codes = _encode_labels(nt_labels)
@@ -386,14 +577,11 @@ def load_connectome(
 
     alphas = dict(alpha_table) if alpha_table is not None else load_alpha_table(alpha_path)
     scale = _edge_scale(nt_codes, nt_names, node_type[pre_i], type_names, alphas)
-    edge_weight = (np.asarray(weight, dtype=np.float64) * scale).astype(np.float32)
+    edge_weight = _scale_weights(weight, scale)
     del weight, scale
 
-    post_i = np.searchsorted(node_ids, post)
-    edge_index = np.empty((2, pre_i.shape[0]), dtype=np.int64)
-    edge_index[0] = pre_i
-    edge_index[1] = post_i
-    del pre, post, pre_i, post_i
+    edge_index = _pack_edges(node_ids, pre_i, post)
+    del pre, post, pre_i
 
     return GraphData(
         n_nodes=int(node_ids.size),

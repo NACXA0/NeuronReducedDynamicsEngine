@@ -6,8 +6,8 @@ nav:
   - 首页: index.md
   - 快速开始:
       - 跑果蝇 Demo（A1 Colab / A2 pip）: quickstart/demo.md
-      - 跑一次连接组仿真: quickstart/engine.md
-      - 拟合你自己的模型: quickstart/pipeline.md
+      - 拟合 F（L0 / L1 / L2）: quickstart/pipeline.md
+      - 稀疏传播: quickstart/engine.md
       - 从源码构建 / 完整开发环境: from_source.md
   - 用户指南:
       - ModelSpec 协议: model_spec_protocol.md

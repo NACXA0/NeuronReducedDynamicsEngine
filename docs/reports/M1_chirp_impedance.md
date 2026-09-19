@@ -18,7 +18,7 @@
 | HH | | | |
 
 ```bash
-python scripts/make_figures.py --models adexp explif hh
+uv run python scripts/make_figures.py --models adexp explif hh
 ```
 
 ## 图

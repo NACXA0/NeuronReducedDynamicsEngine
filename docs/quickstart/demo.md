@@ -6,12 +6,18 @@
 
 给要在果蝇热点上快速开工的研究者（RL、回路建模）——开箱基线，不是奇观。
 
+安装：
+
 ```bash
-pip install "neuron-reduced-dynamics-engine[fly]"
-nrde fetch fly --tier seed          # 下载/校验种子 artifacts（manifest）
-nrde demo flygym --steps 100 --headless
-# 或
-python -c 'import nrde; print(nrde.demo("flygym", steps=100))'
+uv sync --extra fly
+```
+
+运行：
+
+```bash
+uv run nrde fetch fly --tier seed
+uv run nrde demo flygym --steps 100 --headless
+uv run python -c 'import nrde; print(nrde.demo("flygym", steps=100))'
 ```
 
 内部：`artifacts/` 类型键种子 + `configs/flygym_demo.yaml` → `EmbodiedEnv` 闭环。  
@@ -31,7 +37,14 @@ python -c 'import nrde; print(nrde.demo("flygym", steps=100))'
 
 Release 附件含种子 npz + `manifest.json`（sha256）。解压后：
 
+安装：
+
 ```bash
-pip install "neuron-reduced-dynamics-engine[fly]"
-nrde demo flygym --config /path/to/extracted/flygym_demo.yaml --headless
+uv sync --extra fly
+```
+
+运行：
+
+```bash
+uv run nrde demo flygym --config /path/to/extracted/flygym_demo.yaml --headless
 ```

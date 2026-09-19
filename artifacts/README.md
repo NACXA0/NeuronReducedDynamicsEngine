@@ -8,11 +8,7 @@
 | 元数据 | `*.meta.json` 含 `type_ids` / `layer` / `git_commit` / `config_hash` / `naming=type_key` |
 
 ```bash
-# 新拟合默认写类型键
-nrde offline fit --model adexp --type-id aCC
-# → artifacts/aCC.npz
-
-# 一次性迁移目录
-python scripts/migrate_artifacts_to_type_keys.py --dry-run
-python scripts/migrate_artifacts_to_type_keys.py --keep-legacy
+uv run nrde offline fit --model adexp --type-id aCC_local --out /tmp/nrde_fit/aCC_local.npz
+uv run python scripts/migrate_artifacts_to_type_keys.py --dry-run
+uv run python scripts/migrate_artifacts_to_type_keys.py --keep-legacy
 ```
