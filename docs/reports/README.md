@@ -12,12 +12,12 @@ M1 三件套（RFC-001 §4）现在都指向同一组默认数据集计算：
 | chirp \|Z(ω)\| | [M1_chirp_impedance.md](M1_chirp_impedance.md) | 频域峰值与层级判定 |
 
 ```bash
-uv run --no-sync nrde fetch fly --tier pretrained
-uv run --no-sync python scripts/make_figures.py --verify
+uv run nrde fetch fly --tier pretrained
+uv run python scripts/make_figures.py --verify
 ```
 
 重算图与 ledger：
 
 ```bash
-uv run --no-sync python scripts/make_figures.py
+uv run python scripts/make_figures.py
 ```

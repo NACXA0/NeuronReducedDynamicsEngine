@@ -5,6 +5,10 @@
 ## [Unreleased]
 
 ### Added
+- 维护者手册 `maintainer/`：Release、PyPI、重做预训练表、主/第二下载地址、Demo 资产。用户文档不再写这些步骤
+- `nrde fetch` 在表缺失时按 `configs/manifests/fly.yaml` 的 `downloads.primary` 再 `downloads.secondary` 拉取 zip；已在且哈希相符则只校验。工作区根目录改为检出或当前目录，不再假定 `site-packages` 往上两级
+- 可插拔发放率管道（`nrde.engine.ops`）；深度文档 `docs/quickstart/extend.md`
+- `--prefer efficiency|neutral|fidelity` 与可选 `fetch --tier prefer`
 - README 宣传图与证据链：默认数据集 `datasets/fly/` 上重算 AdExp ODE / NRDE \(F\) / 统一 LIF；`docs/reports/evidence.md` + `scripts/make_figures.py`
 - `nrde fetch fly --tier pretrained`（33 个发布表哈希）
 - A1/A2 产品面拆分；`nrde[fly]` extras；`nrde fetch` + `configs/manifests/fly.yaml`
@@ -17,7 +21,8 @@
 - `scan_fi_curve` 默认批量 Euler；`run_rate(..., backend="torch")` / `NRDE_ENGINE`
 
 ### Changed
-- README 改为介绍 / 证据图 / 5 分钟入门；安装矩阵、L0–L3、命名表下沉到文档
+- README 收成展示面：介绍、锁定实测、验收摘要、安装/运行/测试分开、文档目录；细节下沉到独立页
+- 文档地图 `docs/index.md` 与 MkDocs 导航对齐当前结构（主线类型表；脑区/坐标为扩展）
 - README / docs 安装矩阵改为 A1/A2/B/C 四行；历史中文规格加 RFC 横幅（D23）
 - 品牌锁定为 NRDE / `nrde` / `neuron-reduced-dynamics-engine` / `NeuronReducedDynamicsEngine`（果蝇仅为实例预设；方法术语为 state approximation）
 - 品牌守卫：`scripts/assert_nrde_brand.py` + `tests/test_brand_naming.py`

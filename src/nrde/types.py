@@ -18,6 +18,58 @@ SHIU_ALPHA_NA = SHIU_W_SYN_MV * 0.1 / 1.0
 TIER_DEFAULT = "default"
 TIER_LITERATURE = "literature"
 TIER_RESERVED = "reserved"
+TEACHER_KINDS = ("builtin", "modeldb", "fbl")
+
+
+def _zero3() -> np.ndarray:
+    return np.zeros(3, dtype=np.float64)
+
+
+@dataclass
+class TeacherRef:
+    """Where ``F_type`` came from. Not an axis of F."""
+
+    kind: str = "builtin"
+    ref: str = ""
+    notes: str = ""
+
+    def __post_init__(self) -> None:
+        self.kind = str(self.kind).strip().lower()
+        if self.kind not in TEACHER_KINDS:
+            raise ValueError(f"Unknown teacher kind {self.kind!r}. Known: {list(TEACHER_KINDS)}")
+        self.ref = str(self.ref)
+        self.notes = str(self.notes or "")
+
+
+@dataclass
+class PlaceMod:
+    """Identity-axis correction on θ. Rates stay on the type table.
+
+    Identity (the unit) is gain 1, empty/zero region terms, and zero xyz
+    coefficients. Missing coordinates must not change ``eval_rate``.
+    """
+
+    gain: float = 1.0
+    region_gain: dict[str, float] = field(default_factory=dict)
+    xyz_gain: np.ndarray = field(default_factory=_zero3)
+    region_onset: dict[str, float] = field(default_factory=dict)
+    xyz_onset: np.ndarray = field(default_factory=_zero3)
+
+    def __post_init__(self) -> None:
+        self.gain = float(self.gain)
+        self.region_gain = {str(k): float(v) for k, v in self.region_gain.items()}
+        self.region_onset = {str(k): float(v) for k, v in self.region_onset.items()}
+        self.xyz_gain = np.asarray(self.xyz_gain, dtype=np.float64).reshape(3).copy()
+        self.xyz_onset = np.asarray(self.xyz_onset, dtype=np.float64).reshape(3).copy()
+
+    def is_identity(self) -> bool:
+        if abs(self.gain - 1.0) > 1e-15:
+            return False
+        if any(v != 0.0 for v in self.region_gain.values()):
+            return False
+        if any(v != 0.0 for v in self.region_onset.values()):
+            return False
+        return not (np.any(self.xyz_gain) or np.any(self.xyz_onset))
 
 
 @dataclass
@@ -29,6 +81,7 @@ class TypeEntry:
     quality: str = "unknown"
     tier: str = TIER_DEFAULT
     reduction_benefit: str = "control"
+    teacher: TeacherRef | None = None
 
 
 @dataclass
@@ -97,6 +150,8 @@ class FittedActivation:
     type_ids: tuple[str, ...] = ()
     git_commit: str | None = None
     config_hash: str | None = None
+    place: PlaceMod = field(default_factory=PlaceMod)
+    teacher: TeacherRef | None = None
 
     def eval_rate(self, I: np.ndarray) -> tuple[np.ndarray, int]:
         I = np.asarray(I, dtype=np.float64)
@@ -118,6 +173,8 @@ class GraphData:
     type_names: tuple[str, ...]
     nt_type: np.ndarray | None = None
     region: np.ndarray | None = None
+    # Soma/root point in the source frame, shape (n_nodes, 3). None if unset.
+    xyz: np.ndarray | None = None
     meta: dict[str, Any] = field(default_factory=dict)
     fallback_mask: np.ndarray | None = None
     # Runtime caches for CSR SpMV and per-type indexing (not serialized).

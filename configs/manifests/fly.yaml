@@ -1,5 +1,9 @@
 preset: fly
 version: 0.1.0
+downloads:
+  primary: ""
+  secondary: ""
+  note: "Zip of datasets/fly and seed artifacts. primary is tried first (GitHub Release asset). secondary is the fallback mirror (Zenodo or another host). Empty skips that hop. How to change them is maintainer/downloads.md; export scripts keep this block."
 tiers:
   smoke:
     description: Verify tracked seed artifact hashes only

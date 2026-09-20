@@ -40,7 +40,14 @@ def step_rate_mixed(
     )
     I_total = I_syn + np.asarray(I_ext, dtype=np.float64)
     type_indices = get_type_indices(graph, len(tables))
-    r_new, n_oor = batched_apply(tables, I_total, graph.node_type, type_indices=type_indices)
+    r_new, n_oor = batched_apply(
+        tables,
+        I_total,
+        graph.node_type,
+        type_indices=type_indices,
+        region=graph.region,
+        xyz=graph.xyz,
+    )
     mask = fallback_mask(graph, fallback_types)
     if not np.any(mask):
         return replace(state, r=r_new, out_of_range=state.out_of_range + n_oor)

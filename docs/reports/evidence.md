@@ -1,12 +1,12 @@
 # 宣传数字的证据链
 
-README 只放三方法对比表。曲线、摘录、协议、哈希和复现命令在本页。数字从默认数据集当场重算，不是手填。登记文件是 `figures/evidence.json`。
+README 只放对比表、验收摘要和 Pareto 图。曲线、摘录、协议、哈希和复现命令在本页。数字从默认数据集当场重算，不是手填。登记文件是 `figures/evidence.json`。
 
 ## 核验（不重算）
 
 ```bash
-uv run --no-sync nrde fetch fly --tier pretrained
-uv run --no-sync python scripts/make_figures.py --verify
+uv run nrde fetch fly --tier pretrained
+uv run python scripts/make_figures.py --verify
 ```
 
 第一条核对 `datasets/fly/` 里 **33** 个预训练 `.npz` 的 sha256（与 `configs/manifests/fly.yaml` 的 `pretrained` 档一致）。第二条核对本目录 CSV/SVG 的 sha256 是否仍等于 `figures/evidence.json` 里登记的值。
@@ -14,7 +14,7 @@ uv run --no-sync python scripts/make_figures.py --verify
 ## 重算（会改墙钟，会改输出哈希）
 
 ```bash
-uv run --no-sync python scripts/make_figures.py
+uv run python scripts/make_figures.py
 ```
 
 精度（f-I \(R^2\) / RMSE / chirp）在同一协议下应可复现。墙钟随 CPU 变化。改完后把 README 对比表里的锁定数字一并更新；`tests/test_evidence_ledger.py` 会检查 README 是否仍引用账本中的 \(R^2\)、RMSE 和墙钟。

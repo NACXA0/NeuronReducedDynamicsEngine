@@ -13,6 +13,8 @@ def test_fetch_smoke_ok():
     assert report["tier"] == "smoke"
     assert report["ok"] is True
     assert all(a["status"] == "ok" for a in report["artifacts"])
+    assert all(a["action"] == "verified" for a in report["artifacts"])
+    assert report["summary"]["downloaded"] == 0
 
 
 def test_cli_fetch_seed():

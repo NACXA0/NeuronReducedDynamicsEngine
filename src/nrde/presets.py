@@ -12,15 +12,13 @@ import yaml
 from nrde.fitting.artifacts import resolve_artifact_path
 from nrde.fitting.fit import fit_fi, load_fit
 from nrde.io.connectome import erdos_renyi_graph
+from nrde.paths import repo_root
 from nrde.types import FittedActivation, GraphData
-
-_ROOT = Path(__file__).resolve().parents[2]
-_DEFAULT_DEMO_CFG = _ROOT / "configs" / "flygym_demo.yaml"
 
 
 def _repo_path(path: str | Path) -> Path:
     p = Path(path)
-    return p if p.is_absolute() else _ROOT / p
+    return p if p.is_absolute() else repo_root() / p
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -95,7 +93,7 @@ def make_flygym_demo(
     """Build EmbodiedEnv closed-loop demo (mock FlyGym if extra missing)."""
     from nrde.adapters.flygym import MockFlyGymSim, NRDEFlyGymEnv, maybe_make_flygym_sim
 
-    cfg_path = _repo_path(config) if config else _DEFAULT_DEMO_CFG
+    cfg_path = _repo_path(config) if config else repo_root() / "configs" / "flygym_demo.yaml"
     cfg = _load_yaml(cfg_path) if cfg_path.exists() else {}
     n_nodes = int(cfg.get("n_nodes", 40))
     n_act = int(cfg.get("n_actuators", 6))

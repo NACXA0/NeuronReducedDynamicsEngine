@@ -2,6 +2,8 @@
 
 当前 MaleCNS 实例的预训练产物。发布给不自己拟合的使用。`artifacts/aCC.npz`、`type_0.npz`、`hh_demo.npz` 仍是种子，不在这里改。
 
+这些表是**类型级**降阶曲线。脑区和位置没有写进 npz，增加身份轴占位之后不必重训。首页数字从这些表重算，见仓库 [README](../../README.md) 与 [证据链](../../docs/reports/evidence.md)。
+
 | 目录 | 内容 |
 |---|---|
 | `fits/` | 各类型的 L0、L1、L2、L1+L2。表是 float64。 |
@@ -10,18 +12,11 @@
 | `reports/` | NFR-4 / NFR-5、chirp、α、闭环。L3（FNO）只记录为 v0.2，没有伪造产物。 |
 | `prefer/` | 可选。同一上限下效率 / 中性 / 拟真三份表。不在默认 `pretrained` 档里。 |
 
-重新生成：
-
-```bash
-uv run --no-sync python scripts/export_fly_default_dataset.py
-uv run --no-sync python scripts/export_prefer_datasets.py
-```
-
 校验默认档，以及可选的效率 / 中性 / 拟真档：
 
 ```bash
-uv run --no-sync nrde fetch fly --tier pretrained
-uv run --no-sync nrde fetch fly --tier prefer
+uv run nrde fetch fly --tier pretrained
+uv run nrde fetch fly --tier prefer
 ```
 
-README 上的精度 / 墙钟图从这些表重算，审计见 [证据链](../../docs/reports/evidence.md)。
+克隆后这两条只校验哈希。表不在工作区、且清单里写了下载地址时，才会下载。

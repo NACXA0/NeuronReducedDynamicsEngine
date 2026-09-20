@@ -345,6 +345,10 @@ def step_rate_torch(
     oor: Any,
     dt: float = 1.0,
 ) -> tuple[Any, Any]:
+    """Identity place mods are a no-op, so this kernel matches NumPy for published fits.
+
+    A non-identity ``PlaceMod`` is applied on the NumPy rate path only.
+    """
     torch = _require_torch()
     csr = bundle["csr"]
     # SpMV in float32; promote before F so onset/interp match numpy float64.

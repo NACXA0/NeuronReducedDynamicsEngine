@@ -8,7 +8,7 @@ $$I = W\,(r\,\Delta t) + I_{\mathrm{ext}}, \qquad r = F(I).$$
 
 `r` 是 Hz。`W` 是每次脉冲的电流（Shiu 起点 0.0275 nA）。一步默认 1 ms，所以乘上的是这一步的期望脉冲数 `r × 0.001`，不是把 Hz 直接乘到纳安上。
 
-`W` 是连接，`F` 是 [上一步](pipeline.md) 写出的 npz。这一步每毫秒乘一次稀疏矩阵，再查表。它不更新 F，没有 epoch，也没有损失曲线。
+`W` 是连接，`F` 是 [上一步](pipeline.md) 写出的 npz。发布仿真按类型查表。脑区/坐标步默认恒等，不改这些数字。这一步每毫秒乘一次稀疏矩阵，再查表。它不更新 F，没有 epoch，也没有损失曲线。
 
 **不接 TensorBoard，也不接 SwanLab。** 那两个工具记的是训练曲线。这里的标准输出是一行 JSON：`mean_rate` 和 `n_nodes`。α 标定（Shiu 0.275 mV 起点上的一个全局缩放）同样只产出一个系数，不接。
 
@@ -46,8 +46,8 @@ uv pip install torch --index-url https://download.pytorch.org/whl/cu130
 用 [拟合 F](pipeline.md) 里的任意一份 npz，或默认数据集里已经拟合好的表。随机图 80 个点、50 步，用来确认 F 能被查到。
 
 ```bash
-uv run --no-sync nrde fetch fly --tier pretrained
-uv run --no-sync nrde run simulate \
+uv run nrde fetch fly --tier pretrained
+uv run nrde run simulate \
   --fit datasets/fly/fits/aCC_l0.npz --n 80 --steps 50
 ```
 

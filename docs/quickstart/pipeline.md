@@ -4,7 +4,17 @@
 
 这一步只拟合降阶函数 F，不读连接组，也不做稀疏矩阵乘。乘 `W r` 是下一步，见 [稀疏传播](engine.md)。v0.1 不做网络级训练，也不把 TensorBoard / SwanLab 接到这条命令上：一次拟合没有 epoch，只有退出时的一行 JSON 和一份 npz。
 
-F 的轴是细胞状态，不是图。少留几轴就是更低的层。L3（FNO / Volterra）属 v0.2，下面没有。
+F 的轴分两层，不要把它们加成两张发放率。仓库首页只放介绍和数字，拟合步骤以本页为准。
+
+状态轴决定层：L0 是电流，L1 再加上距上次发放，L2 再加 SRM。少留几轴就是更低的层。L3（FNO / Volterra）属 v0.2，下面没有。
+
+身份轴的**主线只有类型**：类型选 \(F_{\mathrm{type}}\)。脑区和坐标没有可拟合的数据，不写入发布 npz，已有表不必重训。它们作为已注册的管道步，默认恒等；要非零修正或换掉 \(F\)，见 [自定义管道](extend.md)。
+
+\[
+r = F_{\mathrm{type}}(I,\ \mathrm{state})
+\]
+
+禁止把类型、脑区、位置各自的发放率再加起来。没有源 ODE 教师的函数不能标成 `quality=ok`，也不能进发布数据集。边上的权重和递质不是 F 的维。
 
 | 示例 | 层 | 开关 | 写出 |
 |---|---|---|---|
@@ -153,7 +163,7 @@ fit = attach_srm(fit, fit_srm_kernels("lif"))
 save_fit(fit, "/tmp/nrde_fit/lif_l1l2.npz")
 ```
 
-用 `uv run python` 执行。自定义 ODE 先 `ModelSpec.register()`，再把名字传给 `fit_fi`。协议见 [ModelSpec](../model_spec_protocol.md)。
+用 `uv run python` 执行。自定义 ODE 先 `ModelSpec.register()`，再把名字传给 `fit_fi`。协议见 [ModelSpec](../model_spec_protocol.md)。要在求值管道里加因素、把系数改成函数、或换掉类型表，见 [自定义管道](extend.md) 和 `examples/05_custom_rate_op.py`。
 
 重复拟合且 `config_hash` 相同则不覆写文件。要强制重写加 `--force`。
 

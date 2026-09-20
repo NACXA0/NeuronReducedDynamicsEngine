@@ -26,6 +26,9 @@ NT_ALIASES = (
 ID_ALIASES = ("bodyId", "body_id", "node_id", "id", "root_id", "body")
 TYPE_ALIASES = ("cell_type", "type", "cellType", "instance", "type_id")
 REGION_ALIASES = ("region", "roi", "superclass", "super_class", "neuropil")
+X_ALIASES = ("x", "soma_x", "position_x", "coord_x")
+Y_ALIASES = ("y", "soma_y", "position_y", "coord_y")
+Z_ALIASES = ("z", "soma_z", "position_z", "coord_z")
 
 DEFAULT_NT_SIGN: dict[str, float] = {
     "acetylcholine": 1.0,
@@ -343,6 +346,19 @@ def _labels_for(
     return out
 
 
+def _coords_for(query: np.ndarray, sorted_ids: np.ndarray, coords: np.ndarray) -> np.ndarray:
+    """Align annotation xyz onto nodes. Misses stay NaN; callers treat NaN as 0."""
+    out = np.full((int(query.shape[0]), 3), np.nan, dtype=np.float64)
+    if query.size == 0 or sorted_ids.size == 0:
+        return out
+    pos = np.searchsorted(sorted_ids, query)
+    valid = pos < sorted_ids.size
+    pos = np.minimum(pos, sorted_ids.size - 1)
+    hit = valid & (sorted_ids[pos] == query)
+    out[hit] = np.asarray(coords, dtype=np.float64)[pos[hit]]
+    return out
+
+
 def _factorize(labels: np.ndarray) -> tuple[tuple[str, ...], np.ndarray]:
     if labels.size == 0:
         return ("unknown",), np.zeros(0, dtype=np.int32)
@@ -475,12 +491,17 @@ def load_connectome(
     ann_ids = np.zeros(0, dtype=np.int64)
     ann_types = np.zeros(0, dtype=object)
     ann_regions = np.zeros(0, dtype=object)
+    ann_xyz: np.ndarray | None = None
     if annotations_path is not None:
         ann_path = Path(annotations_path)
         ann_names = _column_names(ann_path)
         id_col = _pick_column(ann_names, ID_ALIASES)
         type_col = _pick_column(ann_names, TYPE_ALIASES)
         region_col = _pick_column(ann_names, REGION_ALIASES)
+        x_col = _pick_column(ann_names, X_ALIASES)
+        y_col = _pick_column(ann_names, Y_ALIASES)
+        z_col = _pick_column(ann_names, Z_ALIASES)
+        has_xyz = x_col is not None and y_col is not None and z_col is not None
         if id_col is None:
             raise ValueError(f"Cannot find id column in annotations {ann_names}")
         ann_wanted = [id_col]
@@ -488,12 +509,26 @@ def load_connectome(
             ann_wanted.append(type_col)
         if region_col is not None:
             ann_wanted.append(region_col)
+        if has_xyz:
+            ann_wanted.extend([x_col, y_col, z_col])
         ann = _read_showing(ann_path, ann_wanted, "reading annotations", "bodies")
-        ann_ids, ann_types, ann_regions = _last_wins_sorted(
-            ann[id_col],
-            np.asarray(ann[type_col]).astype(str) if type_col else np.full(len(ann[id_col]), "unknown"),
-            np.asarray(ann[region_col]).astype(str) if region_col else np.full(len(ann[id_col]), ""),
-        )
+        type_values = np.asarray(ann[type_col]).astype(str) if type_col else np.full(len(ann[id_col]), "unknown")
+        region_values = np.asarray(ann[region_col]).astype(str) if region_col else np.full(len(ann[id_col]), "")
+        columns = [type_values, region_values]
+        if has_xyz:
+            columns.extend(
+                [
+                    np.asarray(ann[x_col], dtype=np.float64),
+                    np.asarray(ann[y_col], dtype=np.float64),
+                    np.asarray(ann[z_col], dtype=np.float64),
+                ]
+            )
+        sorted_cols = _last_wins_sorted(ann[id_col], *columns)
+        ann_ids = sorted_cols[0]
+        ann_types = sorted_cols[1]
+        ann_regions = sorted_cols[2]
+        if has_xyz:
+            ann_xyz = np.column_stack(sorted_cols[3:6]).astype(np.float64, copy=False)
         del ann
 
     mask = np.ones(pre.shape[0], dtype=bool)
@@ -540,12 +575,19 @@ def load_connectome(
             type_names=("unknown",),
             nt_type=np.zeros(0, dtype=object),
             region=np.zeros(0, dtype=object),
-            meta={"synapses_path": str(syn_path)},
+            xyz=None,
+            meta={"synapses_path": str(syn_path), "xyz_source": "unset"},
         )
 
     node_ids = _union_endpoints(pre, post)
     pre_i = _searchsorted_edges(node_ids, pre)
     type_names, node_type, region = _assign_nodes(node_ids, ann_ids, ann_types, ann_regions)
+    if ann_xyz is None:
+        xyz = None
+        xyz_source = "unset"
+    else:
+        xyz = _coords_for(node_ids, ann_ids, ann_xyz)
+        xyz_source = "annotation"
     if raw_nt is not None:
         nt_names_arr, nt_codes = np.unique(raw_nt, return_inverse=True)
         nt_names = [str(name) for name in nt_names_arr]
@@ -592,7 +634,8 @@ def load_connectome(
         type_names=type_names,
         nt_type=_codes_to_objects(nt_codes, nt_names),
         region=region,
-        meta={"synapses_path": str(syn_path)},
+        xyz=xyz,
+        meta={"synapses_path": str(syn_path), "xyz_source": xyz_source},
     )
 
 
@@ -620,5 +663,6 @@ def erdos_renyi_graph(
         type_names=names,
         nt_type=np.where(signs > 0, "acetylcholine", "gaba").astype(str),
         region=np.full(n_nodes, "synthetic", dtype=object),
-        meta={"generator": "erdos_renyi", "p": p, "seed": seed},
+        xyz=np.zeros((n_nodes, 3), dtype=np.float64),
+        meta={"generator": "erdos_renyi", "p": p, "seed": seed, "xyz_source": "unset"},
     )

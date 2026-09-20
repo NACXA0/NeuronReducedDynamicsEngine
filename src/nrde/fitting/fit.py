@@ -15,6 +15,7 @@ from scipy.interpolate import CubicSpline, PchipInterpolator
 
 from nrde import models as _models  # noqa: F401
 from nrde.fitting.chirp import chirp_impedance, decide_layer
+from nrde.place import place_from_meta, place_to_meta, teacher_from_meta, teacher_to_meta
 from nrde.sim import firing_rate, resolve, simulate_spikes
 from nrde.sim_kernels import fill_spike_lut_packed, firing_rates_packed, pack_model
 from nrde.types import NPZ_SCHEMA_VERSION, ExpKernel, FittedActivation, SRMKernels
@@ -422,6 +423,12 @@ def save_fit(
         "config_hash": config_hash,
         "created_utc": datetime.now(timezone.utc).isoformat(),
     }
+    place_meta = place_to_meta(fit.place)
+    if place_meta is not None:
+        meta["place"] = place_meta
+    teacher_meta = teacher_to_meta(fit.teacher)
+    if teacher_meta is not None:
+        meta["teacher"] = teacher_meta
     meta_path = path.with_suffix(".meta.json")
     if path.suffix == ".npz":
         meta_path = Path(str(path)[:-4] + ".meta.json")
@@ -489,4 +496,6 @@ def load_fit(path: str | Path) -> FittedActivation:
         type_ids=type_ids,
         git_commit=meta.get("git_commit"),
         config_hash=meta.get("config_hash"),
+        place=place_from_meta(meta.get("place")),
+        teacher=teacher_from_meta(meta.get("teacher")),
     )

@@ -1,7 +1,7 @@
 # 从源码构建与完整开发环境
 
 面向贡献者与需要本地复现全部产品面（A1 / A2 / B / C）的开发者。  
-**终端用户**请先看仓库 [README 的快速入门](https://github.com/NACXA0/NeuronReducedDynamicsEngine#快速入门)；本页是「装齐一切」的清单。
+**终端用户**请先看仓库 [README](https://github.com/NACXA0/NeuronReducedDynamicsEngine) 的介绍、数字和五分钟命令。本页是「装齐一切」的清单。
 
 ## 1. 最低 vs 完整
 
@@ -84,37 +84,26 @@ uv sync --extra dev --extra docs --extra demo-assets --extra fly
 uv sync --extra pysr
 ```
 
-## 5. 数据与产物（按体积）
+## 5. 数据（用户侧）
 
-| 层级 | 内容 | 如何得到 | 体积量级 | 是否入库 |
-|---|---|---|---|---|
-| 种子 artifacts | `artifacts/type_0.npz`、`aCC.npz`、`hh_demo.npz`（+ meta） | 克隆仓库；`uv run nrde fetch fly --tier smoke\|seed` 校验 | MB | 是（类型键种子） |
-| Demo 配置 | `configs/flygym_demo.yaml`、`configs/manifests/fly.yaml` | 克隆 | KB | 是 |
-| MaleCNS 注释+递质 | Feather 两件 | `uv run nrde fetch fly --tier full` 或 `uv run python scripts/download_malecns.py --skip-weights` | ≈55 MB | 否（`data/` gitignore） |
-| MaleCNS 权重 | `connectome-weights-*.feather` | 同上去掉 `--skip-weights` | ≈1.1 GB | 否 |
-| FlyWire 对照 | 自备导出 | 见 `data/README.md` | 不定 | 否；**禁止与 MaleCNS 混用 ID** |
-| A1 离线包 | `dist/nrde-fly-offline.zip` | `uv run python scripts/make_release.py` | MB | 否（gitignore） |
-| 电生理拟合原料 | ModelDB / NeuroElectro / 文献 | 研究自备；**不**由连接组产生 f-I | — | 不随主包 |
-
-常用命令：
-
-常用命令。`smoke` 只校验种子哈希，`seed` 用仓内种子，`pretrained` 校验 `datasets/fly/` 的 33 个发布表，`full` 再拉 MaleCNS。
+| 要跑什么 | 怎么得到 | 体积 |
+|---|---|---|
+| 种子 demo | 克隆后 `uv run nrde fetch fly --tier seed`（只校验） | 小 |
+| 发布表上的稀疏传播 | `uv run nrde fetch fly --tier pretrained` | 小。缺文件且清单有地址时才下载 |
+| MaleCNS 注释+递质 | `uv run nrde fetch fly --tier full` 或 `uv run python scripts/download_malecns.py --skip-weights` | ≈55 MB，不入库 |
+| MaleCNS 权重 | 去掉 `--skip-weights` | ≈1.1 GB，不入库 |
+| FlyWire | 自备 | 禁止与 MaleCNS 混用 ID |
 
 ```bash
 uv run nrde fetch fly --tier smoke
 uv run nrde fetch fly --tier seed
-uv run --no-sync nrde fetch fly --tier pretrained
+uv run nrde fetch fly --tier pretrained
 uv run nrde fetch fly --tier full
-```
-
-```bash
-uv run python scripts/download_malecns.py --skip-weights
-uv run python scripts/download_malecns.py
 ```
 
 路径约定：`data/malecns/`、`data/flywire/` — 详见 [`data/README.md`](../data/README.md) 与 [数据源](data_sources.md)。
 
-> **注意**：`uv run python examples/01_single_neuron_fit.py` 会写入 `artifacts/aCC.npz`。覆写后 `uv run nrde fetch` 可能因 sha256 / `config_hash` 失配失败。改种子后请同步更新 `configs/manifests/fly.yaml` 与 `configs/flygym_demo.yaml` 中的哈希，或从已知良好副本恢复。
+不要把拟合结果写回 `artifacts/aCC.npz`。那会让种子哈希对不上。
 
 ## 6. 按产品面的「装什么、跑什么」
 
@@ -154,21 +143,7 @@ uv run nrde demo flygym --steps 100 --headless
 
 ### A1（体验包 / Demo 卡）
 
-安装：
-
-```bash
-uv sync --extra dev --extra demo-assets
-```
-
-运行：
-
-```bash
-uv run python scripts/render_demo.py --preset flygym-demo-v01 --steps 40 --seed 0 --out assets/demo/
-uv run python scripts/make_colab.py --out assets/demo/demo.ipynb
-uv run python scripts/make_release.py --out dist/nrde-fly-offline.zip
-```
-
-细节：[A1 资产管线](asset_pipeline.md)。
+看 [跑果蝇 Demo](quickstart/demo.md)。重新生成 GIF 和 notebook 不在本页。
 
 ### 文档站
 
@@ -227,11 +202,10 @@ uv run --extra pysr pytest -m pysr
 - [ ] 种子：`uv run nrde fetch fly --tier seed`
 - [ ] （可选）MaleCNS：`uv run nrde fetch fly --tier full` 或 `uv run python scripts/download_malecns.py`
 - [ ] `uv run --extra dev pytest` 与 `uv run --extra dev ruff check` 通过
-- [ ] （可选）A1 三脚本产出 GIF / ipynb / zip
 
 ## 9. 相关文档
 
 - 贡献流程：[CONTRIBUTING.md](../CONTRIBUTING.md)
 - 数据源 / fetch：[data_sources.md](data_sources.md)
-- A1 管线：[asset_pipeline.md](asset_pipeline.md)
+- 发布、PyPI、重做预训练表、改下载地址：仓库根目录 [maintainer/README.md](../maintainer/README.md)（不在用户步骤里）
 - 架构与 extras 决策：[RFC-002](rfcs/RFC-002.md)

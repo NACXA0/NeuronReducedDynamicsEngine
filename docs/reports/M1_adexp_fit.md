@@ -22,5 +22,5 @@
 图：`figures/adexp_fi_overlay.svg`（CSV 同名）。不要在本页手填新数；改协议后跑：
 
 ```bash
-uv run --no-sync python scripts/make_figures.py
+uv run python scripts/make_figures.py
 ```

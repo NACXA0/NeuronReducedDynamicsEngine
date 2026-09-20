@@ -161,6 +161,18 @@ def _cmd_demo(args: argparse.Namespace) -> int:
     return 0 if ok else 1
 
 
+def _fetch_notice(report: dict) -> str:
+    summary = report.get("summary") or {}
+    verified = int(summary.get("verified") or 0)
+    downloaded = int(summary.get("downloaded") or 0)
+    tier = report.get("tier")
+    if not report.get("ok"):
+        return f"{tier}: 校验失败"
+    if downloaded:
+        return f"{tier}: {verified} 已校验，{downloaded} 已下载"
+    return f"{tier}: {verified} 已校验，未下载"
+
+
 def _cmd_fetch(args: argparse.Namespace) -> int:
     from nrde.fetch import fetch_preset
 
@@ -171,6 +183,7 @@ def _cmd_fetch(args: argparse.Namespace) -> int:
         manifest_path=args.manifest,
         skip_weights=args.skip_weights,
     )
+    print(_fetch_notice(report), file=sys.stderr)
     print(json.dumps(report, indent=2))
     return 0 if report.get("ok") else 1
 

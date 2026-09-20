@@ -9,7 +9,8 @@
 # !pip install -q "neuron-reduced-dynamics-engine[fly]"
 
 # %% [markdown]
-# 拉取种子并跑 50 步 headless：
+# 拉取种子并跑 50 步 headless。
+# 表已在检出里时只校验；缺失且清单写了下载地址时才下载。
 
 # %%
 from nrde import demo

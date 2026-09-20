@@ -1,6 +1,8 @@
 # 跑果蝇 Demo（A1 / A2）
 
-> **不想装环境？** → A1：[Open in Colab](https://colab.research.google.com/)（notebook 由 `scripts/make_colab.py` 生成，M4 挂徽章）· 或看 `assets/demo/` GIF。
+五分钟命令在仓库 [README](../../README.md)。本页是 Demo、Colab 和 GIF 的细节。
+
+> **不想装环境？** → [在 Colab 打开 Demo notebook](https://colab.research.google.com/github/NACXA0/NeuronReducedDynamicsEngine/blob/main/assets/demo/demo.ipynb)，或看 [`assets/demo/demo_seed0.gif`](../../assets/demo/demo_seed0.gif)。
 
 ## 主路径：A2 果蝇实例预设（Python）
 
@@ -25,17 +27,17 @@ uv run python -c 'import nrde; print(nrde.demo("flygym", steps=100))'
 
 ## A1 分支：果蝇奇观（非 Python）
 
-| 产物 | 获取 | 构建 |
-|---|---|---|
-| GIF / 短视频 | README Demo 卡 · `assets/demo/`（小 GIF 可入库） | `scripts/render_demo.py` |
-| Colab | README 徽章 | `scripts/make_colab.py` ← `examples/colab_src/demo.md` |
-| 离线 zip | GitHub Release | `scripts/make_release.py` |
+| 产物 | 获取 |
+|---|---|
+| GIF | [`assets/demo/demo_seed0.gif`](../../assets/demo/demo_seed0.gif) |
+| Colab | 上面的 notebook 链接 |
+| 离线 zip | 发布之后的 GitHub Release 附件。仓库里没有这份 zip |
 
-详见 [asset_pipeline.md](../asset_pipeline.md)。
+这些文件怎么重新生成，不在用户文档里。
 
 ## 离线包分支
 
-Release 附件含种子 npz + `manifest.json`（sha256）。解压后：
+Release 附件含种子 npz、`datasets/fly/` 和 `manifest.json`（sha256）。解压后：
 
 安装：
 

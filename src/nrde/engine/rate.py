@@ -7,6 +7,7 @@ from dataclasses import replace
 import numpy as np
 
 from nrde.engine.backends import resolve_engine_backend
+from nrde.engine.ops import apply_pipeline, pipeline_allows_torch
 from nrde.engine.sparse import (
     get_csr,
     get_type_indices,
@@ -29,7 +30,7 @@ def coalesce_type_tables(
     for table, idx in zip(tables, indices, strict=True):
         if idx.size == 0:
             continue
-        key = (id(table.I_grid), id(table.r_grid), float(table.I_onset))
+        key = (id(table.I_grid), id(table.r_grid), float(table.I_onset), id(table.place))
         if key not in buckets:
             buckets[key] = []
             reps[key] = table
@@ -48,12 +49,16 @@ def batched_apply(
     I: np.ndarray,
     node_type: np.ndarray,
     type_indices: list[np.ndarray] | None = None,
+    region: np.ndarray | None = None,
+    xyz: np.ndarray | None = None,
 ) -> tuple[np.ndarray, int]:
     r = np.zeros_like(I, dtype=np.float64)
     oor = 0
     indices = type_indices if type_indices is not None else indices_for_codes(node_type, len(tables))
     for table, idx in coalesce_type_tables(tables, indices):
-        rt, n = table.eval_rate(I[idx])
+        reg = None if region is None else np.asarray(region)[idx]
+        pts = None if xyz is None else np.asarray(xyz)[idx]
+        rt, n = apply_pipeline(table, I[idx], reg, pts)
         r[idx] = rt
         oor += n
     return r, oor
@@ -78,7 +83,14 @@ def step_rate(
     I_total = I_syn + np.asarray(I_ext, dtype=np.float64)
     if type_indices is None:
         type_indices = get_type_indices(graph, len(tables))
-    r_new, n_oor = batched_apply(tables, I_total, graph.node_type, type_indices=type_indices)
+    r_new, n_oor = batched_apply(
+        tables,
+        I_total,
+        graph.node_type,
+        type_indices=type_indices,
+        region=graph.region,
+        xyz=graph.xyz,
+    )
     return replace(state, r=r_new, out_of_range=state.out_of_range + n_oor)
 
 
@@ -93,7 +105,7 @@ def run_rate(
     backend: str | None = None,
 ) -> tuple[RateState, np.ndarray]:
     engine = resolve_engine_backend(backend)
-    if engine == "torch":
+    if engine == "torch" and pipeline_allows_torch(tables):
         from nrde.engine.torch_rate import run_rate_torch
 
         return run_rate_torch(

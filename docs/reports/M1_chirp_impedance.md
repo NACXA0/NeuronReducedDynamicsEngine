@@ -19,5 +19,5 @@
 `aCC_l0.npz` 内存储的 \(|Z|\) 与重算曲线同形（2 Hz 处略高、随后滚降）。判定原文：无内点峰。图：`figures/adexp_lif_chirp.svg`。
 
 ```bash
-uv run --no-sync python scripts/make_figures.py
+uv run python scripts/make_figures.py
 ```

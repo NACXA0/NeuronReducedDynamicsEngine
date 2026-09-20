@@ -37,6 +37,8 @@ uv run python examples/04_custom_model_pipeline.py
 
 产物 meta 含 `config_hash`：重复拟合且哈希相同则跳过写入（幂等）。
 
+求值管道（类型表 → 脑区/位置 → 调质占位）可追加或替换，见 [自定义管道](quickstart/extend.md) 和 `examples/05_custom_rate_op.py`。那不是换教师 ODE，而是换发放率怎么从电流算出来。
+
 ## IO 点声明（协议 3）
 
 见 `configs/flygym_demo.yaml` 的 `io_map`：按 `type_id` 选择编码器/解码器；研究者可改用 `neuron_id` 列表（后续扩展）。

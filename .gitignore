@@ -17,6 +17,9 @@ site/
 .vscode/
 .DS_Store
 
+# PySR and other local fit runs
+outputs/
+
 # Default: ignore npz; allow committed seed artifacts + tests fixtures
 *.npz
 !tests/data/**

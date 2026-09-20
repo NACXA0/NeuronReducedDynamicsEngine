@@ -26,6 +26,7 @@ nrde.run(["simulate", "--fit", "artifacts/aCC.npz", "--steps", "50"])
 ## Online (DD-4)
 
 - `nrde.engine.rate.run_rate` / `step_rate`
+- `nrde.engine.ops.register_op` / `append_op` / `replace_op` / `reset_pipeline` — 发放率管道；发布主线有效步骤是 `type`，`place` / `modulator` 默认恒等
 - `nrde.engine.spike.run_spike` / `step_spike_lut` / `step_spike_izhikevich`
 - `nrde.engine.hybrid.step_rate_mixed` — local Euler ODE fallback
 

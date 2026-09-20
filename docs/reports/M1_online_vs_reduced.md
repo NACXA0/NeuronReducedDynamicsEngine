@@ -22,6 +22,6 @@ NFR-5 的 Victor–Purpura 在导出数据集时写入 `datasets/fly/reports/acc
 ## 复现
 
 ```bash
-uv run --no-sync python scripts/make_figures.py --verify
+uv run python scripts/make_figures.py --verify
 uv run --extra dev pytest tests/test_validation.py -q
 ```

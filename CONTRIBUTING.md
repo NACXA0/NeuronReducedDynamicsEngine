@@ -1,6 +1,6 @@
 # 贡献指南
 
-感谢参与 NRDE（Neuron Reduced-Dynamics Engine）开发。
+感谢参与 NRDE（Neuron Reduced-Dynamics Engine）开发。对外展示面是仓库 [README](README.md)；文档地图是 [docs/index.md](docs/index.md)。
 
 ## 命名约定
 
@@ -25,7 +25,11 @@
 
 公共 import 面仅五符号：`make` / `demo` / `run` / `offline` / `ModelSpec`（RFC-002）。深度 API 从子模块导入。
 
-产品面：**A1** 奇观（Colab/GIF/Release）· **A2** 预设（`nrde[fly]` + `nrde fetch`）· **B** 引擎 · **C** 管线。A1 资产脚本见 `docs/asset_pipeline.md`。
+产品面：**A1** 奇观（Colab/GIF/Release）· **A2** 预设（`nrde[fly]` + `nrde fetch`）· **B** 引擎 · **C** 管线。
+
+## 维护者
+
+GitHub Release、PyPI、重做预训练表、修改数据集第二下载地址、重新生成 Demo 资产，写在 [`maintainer/`](maintainer/README.md)。不要把这些步骤写回 README 或 `docs/`。
 
 ## 许可证与贡献条款
 

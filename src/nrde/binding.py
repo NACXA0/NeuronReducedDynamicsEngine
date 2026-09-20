@@ -6,7 +6,7 @@ from pathlib import Path
 
 import yaml
 
-from nrde.types import FittedActivation, GraphData, TypeEntry
+from nrde.types import FittedActivation, GraphData, TeacherRef, TypeEntry
 
 
 def tables_for_graph(
@@ -38,6 +38,18 @@ def load_type_map(path: str) -> list[TypeEntry]:
             ref=item.get("ref"),
             tier=str(item.get("tier", "default")),
             reduction_benefit=str(item.get("reduction_benefit", "control")),
+            teacher=_teacher_from_item(item),
         )
         for item in raw
     ]
+
+
+def _teacher_from_item(item: dict) -> TeacherRef | None:
+    raw = item.get("teacher")
+    if not isinstance(raw, dict):
+        return None
+    return TeacherRef(
+        kind=str(raw.get("kind", "builtin")),
+        ref=str(raw.get("ref", item.get("model", ""))),
+        notes=str(raw.get("notes", "") or ""),
+    )
