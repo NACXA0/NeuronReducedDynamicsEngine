@@ -37,7 +37,12 @@ artifacts/**
 !artifacts/explif.npz
 !artifacts/hh.npz
 
-docs/reports/figures/
+# Figure working copies; committed evidence (csv/svg/json) is tracked
+docs/reports/figures/**
+!docs/reports/figures/*.csv
+!docs/reports/figures/*.svg
+!docs/reports/figures/*.json
+!docs/reports/figures/*.md
 dist/
 assets/demo/*
 !assets/demo/README.md

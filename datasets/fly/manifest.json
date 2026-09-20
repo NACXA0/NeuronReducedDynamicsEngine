@@ -5,8 +5,8 @@
   "files": [
     {
       "path": "datasets/fly/README.md",
-      "sha256": "c2bf2477eacc3f2d87157c256dcd03bc43966b7efd69f527e7c6beeb53c50541",
-      "bytes": 814
+      "sha256": "a3a5e7855d2082593b82f6ec1ca367369d553c7344149e56c97d73607fec949b",
+      "bytes": 924
     },
     {
       "path": "datasets/fly/fits/T4_l0.meta.json",

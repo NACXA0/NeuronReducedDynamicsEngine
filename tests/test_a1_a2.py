@@ -20,6 +20,15 @@ def test_cli_fetch_seed():
     assert rc == 0
 
 
+def test_cli_fetch_pretrained():
+    rc = main(["fetch", "fly", "--tier", "pretrained"])
+    assert rc == 0
+    report = fetch_preset("fly", tier="pretrained")
+    assert report["ok"] is True
+    assert len(report["artifacts"]) == 33
+    assert all(a.get("status") in {"ok", "ok_refresh_noop"} for a in report["artifacts"])
+
+
 def test_render_demo_script(tmp_path: Path):
 
     # scripts may not be a package — invoke via path run

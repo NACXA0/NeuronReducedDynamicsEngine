@@ -184,6 +184,17 @@ def _add_validate_parser(sub: argparse._SubParsersAction, name: str = "validate"
     val.set_defaults(func=_cmd_validate)
 
 
+def _fetch_tier_choices() -> tuple[str, ...]:
+    fallback = ("smoke", "seed", "pretrained", "full")
+    try:
+        from nrde.fetch import load_manifest
+
+        names = tuple((load_manifest().get("tiers") or {}).keys())
+    except Exception:  # noqa: BLE001 — parser must still build without a manifest
+        return fallback
+    return names or fallback
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="nrde",
@@ -205,9 +216,9 @@ def build_parser() -> argparse.ArgumentParser:
     fetch_p.add_argument("preset", nargs="?", default="fly", help="Preset name (default: fly)")
     fetch_p.add_argument(
         "--tier",
-        choices=("smoke", "seed", "full"),
+        choices=_fetch_tier_choices(),
         default="seed",
-        help="smoke=hash check; seed=artifacts; full=+connectome download",
+        help="smoke=seed hashes; seed=artifacts; pretrained=datasets/fly; full=+connectome download",
     )
     fetch_p.add_argument("--refresh", action="store_true")
     fetch_p.add_argument("--manifest", default=None, help="Override manifest YAML path")

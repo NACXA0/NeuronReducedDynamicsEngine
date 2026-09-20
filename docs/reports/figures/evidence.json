@@ -1,0 +1,305 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-09-20T05:18:48.548112+00:00",
+  "git_commit": "61a61292e99d96907b5ee7de8fa683de4c4cfea7",
+  "command": "uv run --no-sync python scripts/make_figures.py",
+  "host": {
+    "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.43",
+    "python": "3.14.6",
+    "cpu": "AMD Ryzen 7 5800X 8-Core Processor",
+    "nrde_engine": "numpy"
+  },
+  "dataset": {
+    "tier": "pretrained",
+    "fetch_ok": true,
+    "n_artifacts": 33,
+    "ground_truth_fit": "datasets/fly/fits/aCC_l0.npz",
+    "lif_fit": "datasets/fly/fits/default_inhibitory_l0.npz",
+    "circuit": "datasets/fly/sparse/accessory_mn_circuit.feather",
+    "files": [
+      {
+        "path": "datasets/fly/fits/T4_l0.npz",
+        "sha256": "a64d40186add7c7f30203f25dbfba4f2b7bd20fbe9c859973ea12af6e9b5c74e",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/fits/T4_l1.npz",
+        "sha256": "ddf76f9de4517f06efdd429faf0a62806d13505c6bb3f7258f336703e6dde37d",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/fits/T4_l1l2.npz",
+        "sha256": "7a87c6a8f05839c577ca05f3de7e4279dec868953a5991c8409859eb9b373394",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/fits/T4_l2.npz",
+        "sha256": "7e7ddb188595056c4056cfd29053a0a79bc54df983697b9d6834117809c5aaf0",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/fits/aCC_l0.npz",
+        "sha256": "a64d40186add7c7f30203f25dbfba4f2b7bd20fbe9c859973ea12af6e9b5c74e",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/fits/aCC_l1.npz",
+        "sha256": "ddf76f9de4517f06efdd429faf0a62806d13505c6bb3f7258f336703e6dde37d",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/fits/aCC_l1l2.npz",
+        "sha256": "7a87c6a8f05839c577ca05f3de7e4279dec868953a5991c8409859eb9b373394",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/fits/aCC_l2.npz",
+        "sha256": "7e7ddb188595056c4056cfd29053a0a79bc54df983697b9d6834117809c5aaf0",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/fits/default_excitatory_l0.npz",
+        "sha256": "0091c3cc678d138f53e43a654dfbb75f32472eda200854148750ec03e529adcd",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/fits/default_excitatory_l1.npz",
+        "sha256": "bcafc9a7e62708ef3193357d4f03f66d68c2ff3e0902e627bb63c5bac35ca12f",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/fits/default_excitatory_l1l2.npz",
+        "sha256": "ac3d5c18df8f5a33a8e75ab63ca5d4209acd873102399c0ebb6af2241f52718a",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/fits/default_excitatory_l2.npz",
+        "sha256": "5141b9e21d9fbd60c16cb541f2b0318ee76182bf823f2944e81148181e10e5be",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/fits/default_inhibitory_l0.npz",
+        "sha256": "102f002396c2fe4ed607f375b3b381e6338c939a69293fcce245f34a93558a91",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/fits/default_inhibitory_l1.npz",
+        "sha256": "a80720c475d362f9c85cc677096d8d6ebfa3a45d1332103385b9acbc11149104",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/fits/default_inhibitory_l1l2.npz",
+        "sha256": "01fe246f8dcdce7fcc9bd1a186cb60ae7dfb1fc760f1423e54ebcced48b6b01e",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/fits/default_inhibitory_l2.npz",
+        "sha256": "a369ab93f0777325c6ad0547ddce387e8a19b935eeb0ef1ae96100962de3e41a",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/precision/T4_l0_f32.npz",
+        "sha256": "28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/precision/T4_l1_f32.npz",
+        "sha256": "28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/precision/T4_l1l2_f32.npz",
+        "sha256": "28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/precision/T4_l2_f32.npz",
+        "sha256": "28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/precision/aCC_l0_f32.npz",
+        "sha256": "28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/precision/aCC_l1_f32.npz",
+        "sha256": "28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/precision/aCC_l1l2_f32.npz",
+        "sha256": "28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/precision/aCC_l2_f32.npz",
+        "sha256": "28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/precision/default_excitatory_l0_f32.npz",
+        "sha256": "ca7ce11d1ffa8771f643b80889fa9875647ba86a9a1802c0f4a97921464733fc",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/precision/default_excitatory_l1_f32.npz",
+        "sha256": "ca7ce11d1ffa8771f643b80889fa9875647ba86a9a1802c0f4a97921464733fc",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/precision/default_excitatory_l1l2_f32.npz",
+        "sha256": "ca7ce11d1ffa8771f643b80889fa9875647ba86a9a1802c0f4a97921464733fc",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/precision/default_excitatory_l2_f32.npz",
+        "sha256": "ca7ce11d1ffa8771f643b80889fa9875647ba86a9a1802c0f4a97921464733fc",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/precision/default_inhibitory_l0_f32.npz",
+        "sha256": "cab88b3ab44974ca2b358151d571f87e8aa987cf748e193fa820f6373415a47e",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/precision/default_inhibitory_l1_f32.npz",
+        "sha256": "cab88b3ab44974ca2b358151d571f87e8aa987cf748e193fa820f6373415a47e",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/precision/default_inhibitory_l1l2_f32.npz",
+        "sha256": "cab88b3ab44974ca2b358151d571f87e8aa987cf748e193fa820f6373415a47e",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/precision/default_inhibitory_l2_f32.npz",
+        "sha256": "cab88b3ab44974ca2b358151d571f87e8aa987cf748e193fa820f6373415a47e",
+        "status": "ok"
+      },
+      {
+        "path": "datasets/fly/sparse/shiu_labelled_circuit.npz",
+        "sha256": "2288c9f336f857ab6cca7bc60190538071c8672638381b4f085cb46e4ec7cd40",
+        "status": "ok"
+      }
+    ]
+  },
+  "protocol": {
+    "ground_truth": "AdExp Euler, dt=0.05 ms; error relative to this ODE",
+    "fi": {
+      "t_total_ms": 800.0,
+      "window_ms": 400.0,
+      "dt_ms": 0.05,
+      "I_eval": "midpoints of aCC_l0 I_grid (held-out vs training knots)",
+      "n_eval": 15
+    },
+    "timing": {
+      "n_nodes": 249,
+      "n_edges": 4622,
+      "n_steps": 200,
+      "engine_dt_ms": 1.0,
+      "simulated_ms": 200.0,
+      "ode_dt_ms": 0.05,
+      "ode_cells_measured": 8,
+      "ode_wall_scaled_to_n_nodes": true,
+      "I_ext_nA": 0.4,
+      "repeats": 3,
+      "stat": "median"
+    },
+    "notes": [
+      "aCC_l0.npz stores the AdExp steady f-I; fitter labels layer L1 because of adaptation.",
+      "T4 tables clone aCC; not a second electrophysiology source.",
+      "Circuit X-axis is typed F vs uniform LIF lookup on the 249-node accessory MN graph.",
+      "ODE wall-clock is 8 cells \u00d7 200 ms Euler, linearly scaled to 249 cells."
+    ]
+  },
+  "results": {
+    "r2_F_vs_ode": 0.9946071099861942,
+    "r2_lif_vs_ode": -24.249942475839855,
+    "r2_F_meta": 0.9946975227872065,
+    "mse_F": 2.6041666666666665,
+    "mse_lif": 12192.916666666666,
+    "rmse_F_Hz": 1.613743060919757,
+    "rmse_lif_Hz": 110.42154077292467,
+    "nfr4_pass": true,
+    "acc_layer_in_meta": "L1",
+    "wall_ms": {
+      "ode_adexp_probe": 58.018987998366356,
+      "ode_adexp_scaled": 1805.8410014491528,
+      "nrde_F_circuit": 14.833110000836314,
+      "lif_F_circuit": 11.98182499865652
+    },
+    "speedup_vs_ode": {
+      "nrde_F": 121.74392297686303,
+      "lif_F": 150.71502059591384
+    },
+    "circuit_mean_rate_Hz": {
+      "typed_F": 133.79709802372298,
+      "uniform_lif": 219.462464374099
+    },
+    "chirp": {
+      "adexp_has_peak": false,
+      "adexp_peak_hz": null,
+      "adexp_notes": "no interior |Z| peak",
+      "lif_has_peak": false,
+      "lif_notes": "no interior |Z| peak",
+      "stored_in_aCC_npz": {
+        "freq_Hz": [
+          1.0,
+          2.0,
+          5.0,
+          10.0,
+          20.0,
+          40.0,
+          80.0
+        ],
+        "Z_abs": [
+          86.55738965564645,
+          91.66163158559456,
+          87.44345495881267,
+          64.96312295189564,
+          37.80517391332105,
+          20.44153308285927,
+          12.591293013014399
+        ]
+      }
+    },
+    "train_knots_r_F_first3": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "outputs": [
+    {
+      "path": "docs/reports/figures/adexp_fi_overlay.csv",
+      "sha256": "5a36777b631d5ddd3ed31861fa424a20daf1d59cb6bc6e0bb3471256cbe4268c",
+      "bytes": 1923
+    },
+    {
+      "path": "docs/reports/figures/adexp_lif_chirp.csv",
+      "sha256": "3c008bce5ddb6c32640e61402fb8ecc44b1c06e960033420e1193f1e99f88a63",
+      "bytes": 547
+    },
+    {
+      "path": "docs/reports/figures/hero_pareto.csv",
+      "sha256": "b7604fd5ff0db91b86fb886ac69a85aab6966b708b84322dd199fbcde45836d2",
+      "bytes": 152
+    },
+    {
+      "path": "docs/reports/figures/adexp_fi_overlay.svg",
+      "sha256": "f8137fa3806615359a592bbbcc0047a3507c36b0446058af3f987fe81f6622bf",
+      "bytes": 4072
+    },
+    {
+      "path": "docs/reports/figures/adexp_lif_chirp.svg",
+      "sha256": "7b128023791535386d689003d22ba9caf0c60cf4bf7baca33257fa5ac6f4f10a",
+      "bytes": 2691
+    },
+    {
+      "path": "docs/reports/figures/hero_pareto.svg",
+      "sha256": "696133f9120ad131c0780eb9df6c13285c9f2035a3e1c6e1caeac79f0f64de54",
+      "bytes": 2708
+    }
+  ]
+}

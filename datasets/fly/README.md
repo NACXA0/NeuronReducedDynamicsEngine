@@ -20,3 +20,5 @@ uv run --no-sync python scripts/export_fly_default_dataset.py
 ```bash
 uv run --no-sync nrde fetch fly --tier pretrained
 ```
+
+README 上的精度 / 墙钟图从这些表重算，审计见 [证据链](../../docs/reports/evidence.md)。

@@ -1,28 +1,26 @@
 # M1 — AdExp 拟合对比
 
-**状态**：骨架（数值由 `scripts/make_figures.py` 与 `nrde fit` / `pytest` 填充）  
-**对应**：RFC-001 验收条 1；NFR-4；`tests/test_fit.py`
+**状态**：已用默认数据集重算（[证据链](evidence.md)）  
+**对应**：RFC-001 验收条 1；NFR-4
 
 ## 协议
 
-- 模型：AdExp（主对象）；ExpLIF / LIF 为对照
-- 观测量：稳态 f-I 曲线 \(r(I)\)
-- 拟合：PCHIP（CubicSpline 过冲则降级）；质量门 `r2 ≥ 0.98`
-- 产物：`artifacts/aCC.npz` + `aCC.meta.json`（含 `type_id`、`layer`、`git_commit`、`config_hash`）
+- Ground truth：在线 AdExp Euler，`dt = 0.05` ms
+- 表：`datasets/fly/fits/aCC_l0.npz`（稳态 f-I；meta `layer=L1`，因适应）
+- 对照：`datasets/fly/fits/default_inhibitory_l0.npz`（统一 LIF）
+- 电流：训练网格中点（留出），`t_total=800` ms，窗口 `400` ms
 
 ## 结果摘要
 
 | 指标 | 目标 | 实测 |
 |---|---|---|
-| \(R^2\) | ≥ 0.98 | （运行 `nrde fit --model adexp` 后填入） |
-| MSE | 报告 | |
-| 方法 | pchip / cubic | |
+| \(F\) vs ODE \(R^2\) | ≥ 0.98 | **0.995** |
+| \(F\) RMSE | 报告 | 1.6 Hz |
+| LIF RMSE（同一 ODE） | 对照 | 110 Hz |
+| 方法 | pchip | pchip（meta） |
+
+图：`figures/adexp_fi_overlay.svg`（CSV 同名）。不要在本页手填新数；改协议后跑：
 
 ```bash
-uv run nrde offline fit --model adexp --type-id aCC_local --out /tmp/nrde_fit/aCC_local.npz
-uv run python scripts/make_figures.py --models adexp
+uv run --no-sync python scripts/make_figures.py
 ```
-
-## 图
-
-- `figures/M1_adexp_fi.csv` — `I_nA,r_ode_Hz,r_F_Hz`

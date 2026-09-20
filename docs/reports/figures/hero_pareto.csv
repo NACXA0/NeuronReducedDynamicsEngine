@@ -1,0 +1,4 @@
+method,wall_ms,rmse_Hz,r2_vs_adexp_ode
+ode_adexp,1805.841001,0,1
+nrde_F,14.833110,1.61374306,0.99460711
+unified_lif,11.981825,110.42154077,-24.24994248

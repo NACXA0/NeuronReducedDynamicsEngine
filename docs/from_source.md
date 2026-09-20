@@ -1,7 +1,7 @@
 # 从源码构建与完整开发环境
 
 面向贡献者与需要本地复现全部产品面（A1 / A2 / B / C）的开发者。  
-**终端用户**请先看仓库 [README 安装矩阵](https://github.com/NACXA0/NeuronReducedDynamicsEngine#安装矩阵终稿四行)；本页是「装齐一切」的清单。
+**终端用户**请先看仓库 [README 的 5 分钟](https://github.com/NACXA0/NeuronReducedDynamicsEngine#5-分钟)；本页是「装齐一切」的清单。
 
 ## 1. 最低 vs 完整
 
@@ -98,11 +98,12 @@ uv sync --extra pysr
 
 常用命令：
 
-常用命令。`smoke` 只校验种子哈希，`seed` 用仓内种子，`full` 再拉 MaleCNS。
+常用命令。`smoke` 只校验种子哈希，`seed` 用仓内种子，`pretrained` 校验 `datasets/fly/` 的 33 个发布表，`full` 再拉 MaleCNS。
 
 ```bash
 uv run nrde fetch fly --tier smoke
 uv run nrde fetch fly --tier seed
+uv run --no-sync nrde fetch fly --tier pretrained
 uv run nrde fetch fly --tier full
 ```
 

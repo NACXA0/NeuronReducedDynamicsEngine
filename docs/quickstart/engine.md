@@ -43,7 +43,15 @@ uv pip install torch --index-url https://download.pytorch.org/whl/cu130
 
 ## 2. 运行
 
-用 [拟合 F](pipeline.md) 里的任意一份 npz。随机图 80 个点、50 步，用来确认 F 能被查到。
+用 [拟合 F](pipeline.md) 里的任意一份 npz，或默认数据集里已经拟合好的表。随机图 80 个点、50 步，用来确认 F 能被查到。
+
+```bash
+uv run --no-sync nrde fetch fly --tier pretrained
+uv run --no-sync nrde run simulate \
+  --fit datasets/fly/fits/aCC_l0.npz --n 80 --steps 50
+```
+
+自己刚拟合的文件同样可以：
 
 ```bash
 uv run nrde run simulate --fit /tmp/nrde_fit/lif_l0.npz --n 80 --steps 50

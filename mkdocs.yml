@@ -25,6 +25,7 @@ nav:
       - RFC-002: rfcs/RFC-002.md
       - 验证报告:
           - 索引: reports/README.md
+          - 证据链: reports/evidence.md
           - M1 AdExp 拟合: reports/M1_adexp_fit.md
           - M1 在线 vs 降阶: reports/M1_online_vs_reduced.md
           - M1 chirp: reports/M1_chirp_impedance.md

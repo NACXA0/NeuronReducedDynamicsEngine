@@ -20,6 +20,7 @@ A2 用户用统一入口拉预设数据，而不手抄 URL：
 ```bash
 uv run nrde fetch fly --tier smoke
 uv run nrde fetch fly --tier seed
+uv run --no-sync nrde fetch fly --tier pretrained
 uv run nrde fetch fly --tier full
 uv run nrde fetch fly --refresh
 ```
@@ -28,6 +29,7 @@ uv run nrde fetch fly --refresh
 |---|---|---|
 | `smoke` | 校验已跟踪的 `artifacts/*.npz` sha256 | ≈0 |
 | `seed` | 类型键种子（`type_0` / `aCC` / `hh_demo`） | MB |
+| `pretrained` | 发布默认表 `datasets/fly/`（33 个 npz） | MB |
 | `full` | 种子 + MaleCNS Feather（weights 可选） | GB |
 
 清单：`configs/manifests/fly.yaml`。缓存目录默认 `data/` 与 `artifacts/`；校验失败非零退出。Zenodo DOI 在 v0.1 发布时填入 manifest（当前可为空，回退 GCS / 仓库内种子）。

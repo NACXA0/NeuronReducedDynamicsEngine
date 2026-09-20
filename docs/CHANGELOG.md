@@ -5,6 +5,8 @@
 ## [Unreleased]
 
 ### Added
+- README 宣传图与证据链：默认数据集 `datasets/fly/` 上重算 AdExp ODE / NRDE \(F\) / 统一 LIF；`docs/reports/evidence.md` + `scripts/make_figures.py`
+- `nrde fetch fly --tier pretrained`（33 个发布表哈希）
 - A1/A2 产品面拆分；`nrde[fly]` extras；`nrde fetch` + `configs/manifests/fly.yaml`
 - A1 资产管线骨架：`scripts/render_demo.py` / `make_colab.py` / `make_release.py`；`docs/asset_pipeline.md`；`ci-demo-assets.yml`
 - CI：Python 3.14 allow-failure lane（D13）
@@ -15,6 +17,7 @@
 - `scan_fi_curve` 默认批量 Euler；`run_rate(..., backend="torch")` / `NRDE_ENGINE`
 
 ### Changed
+- README 改为介绍 / 证据图 / 5 分钟入门；安装矩阵、L0–L3、命名表下沉到文档
 - README / docs 安装矩阵改为 A1/A2/B/C 四行；历史中文规格加 RFC 横幅（D23）
 - 品牌锁定为 NRDE / `nrde` / `neuron-reduced-dynamics-engine` / `NeuronReducedDynamicsEngine`（果蝇仅为实例预设；方法术语为 state approximation）
 - 品牌守卫：`scripts/assert_nrde_brand.py` + `tests/test_brand_naming.py`
