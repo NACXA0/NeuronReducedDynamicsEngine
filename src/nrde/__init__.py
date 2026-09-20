@@ -1,4 +1,4 @@
-"""NRDE: connectome-driven reduced neuron engine (RFC-002 public surface)."""
+"""NRDE: type-bound reduced-dynamics engine (RFC-002 surface; RFC-003 intent)."""
 
 from __future__ import annotations
 

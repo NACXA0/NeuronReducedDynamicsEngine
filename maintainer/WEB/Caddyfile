@@ -1,0 +1,45 @@
+# NRDE 静态宣传页示例
+#
+# 在本目录先构建：
+#   npm ci && npm run build
+# 再启动（默认 http://localhost:8080 ，站点根是 dist/）：
+#   caddy run --config Caddyfile
+#
+# 对外发布时：删掉下面的 :8080 站点，打开文件末尾的域名站点。
+# 域名站点会由 Caddy 自动申请证书。把 example.com 换成真实域名。
+
+:8080 {
+	root * dist
+	encode gzip zstd
+	file_server
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		X-Frame-Options DENY
+		-Server
+	}
+
+	# Vite 产物文件名带哈希，可以长期缓存；入口 HTML 不要缓存死。
+	@hashed path /assets/*
+	header @hashed Cache-Control "public, max-age=31536000, immutable"
+	header /index.html Cache-Control "no-cache"
+}
+
+# example.com {
+# 	root * dist
+# 	encode gzip zstd
+# 	file_server
+#
+# 	header {
+# 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+# 		X-Content-Type-Options nosniff
+# 		Referrer-Policy strict-origin-when-cross-origin
+# 		X-Frame-Options DENY
+# 		-Server
+# 	}
+#
+# 	@hashed path /assets/*
+# 	header @hashed Cache-Control "public, max-age=31536000, immutable"
+# 	header /index.html Cache-Control "no-cache"
+# }

@@ -1,10 +1,11 @@
 # Changelog
 
-本文件遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号语义化。决策编号见 [RFC-002](rfcs/RFC-002.md)。
+本文件遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号语义化。决策编号见 [RFC-002](rfcs/RFC-002.md) / [RFC-003](rfcs/RFC-003.md)。
 
 ## [Unreleased]
 
 ### Added
+- RFC-003：终局意图（范式 → 智慧结构 → 新 AI）、默认少维工具合同、改进阶段 P0–P3；用户摘要 `docs/roadmap.md`
 - 维护者手册 `maintainer/`：Release、PyPI、重做预训练表、主/第二下载地址、Demo 资产。用户文档不再写这些步骤
 - `nrde fetch` 在表缺失时按 `configs/manifests/fly.yaml` 的 `downloads.primary` 再 `downloads.secondary` 拉取 zip；已在且哈希相符则只校验。工作区根目录改为检出或当前目录，不再假定 `site-packages` 往上两级
 - 可插拔发放率管道（`nrde.engine.ops`）；深度文档 `docs/quickstart/extend.md`
@@ -21,6 +22,7 @@
 - `scan_fi_curve` 默认批量 Euler；`run_rate(..., backend="torch")` / `NRDE_ENGINE`
 
 ### Changed
+- README / 文档地图 / 自定义管道 / B 层入口对齐 RFC-003：生物为来源非终点；默认身份维只有类型；自定义维是开关
 - README 收成展示面：介绍、锁定实测、验收摘要、安装/运行/测试分开、文档目录；细节下沉到独立页
 - 文档地图 `docs/index.md` 与 MkDocs 导航对齐当前结构（主线类型表；脑区/坐标为扩展）
 - README / docs 安装矩阵改为 A1/A2/B/C 四行；历史中文规格加 RFC 横幅（D23）

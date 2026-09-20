@@ -9,6 +9,7 @@
 | 重做预训练表、种子 npz、证据链 | [pretrained.md](pretrained.md) |
 | 修改数据集的主下载地址和第二下载地址 | [downloads.md](downloads.md) |
 | 重新生成 GIF / Colab | [assets.md](assets.md) |
+| 构建并挂出静态宣传页 | [WEB/README.md](WEB/README.md) |
 
 现在还不要发版。`pyproject.toml` 与 Changelog 的已发布段仍是 0.1.0，未发布改动在 `[Unreleased]`。`downloads.primary` 和 `downloads.secondary` 都是空字符串：克隆用户靠 Git 里的表，`fetch` 只校验。地址填上之后，缺文件才会下载。
 

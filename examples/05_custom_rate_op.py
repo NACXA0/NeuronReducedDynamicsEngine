@@ -1,4 +1,8 @@
-"""Append or replace RateOp steps. Does not write seed artifacts."""
+"""Append or replace RateOp steps. Does not write seed artifacts.
+
+Default engine contract is type-only. Extra steps are exploration switches
+(RFC-003); identity steps must match the published pipeline pointwise.
+"""
 
 from __future__ import annotations
 

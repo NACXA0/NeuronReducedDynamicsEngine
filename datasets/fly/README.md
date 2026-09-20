@@ -1,6 +1,6 @@
 # 果蝇默认数据集
 
-当前 MaleCNS 实例的预训练产物。发布给不自己拟合的使用。`artifacts/aCC.npz`、`type_0.npz`、`hh_demo.npz` 仍是种子，不在这里改。
+当前 MaleCNS 实例的预训练产物。发布给不自己拟合的使用。`artifacts/aCC.npz`、`type_0.npz`、`hh_demo.npz` 仍是种子，不在这里改。引擎核不依赖本目录；本目录是类型维上的一份实例资产（[RFC-003](../../docs/rfcs/RFC-003.md)）。
 
 这些表是**类型级**降阶曲线。脑区和位置没有写进 npz，增加身份轴占位之后不必重训。首页数字从这些表重算，见仓库 [README](../../README.md) 与 [证据链](../../docs/reports/evidence.md)。
 

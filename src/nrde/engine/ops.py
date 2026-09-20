@@ -1,6 +1,8 @@
 """Pluggable rate-eval pipeline. Default: type table, then place, then modulator.
 
-Custom steps register by name. They are not serialized into npz.
+Place and modulator are identity until a teacher fills them (RFC-003: extra
+axes are switches, not the engine contract). Custom steps register by name.
+They are not serialized into npz.
 """
 
 from __future__ import annotations

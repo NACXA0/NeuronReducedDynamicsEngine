@@ -1,18 +1,18 @@
 # NRDE — Neuron Reduced-Dynamics Engine
 
-连接组进，按细胞类型绑定的降阶函数 \(F\) 出。运行时做稀疏传播再查 \(F\)，不再逐步积分 AdExp / HH。果蝇 MaleCNS 是当前实例，不是引擎的全部范围。
+连接组进，按类型绑定的降阶函数 \(F\) 出。运行时做稀疏传播再查 \(F\)，不再逐步积分 AdExp / HH。默认身份维只有类型。果蝇 MaleCNS 是当前实例，不是引擎的全部范围。
 
 ## 介绍
 
-一边是 FlyBrainLab 这类逐步解单胞 ODE 的仿真：保真，全脑太贵。另一边是全脑统一 LIF：只要连接表加一条曲线，快，但所有细胞共用同一个函数。NRDE 走中间：输入仍是连接表和类型；离线把每一类的源 ODE 拟合成 \(F\)；在线只做
+一边是 FlyBrainLab 这类逐步解单胞 ODE 的仿真：保真，全脑太贵。另一边是全脑统一 LIF：只要连接表加一条曲线，快，但所有细胞共用同一个函数。NRDE 走中间：输入仍是连接表和类型；离线把每一类的源动力学拟合成 \(F\)；在线只做
 
 \[
 I = W\,(r\,\Delta t) + I_{\mathrm{ext}},\qquad r = F(I).
 \]
 
-主线里 \(F\) 只按**类型**绑定。脑区、坐标、调质没有可拟合的数据，不改变已发布表，也不需要重新训练。它们作为可插拔管道步留给深度开发，也可以把 \(F\) 换成与 ODE 无关的映射，用来试抽象规则。这不是宣称已经重建真实电生理，也不主张虚拟果蝇能走出有意义的行为。
+这是引擎合同：图 \(W\)、类型表 \(F\)、外源 \(I_{\mathrm{ext}}\)。主线里 \(F\) 只按**类型**绑定，作为可嵌入的仿真基础设施（游戏、群落、控制同构：类型选局部映射，交互走图）。脑区、坐标、调质没有可拟合的数据，不改变已发布表；它们是可开关的探索维，用来量对 \(\Phi=F\circ W\) 的贡献，也可以把 \(F\) 换成与 ODE 无关的映射。这不是宣称已经重建真实电生理，也不主张虚拟果蝇能走出有意义的行为。
 
-口径以 [RFC-001](docs/rfcs/RFC-001.md) 为准。初衷全文在 [初始设想](docs/初始设想.md)。
+终局不是回答生物学问题，而是从生物结构抽出这一建模范式，看它能否形成智慧结构并发展成新的 AI 基元。v0.1 仍只验收逼近误差、墙钟和接口 Demo。意图与改进顺序见 [RFC-003](docs/rfcs/RFC-003.md) 和 [路线图](docs/roadmap.md)。分层与禁止项以 [RFC-001](docs/rfcs/RFC-001.md) 为准。初衷全文在 [初始设想](docs/初始设想.md)（历史快照）。
 
 发布集在 [`datasets/fly/`](datasets/fly/README.md)：aCC / T4 共用 AdExp 替身，默认兴奋是 ExpLIF，默认抑制是 LIF，另有 249 节点、4622 边的附属屈肌运动神经元回路。
 
@@ -41,7 +41,7 @@ I = W\,(r\,\Delta t) + I_{\mathrm{ext}},\qquad r = F(I).
 | 覆盖率 | 0.7745（门限 0.70）。PySR 未装，记为 retired |
 | L3 / FNO | 未做。记录 `deferred_v0.2`，没有伪造表 |
 
-协议、曲线、哈希和重算命令在 [证据链](docs/reports/evidence.md)。
+协议、曲线、哈希和重算命令在 [证据链](docs/reports/evidence.md)。同一口径的可部署宣传页在 [maintainer/WEB](maintainer/WEB/README.md)（React 19，附 Caddyfile 示例）。
 
 ## 快速入门
 
@@ -89,7 +89,8 @@ uv run --extra dev pytest -m "not pysr and not flygym"
 
 | 文档 | 内容 |
 |---|---|
-| [自定义管道](docs/quickstart/extend.md) | 追加 RateOp、换掉类型表、系数改成函数 |
+| [自定义管道](docs/quickstart/extend.md) | 追加维 / 换掉类型表；默认关则与主线相同 |
+| [意图与改进计划](docs/roadmap.md) | 终局、少维合同、P1–P3 |
 | [ModelSpec](docs/model_spec_protocol.md) | 自有 ODE 怎么进拟合 |
 | [API](docs/api.md) | 顶层五符号与子模块 |
 | [不适用清单](docs/known-inapproximable.md) | 降阶失败时的在线 ODE 回退 |
@@ -111,7 +112,8 @@ uv run --extra dev pytest -m "not pysr and not flygym"
 |---|---|
 | [RFC-001](docs/rfcs/RFC-001.md) | 拟合分层、宣传口径 |
 | [RFC-002](docs/rfcs/RFC-002.md) | 包结构与产品面 |
-| [需求文档](docs/需求文档.md) · [计划书](docs/项目计划书.md) · [设计说明书](docs/系统设计说明书.md) | FR / 里程碑 / 两阶段架构 |
+| [RFC-003](docs/rfcs/RFC-003.md) · [路线图](docs/roadmap.md) | 终局意图、工具合同、改进阶段 |
+| [需求文档](docs/需求文档.md) · [计划书](docs/项目计划书.md) · [设计说明书](docs/系统设计说明书.md) | FR / 里程碑 / 两阶段架构（历史快照） |
 | [贡献约定](CONTRIBUTING.md) · [Changelog](docs/CHANGELOG.md) | 命名、测试、版本。发布与数据维护在 [maintainer](maintainer/README.md) |
 
 许可证：[Apache License 2.0](LICENSE)。

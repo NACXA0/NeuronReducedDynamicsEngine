@@ -27,4 +27,18 @@
 
 标记语法（自动化预留）：测试名或文档锚点使用 `D##` / `FR-x` / `TC-x`；脚本扫描尚未强制。
 
+## RFC-003 决策追溯（D24–D30）
+
+| 编号 | 落点 | 测试 / 文档 |
+|---|---|---|
+| D24 | 终局：范式 → 智慧结构 → 新 AI | `docs/rfcs/RFC-003.md`；`docs/roadmap.md`；README 介绍 |
+| D25 | 默认身份维 = 类型；内核无领域 | `docs/quickstart/engine.md`；`docs/index.md` |
+| D26 | 少维工具 / 加维探索 | `docs/quickstart/extend.md` |
+| D27 | `RateOp` 是钩子不是轴 | `docs/quickstart/extend.md` §5 |
+| D28 | 不放松 RFC-001；可学习 \(\Phi\) 另开 RFC | RFC-001 勘误；路线图 P3 |
+| D29 | 探索优先记忆层 / \(W\) / IO | RFC-003 §3 |
+| D30 | 改进阶段 P0–P3；本轮仅 P0 | `docs/roadmap.md` |
+
+本轮无新测试：P0 只改文档。P1+ 的 TC 随实现 PR 补。
+
 Hopkins / Shiu 对照只用 FlyWire 子集。MaleCNS 全图只做加载与速率一步。连接组数据不产生 f-I（见 `data_sources.md`）。

@@ -13,6 +13,7 @@ nav:
       - 自定义管道: quickstart/extend.md
       - ModelSpec: model_spec_protocol.md
       - API: api.md
+      - 意图与改进计划: roadmap.md
       - 不适用清单: known-inapproximable.md
       - PySR 准入: pysr_admission.md
   - 数据与证据:
@@ -28,6 +29,7 @@ nav:
   - 规格:
       - RFC-001: rfcs/RFC-001.md
       - RFC-002: rfcs/RFC-002.md
+      - RFC-003: rfcs/RFC-003.md
       - 需求文档: 需求文档.md
       - 项目计划书: 项目计划书.md
       - 系统设计说明书: 系统设计说明书.md

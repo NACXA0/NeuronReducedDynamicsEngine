@@ -25,11 +25,11 @@
 
 公共 import 面仅五符号：`make` / `demo` / `run` / `offline` / `ModelSpec`（RFC-002）。深度 API 从子模块导入。
 
-产品面：**A1** 奇观（Colab/GIF/Release）· **A2** 预设（`nrde[fly]` + `nrde fetch`）· **B** 引擎 · **C** 管线。
+产品面：**A1** 奇观（Colab/GIF/Release）· **A2** 预设（`nrde[fly]` + `nrde fetch`）· **B** 引擎（默认身份维只有类型；果蝇是实例）· **C** 管线（教师 + 可选探索维）。终局与改进阶段见 [RFC-003](docs/rfcs/RFC-003.md) / [路线图](docs/roadmap.md)。
 
 ## 维护者
 
-GitHub Release、PyPI、重做预训练表、修改数据集第二下载地址、重新生成 Demo 资产，写在 [`maintainer/`](maintainer/README.md)。不要把这些步骤写回 README 或 `docs/`。
+GitHub Release、PyPI、重做预训练表、修改数据集第二下载地址、重新生成 Demo 资产、构建静态宣传页，写在 [`maintainer/`](maintainer/README.md)。宣传页在 [`maintainer/WEB`](maintainer/WEB/README.md)。不要把发布步骤写回 README 或 `docs/`。
 
 ## 许可证与贡献条款
 
@@ -60,7 +60,7 @@ uv run --extra dev pytest --cov=nrde --cov-fail-under=70 -m "not pysr and not fl
 
 - 中文规格文件名保持中文；内容可中英混排。
 - 验证报告写在 `docs/reports/`，并加入 `mkdocs.yml` 导航。
-- 行为变更请更新 `docs/CHANGELOG.md`；架构级变更走 `docs/rfcs/`。
+- 行为变更请更新 `docs/CHANGELOG.md`；架构级变更走 `docs/rfcs/`。终局口径以 RFC-003 为准；不要把可学习 \(\Phi\) 或额外身份维写进 v0.1 验收。
 
 ## PR 检查清单
 

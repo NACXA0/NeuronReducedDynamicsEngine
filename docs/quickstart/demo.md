@@ -1,6 +1,6 @@
 # 跑果蝇 Demo（A1 / A2）
 
-五分钟命令在仓库 [README](../../README.md)。本页是 Demo、Colab 和 GIF 的细节。
+五分钟命令在仓库 [README](../../README.md)。本页是 Demo、Colab 和 GIF 的细节。果蝇是实例预设，不是引擎核（核是图 + 类型 \(F\) + 步进，见 [RFC-003](../rfcs/RFC-003.md)）。
 
 > **不想装环境？** → [在 Colab 打开 Demo notebook](https://colab.research.google.com/github/NACXA0/NeuronReducedDynamicsEngine/blob/main/assets/demo/demo.ipynb)，或看 [`assets/demo/demo_seed0.gif`](../../assets/demo/demo_seed0.gif)。
 

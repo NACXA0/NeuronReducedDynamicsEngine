@@ -1,4 +1,6 @@
-# Python API (v0.1 / RFC-001 + RFC-002)
+# Python API (v0.1 / RFC-001 + RFC-002 + RFC-003)
+
+顶层五符号仍只服务 A/B/C 产品面。引擎核（图 + 类型 \(F\) + 步进）从子模块导入；果蝇单位与 `make("flygym-demo-v01")` 是实例。终局与可学习 \(\Phi\) 见 [RFC-003](rfcs/RFC-003.md)，v0.1 顶层不导出训练接口。
 
 ## 公共面（顶层 `import nrde`）
 
