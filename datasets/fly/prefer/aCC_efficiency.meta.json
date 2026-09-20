@@ -1,0 +1,22 @@
+{
+  "schema_version": 2,
+  "type_id": "aCC_efficiency",
+  "type_ids": [
+    "aCC_efficiency"
+  ],
+  "model": "adexp",
+  "params": {},
+  "method": "pchip",
+  "quality": "ok",
+  "r2": 0.9999661963410648,
+  "mse": 0.012780704381359387,
+  "notes": "CubicSpline overshoot or Type-II gap; using PCHIP; n_I=8 r2=1.0000 vp=None action=fit_fi; n_I=8 r2=1.0000 vp=0.0040 action=attach_lut; prefer=efficiency",
+  "layer": "L1",
+  "level_decision": "adaptation/state LUT for adexp",
+  "lut_hit_rate": 0.421875,
+  "pysr_expr": null,
+  "fallback_ode": false,
+  "git_commit": "ef989a060559786303596f060ebeb57fc3028156",
+  "config_hash": "4bc5d181113585ac",
+  "created_utc": "2026-09-20T05:51:28.136845+00:00"
+}

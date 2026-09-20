@@ -7,6 +7,7 @@ from nrde.fitting.fit import (
     load_fit,
     save_fit,
 )
+from nrde.fitting.iterate import fit_iterative, fit_layers
 from nrde.fitting.pysr_backend import FitterBackend, admission_exam, pysr_available
 from nrde.fitting.srm import attach_srm, fit_srm_kernels, step_srm
 
@@ -19,6 +20,8 @@ __all__ = [
     "chirp_impedance",
     "decide_layer",
     "fit_fi",
+    "fit_iterative",
+    "fit_layers",
     "fit_spike_lut",
     "fit_srm_kernels",
     "load_fit",

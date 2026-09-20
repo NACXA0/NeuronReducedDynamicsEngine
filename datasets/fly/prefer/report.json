@@ -1,0 +1,112 @@
+{
+  "lif_efficiency": {
+    "prefer": "efficiency",
+    "model": "lif",
+    "layer": "L0",
+    "quality": "ok",
+    "r2": 0.9997558178348436,
+    "method": "analytic",
+    "fallback_ode": false,
+    "has_lut": false,
+    "has_srm": false,
+    "path": "datasets/fly/prefer/lif_efficiency.npz",
+    "rounds": [
+      {
+        "n_I": 8,
+        "r2": 0.8146785131931927,
+        "relative_vp": null,
+        "action": "fit_fi"
+      },
+      {
+        "n_I": 16,
+        "r2": 0.9997558178348436,
+        "relative_vp": null,
+        "action": "analytic_grid"
+      }
+    ]
+  },
+  "aCC_efficiency": {
+    "prefer": "efficiency",
+    "model": "adexp",
+    "layer": "L1",
+    "quality": "ok",
+    "r2": 0.9999661963410648,
+    "method": "pchip",
+    "fallback_ode": false,
+    "has_lut": true,
+    "has_srm": false,
+    "path": "datasets/fly/prefer/aCC_efficiency.npz",
+    "rounds": [
+      {
+        "n_I": 8,
+        "r2": 0.9999661963410648,
+        "relative_vp": null,
+        "action": "fit_fi"
+      },
+      {
+        "n_I": 8,
+        "r2": 0.9999661963410648,
+        "relative_vp": 0.003953690412440792,
+        "action": "attach_lut"
+      }
+    ]
+  },
+  "aCC_neutral": {
+    "prefer": "neutral",
+    "model": "adexp",
+    "layer": "L1",
+    "quality": "ok",
+    "r2": 0.9999661963410648,
+    "method": "pchip",
+    "fallback_ode": false,
+    "has_lut": true,
+    "has_srm": false,
+    "path": "datasets/fly/prefer/aCC_neutral.npz",
+    "rounds": [
+      {
+        "n_I": 8,
+        "r2": 0.9999661963410648,
+        "relative_vp": null,
+        "action": "fit_fi"
+      },
+      {
+        "n_I": 8,
+        "r2": 0.9999661963410648,
+        "relative_vp": 0.003953690412440792,
+        "action": "attach_lut"
+      }
+    ]
+  },
+  "aCC_fidelity": {
+    "prefer": "fidelity",
+    "model": "adexp",
+    "layer": "L2",
+    "quality": "ok",
+    "r2": 0.9999661963410648,
+    "method": "pchip",
+    "fallback_ode": false,
+    "has_lut": true,
+    "has_srm": true,
+    "path": "datasets/fly/prefer/aCC_fidelity.npz",
+    "rounds": [
+      {
+        "n_I": 8,
+        "r2": 0.9999661963410648,
+        "relative_vp": null,
+        "action": "fit_fi"
+      },
+      {
+        "n_I": 8,
+        "r2": 0.9999661963410648,
+        "relative_vp": 0.003953690412440792,
+        "action": "attach_lut"
+      },
+      {
+        "n_I": 8,
+        "r2": 0.9999661963410648,
+        "relative_vp": 0.003953690412440792,
+        "action": "attach_srm"
+      }
+    ]
+  }
+}

@@ -1,8 +1,6 @@
 # 宣传数字的证据链
 
-README 上的 \(R^2\)、RMSE 和墙钟都从默认数据集 **当场重算**，不是手填。本页说明数字从哪来、怎么核验、什么不能从这组图推出去。
-
-**需要单独成文。** README 只引用结果；协议、输入哈希、主机和复现命令放在这里和 `figures/evidence.json`。否则版本一变，图上的数会变成无法审计的截图。
+README 只放三方法对比表。曲线、摘录、协议、哈希和复现命令在本页。数字从默认数据集当场重算，不是手填。登记文件是 `figures/evidence.json`。
 
 ## 核验（不重算）
 
@@ -19,7 +17,7 @@ uv run --no-sync python scripts/make_figures.py --verify
 uv run --no-sync python scripts/make_figures.py
 ```
 
-精度（f-I \(R^2\) / RMSE / chirp）在同一协议下应可复现。墙钟随 CPU 变化，ledger 里写了主机；README 引用数量级和 CPU 型号，不把毫秒写死成跨机器承诺。
+精度（f-I \(R^2\) / RMSE / chirp）在同一协议下应可复现。墙钟随 CPU 变化。改完后把 README 对比表里的锁定数字一并更新；`tests/test_evidence_ledger.py` 会检查 README 是否仍引用账本中的 \(R^2\)、RMSE 和墙钟。
 
 ## 输入
 
@@ -45,19 +43,51 @@ uv run --no-sync python scripts/make_figures.py
 | NRDE \(F\) | 屈肌运动神经元绑 aCC 表，其余绑默认兴奋（ExpLIF）表 |
 | 统一 LIF | 全图绑 `default_inhibitory_l0` |
 
-负的 LIF \(R^2\) 不是算错：默认 LIF（\(C=0.1\) nF、无适应）在同一 \(I\) 上发放远快于 AdExp。README 用 RMSE（Hz）报这件事，避免把负 \(R^2\) 读成程序故障。
+负的 LIF \(R^2\) 不是算错：默认 LIF（\(C=0.1\) nF、无适应）在同一 \(I\) 上发放远快于 AdExp。
 
 ## 本次锁定的结果
 
-以仓库内 `figures/evidence.json` 为准（生成时主机：AMD Ryzen 7 5800X，CPython 3.14，NumPy 引擎）：
+主机：AMD Ryzen 7 5800X，CPython 3.14，NumPy。以 `figures/evidence.json` 为准。
 
 | 方法 | 相对 AdExp ODE 的 \(R^2\) | RMSE (Hz) | 249×200 ms 墙钟 |
-|---|---|---|---|
-| 在线 AdExp ODE | 1（定义） | 0 | ~1.8 s（8 细胞外推） |
-| NRDE \(F\)（aCC 表） | **0.995** | **1.6** | ~15 ms |
-| 统一 LIF | 负（曲线形状/增益都不贴） | **110** | ~12 ms |
+|---|---:|---:|---:|
+| 在线 AdExp ODE | 1 | 0 | 1805.8 ms |
+| NRDE \(F\)（aCC 表） | 0.994607 | 1.61 | 14.83 ms |
+| 统一 LIF | −24.25 | 110.42 | 11.98 ms |
 
-NFR-4（\(R^2 \ge 0.98\)）通过。拟合器写入 meta 的 \(R^2=0.9947\) 与留出中点重算的 \(0.9946\) 一致。
+拟合器写入 meta 的 \(R^2\) 是 0.994698。上表是留出中点重算。NFR-4（≥ 0.98）通过。
+
+同一回路 200 步后的平均发放率：按类型绑定 \(F\) 为 133.8 Hz，全图改绑统一 LIF 为 219.5 Hz。这是两条策略的输出差，不是相对 ODE 的误差。
+
+脉冲时刻见 `datasets/fly/reports/acceptance.json`（1 s 窗口，Victor–Purpura 相对距离，门限 ≤ 0.10）：aCC 的 L1 表为 0.00395，默认 LIF 的 L1 表为 0.0640。
+
+![精度 vs 代价](figures/hero_pareto.svg)
+
+### f–I
+
+完整 15 点：[adexp_fi_overlay.csv](figures/adexp_fi_overlay.csv)。
+
+| \(I\) (nA) | AdExp ODE (Hz) | NRDE \(F\) | 统一 LIF |
+|---:|---:|---:|---:|
+| 0.187 | 0 | 0 | 0 |
+| 0.240 | 5.0 | 0 | 57.5 |
+| 0.400 | 22.5 | 23.8 | 132.5 |
+| 0.560 | 40.0 | 41.3 | 182.5 |
+| 0.773 | 62.5 | 62.5 | 230.0 |
+
+![AdExp f–I](figures/adexp_fi_overlay.svg)
+
+### 阻抗谱
+
+两组都没有内点谐振峰。AdExp 仍因适应被标成 L1。完整 7 点：[adexp_lif_chirp.csv](figures/adexp_lif_chirp.csv)。
+
+| 频率 (Hz) | AdExp \|Z\| | LIF \|Z\| |
+|---:|---:|---:|
+| 2 | 91.7 | 98.9 |
+| 10 | 64.6 | 86.7 |
+| 80 | 16.9 | 22.8 |
+
+![亚阈值阻抗谱](figures/adexp_lif_chirp.svg)
 
 ## 口径
 

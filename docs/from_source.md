@@ -1,7 +1,7 @@
 # 从源码构建与完整开发环境
 
 面向贡献者与需要本地复现全部产品面（A1 / A2 / B / C）的开发者。  
-**终端用户**请先看仓库 [README 的 5 分钟](https://github.com/NACXA0/NeuronReducedDynamicsEngine#5-分钟)；本页是「装齐一切」的清单。
+**终端用户**请先看仓库 [README 的快速入门](https://github.com/NACXA0/NeuronReducedDynamicsEngine#快速入门)；本页是「装齐一切」的清单。
 
 ## 1. 最低 vs 完整
 

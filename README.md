@@ -1,37 +1,32 @@
 # NRDE — Neuron Reduced-Dynamics Engine
 
-连接组进，类型绑定的降阶激活函数 \(F\) 出。仿真主循环做稀疏传播并查 \(F\)，不再逐步积分 HH / AdExp。
+连接组进，按细胞类型绑定的降阶激活函数 \(F\) 出。仿真主循环做稀疏传播并查 \(F\)，不再逐步积分 AdExp / HH。果蝇 MaleCNS 是当前实例预设，不是引擎的全部范围。
 
-果蝇 MaleCNS 是当前实例预设，不是引擎的全部范围。  
-**不是**完整生物物理重建，**不**主张有意义行走行为（[RFC-001 宣传口径](docs/rfcs/RFC-001.md)）。
+## 初衷
 
-## 为什么存在
+一边是 FlyBrainLab、Neurokernel 这类在线生物动力学仿真：每步求解单细胞微分方程，保真，但全脑规模太贵。另一边是 ornata/fly，以及 Shiu 等人那种全脑统一 LIF：只要连接表加一条激活曲线，快，但所有细胞共用同一个函数。
 
-在线 ODE（FlyBrainLab 一类）准，但主循环太贵。统一 LIF（Shiu 一类）快，但所有细胞共用一条曲线。NRDE 把单胞 ODE **离线**拟合成按类型绑定的 \(F\)，运行时走查表。
+本项目要的是中间这条路。输入仍然只是连接表和细胞类型。离线把每一类神经元的 ODE 拟合成 \(F\)，运行时查表。比逐步积分轻，又比全脑一条 LIF 更接近原来的单胞动力学。这是工程上的抽象，用来把网络规模做上去，不是宣称已经重建了真实电生理，也不主张虚拟果蝇能走出有意义的行为。
 
-默认数据集上的实测（AdExp 细胞 `aCC`，相对在线 Euler；回路为 MaleCNS 附属屈肌运动神经元 249 点）：
+全文在 [初始设想](docs/初始设想.md)。后来的范围和口径以 [RFC-001](docs/rfcs/RFC-001.md) 为准。
 
-| 方法 | 相对 AdExp ODE | 249 细胞 × 200 ms |
-|---|---|---|
-| 在线 AdExp ODE | 定义上的 ground truth | ~1.8 s（8 细胞外推） |
-| **NRDE \(F\)** | \(R^2=0.995\)，RMSE **1.6 Hz** | **~15 ms**（约 120×） |
-| 统一 LIF | 同一 \(I\) 上发放高一个量级，RMSE **110 Hz** | ~12 ms |
+## 介绍
 
-硬件：证据链记录为 AMD Ryzen 7 5800X、NumPy 引擎。墙钟会随机器变；精度在同一协议下应可复现。
+给定连接表和细胞类型，NRDE 离线拟合 \(F\)（L0 稳态 f–I、L1 查找表、L2 SRM 核），在线只做 \(I = Wr + I_{\mathrm{ext}}\)、\(r = F(I)\)。默认发布集在 `datasets/fly/`：aCC / T4 用同一张 AdExp 替身表，默认兴奋是 ExpLIF，默认抑制是 LIF，另有一条 249 节点、4622 边的附属屈肌运动神经元回路。
 
-![精度 vs 代价](docs/reports/figures/hero_pareto.svg)
+## 宣传
 
-![AdExp f-I：ODE、NRDE F、统一 LIF](docs/reports/figures/adexp_fi_overlay.svg)
+默认数据集上，相对在线 AdExp：NRDE 的发放率误差约 1.6 Hz，249 个细胞仿真 200 ms 大约快 122 倍。相对统一 LIF：墙钟同为十几毫秒，但 LIF 相对同一条 AdExp 曲线偏出约 110 Hz。
 
-左图：ODE 准而慢，LIF 快但偏，\(F\) 贴着 ODE 的精度、贴着 LIF 的代价。右图：虚线（\(F\)）叠在实线（AdExp ODE）上；点线是默认 LIF。
+| 方法 | 相对 AdExp ODE 的 RMSE | \(R^2\) | 249 细胞 × 200 ms |
+|---|---:|---:|---:|
+| 在线 AdExp ODE | 0 | 1 | 1805.8 ms |
+| NRDE \(F\) | 1.61 Hz | 0.994607 | 14.83 ms |
+| 统一 LIF | 110.42 Hz | −24.25 | 11.98 ms |
 
-![亚阈值阻抗谱](docs/reports/figures/adexp_lif_chirp.svg)
+数字锁定在 AMD Ryzen 7 5800X、NumPy 上；墙钟换机器会变。f–I 曲线、阻抗谱、协议和哈希在 [证据链](docs/reports/evidence.md)。
 
-稳态对准不等于频域对准。这组 AdExp 在默认 chirp 协议下没有内点谐振峰（拟合器仍因适应把 `aCC_l0.npz` 标成 L1）。协议、哈希、复现命令：[证据链](docs/reports/evidence.md)。
-
-和现有项目的关系：FlyBrainLab / Neurokernel 在线积 HH；ornata/fly 用通用激活；Shiu et al. 2024 用统一 LIF + 固定 \(W_\mathrm{syn}\)（NRDE 把该值当 α **初值**，并按类型绑 \(F\)）。
-
-## 5 分钟
+## 快速入门
 
 本地开发不要 `pip install` 进系统 Python。uv 把包装进仓库下的 `.venv`，命令一律 `uv run`。
 
@@ -45,18 +40,50 @@ uv run --no-sync nrde run simulate \
   --n 80 --steps 50
 ```
 
-`fetch --tier pretrained` 校验 `datasets/fly/` 里 33 个表文件的 sha256。预训练是两步：先有 \(F\)（已经在 `fits/`），再稀疏传播。传播不是再训练。
+`fetch --tier pretrained` 校验 `datasets/fly/` 里 33 个表文件的 sha256。表已经拟合好；这条仿真只做稀疏传播，不是再训练。
 
-果蝇具身 Demo、自己拟合 L0–L2、从源码装齐 extras，分别在下面，不堆在这一页。
+## 文档目录
 
-## 接下来
+### 快速开始
 
-| 想做的事 | 文档 |
+| 文档 | 内容 |
 |---|---|
-| 果蝇 Demo（Colab / `nrde demo flygym`） | [快速开始：Demo](docs/quickstart/demo.md) |
-| 在默认回路上做稀疏传播 | [快速开始：引擎](docs/quickstart/engine.md) |
-| 自己拟合 L0 / L1 / L2 | [快速开始：拟合 F](docs/quickstart/pipeline.md) |
-| 从源码开发、extras、MaleCNS 全量 | [从源码构建](docs/from_source.md) |
-| 数字怎么来的 | [证据链](docs/reports/evidence.md) |
+| [果蝇 Demo](docs/quickstart/demo.md) | Colab / GIF，以及 `nrde demo flygym` |
+| [拟合 F](docs/quickstart/pipeline.md) | 自己做 L0 / L1 / L2 / L1+L2 |
+| [稀疏传播](docs/quickstart/engine.md) | 默认回路与全量 MaleCNS 上的 `nrde run simulate` |
+| [从源码构建](docs/from_source.md) | extras、系统依赖、贡献者环境 |
 
-贡献约定（命名、测试）见 [CONTRIBUTING.md](CONTRIBUTING.md)。许可证：[Apache License 2.0](LICENSE)。
+### 数据与证据
+
+| 文档 | 内容 |
+|---|---|
+| [默认数据集](datasets/fly/README.md) | `fits/`、`precision/`、`sparse/`、验收 JSON |
+| [证据链](docs/reports/evidence.md) | 对比曲线、阻抗谱、协议、哈希、重算命令 |
+| [验证报告索引](docs/reports/README.md) | M1：拟合、在线 vs 降阶、chirp |
+| [数据源](docs/data_sources.md) | `fetch` 的 smoke / seed / pretrained / full |
+
+### 使用与参考
+
+| 文档 | 内容 |
+|---|---|
+| [ModelSpec](docs/model_spec_protocol.md) | 自有 ODE 怎么进管线 |
+| [API](docs/api.md) | 公共符号 |
+| [不适用清单](docs/known-inapproximable.md) | 降阶失败时的在线 ODE 回退 |
+| [PySR 准入](docs/pysr_admission.md) | 可选符号回归；未通过则退场 |
+| [贡献约定](CONTRIBUTING.md) | 命名、测试、许可证 |
+| [Changelog](docs/CHANGELOG.md) | 版本记录 |
+
+### 规格与决策
+
+冲突时以 RFC 为准。中文规格是历史快照。
+
+| 文档 | 内容 |
+|---|---|
+| [RFC-001](docs/rfcs/RFC-001.md) | 拟合分层、宣传口径 |
+| [RFC-002](docs/rfcs/RFC-002.md) | 包结构与产品面 |
+| [需求文档](docs/需求文档.md) | FR / NFR |
+| [项目计划书](docs/项目计划书.md) | 里程碑 |
+| [系统设计说明书](docs/系统设计说明书.md) | 两阶段架构 |
+| [初始设想](docs/初始设想.md) | 初衷全文 |
+
+许可证：[Apache License 2.0](LICENSE)。

@@ -30,11 +30,19 @@ def test_evidence_ledger_verify():
     assert proc.returncode == 0, proc.stdout + proc.stderr
 
 
-def test_readme_cites_ledger_r2_and_evidence_doc():
+def test_readme_cites_ledger_numbers():
     ledger = json.loads((ROOT / "docs" / "reports" / "figures" / "evidence.json").read_text(encoding="utf-8"))
-    r2 = f"{float(ledger['results']['r2_F_vs_ode']):.3f}"
+    results = ledger["results"]
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    assert r2 in readme
+    cited = [
+        f"{float(results['r2_F_vs_ode']):.6f}",
+        f"{float(results['rmse_F_Hz']):.2f}",
+        f"{float(results['rmse_lif_Hz']):.2f}",
+        f"{float(results['wall_ms']['nrde_F_circuit']):.2f}",
+        f"{float(results['wall_ms']['ode_adexp_scaled']):.1f}",
+    ]
+    missing = [item for item in cited if item not in readme]
+    assert not missing, missing
     assert "docs/reports/evidence.md" in readme
-    assert ledger["results"]["nfr4_pass"] is True
+    assert results["nfr4_pass"] is True
     assert ledger["dataset"]["n_artifacts"] == 33

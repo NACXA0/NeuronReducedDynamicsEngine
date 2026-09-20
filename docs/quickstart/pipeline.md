@@ -15,6 +15,44 @@ F 的轴是细胞状态，不是图。少留几轴就是更低的层。L3（FNO 
 
 `--chirp` 可以加在任一条上。它扫阻抗，有峰就在 JSON 的 `layer` 里建议升到 L2。它不是第四层。
 
+## 自动升层
+
+不加 `--auto` 时，上面的单次开关不变。`--auto` 才多轮迭代，标准输出多 `rounds` 和 `fallback_ode`。轮次记在 JSON 里，不接 TensorBoard。
+
+默认是**偏向效率**（`--prefer efficiency`）：R² 和需要检查的脉冲门槛一过就停，不再挂更贵的层。R² 低于 0.98 时把 `--n-I` 加倍，最多再试两次，不超过 64。只有 `--model lif` 会在表和闭式 f–I 也对得上时把 `method` 记成 `analytic`。中性（`--prefer neutral`）只在相对 VP 仍大于 0.05，且再挂 SRM 后至少再降 0.02 时才留下更高层，否则退回。偏向拟真（`--prefer fidelity`）即使已经通过，也做到 `--max-layer`（L3 仍然只记录延期）。三种都不会把非 LIF 换成 LIF。
+
+本地可选产物在 `datasets/fly/prefer/`，不进默认的 `fetch --tier pretrained`。要校验再加 `--tier prefer`。
+
+```bash
+uv run nrde offline fit \
+  --auto \
+  --prefer efficiency \
+  --max-layer L2 \
+  --model lif \
+  --type-id lif_efficiency \
+  --I-min 0 \
+  --I-max 0.8 \
+  --n-I 16 \
+  --out /tmp/nrde_fit/lif_efficiency.npz
+```
+
+AdExp / HH 在封顶至少 L1 时挂上时刻表，并用 NFR-5 验收。相对 VP 仍超过 10% 且封顶至少 L2 时，在这张 L1 表上再挂 SRM（L1+L2）。到封顶仍失败则 `quality` 为 `poor`，`fallback_ode` 为 true。`--max-layer L3` 只在失败时多写一行 `l3=deferred_v0.2`，不训练 FNO。
+
+`--layers L0|L1|L2|L1+L2` 一次做成指定形态，不加密、不升层。它优先于 `--auto`。
+
+```bash
+uv run nrde offline fit \
+  --auto \
+  --prefer efficiency \
+  --max-layer L2 \
+  --model adexp \
+  --type-id adexp_auto \
+  --I-min 0 \
+  --I-max 0.8 \
+  --n-I 16 \
+  --out /tmp/nrde_fit/adexp_auto.npz
+```
+
 PySR 只精修已经拟合好的 f–I，不是启动前提。没装 Julia 也可以拟合。
 
 ## 1. 安装
@@ -130,6 +168,9 @@ save_fit(fit, "/tmp/nrde_fit/lif_l1l2.npz")
 | `--lut` | L1：二维 LUT + 恒定电流时刻表 | 已支持 |
 | `--srm` | L2：SRM 核 | 已支持 |
 | `--chirp` | 扫频阻抗，参与判层 | 已支持。可加在上面任一条 |
-| `--layers L0,L1,L2` | 一次声明各层 | **还没有**。用 `--lut` / `--srm` |
+| `--layers L0\|L1\|L2\|L1+L2` | 一次做成该形态，不迭代 | 已支持。优先于 `--auto` |
+| `--auto` | 按门槛加密并升层 | 已支持。默认 `--prefer efficiency`，封顶 L2 |
+| `--prefer efficiency\|neutral\|fidelity` | 效率 / 中性 / 拟真 | 已支持。只在 `--auto` 下改变停层 |
+| `--max-layer L0\|L1\|L2\|L3` | `--auto` 的上限 | 已支持。L3 只记录 `deferred_v0.2`，不训练 FNO |
 
 不需要 FlyGym，也不需要果蝇连接组。下一步：[稀疏传播](engine.md)。

@@ -101,3 +101,15 @@ tiers:
       sha256: cab88b3ab44974ca2b358151d571f87e8aa987cf748e193fa820f6373415a47e
     - path: datasets/fly/sparse/shiu_labelled_circuit.npz
       sha256: 2288c9f336f857ab6cca7bc60190538071c8672638381b4f085cb46e4ec7cd40
+  prefer:
+    description: Optional efficiency / neutral / fidelity fits. Not the published
+      default.
+    artifacts:
+    - path: datasets/fly/prefer/aCC_efficiency.npz
+      sha256: 9a4d58a223a043c80819b5997b8bd10b7f4ef837b65fdc5abc9b4178e9eb760e
+    - path: datasets/fly/prefer/aCC_fidelity.npz
+      sha256: 6d2a22e279505e351dc49e92ad89c48cda6a072f35484306af83c669dac80e51
+    - path: datasets/fly/prefer/aCC_neutral.npz
+      sha256: 9a4d58a223a043c80819b5997b8bd10b7f4ef837b65fdc5abc9b4178e9eb760e
+    - path: datasets/fly/prefer/lif_efficiency.npz
+      sha256: c1432b1c25c58daa24ea12d3001c0fce64fd946c8747e63afaa362f72b8854e2

@@ -13,44 +13,78 @@ def _cmd_fit(args: argparse.Namespace) -> int:
     from nrde.fitting.artifacts import default_artifact_path
     from nrde.fitting.fit import attach_lut, fit_fi, fit_spike_lut, save_fit
 
-    fit = fit_fi(
-        args.model,
-        type_id=args.type_id,
-        I_min=args.I_min,
-        I_max=args.I_max,
-        n_I=args.n_I,
-        t_total=args.t_total,
-        window=args.window,
-        dt=args.dt,
-        chirp=args.chirp,
-    )
-    if args.lut:
-        lut = fit_spike_lut(
+    rounds = None
+    if getattr(args, "layers", None):
+        from nrde.fitting.iterate import fit_layers
+
+        fit, rounds = fit_layers(
+            args.layers,
             args.model,
+            type_id=args.type_id,
             I_min=args.I_min,
             I_max=args.I_max,
-            n_I=max(8, args.n_I // 2),
+            n_I=args.n_I,
+            t_total=args.t_total,
+            window=args.window,
+            dt=args.dt,
+            chirp=args.chirp,
         )
-        fit = attach_lut(fit, lut)
-    if args.srm:
-        from nrde.fitting.srm import attach_srm, fit_srm_kernels
+    elif getattr(args, "auto", False):
+        from nrde.fitting.iterate import fit_iterative
 
-        fit = attach_srm(fit, fit_srm_kernels(args.model, t_kernel=40.0, dt=0.1))
+        fit, rounds = fit_iterative(
+            args.model,
+            type_id=args.type_id,
+            I_min=args.I_min,
+            I_max=args.I_max,
+            n_I=args.n_I,
+            t_total=args.t_total,
+            window=args.window,
+            dt=args.dt,
+            chirp=args.chirp,
+            max_layer=args.max_layer,
+            prefer=args.prefer,
+        )
+    else:
+        fit = fit_fi(
+            args.model,
+            type_id=args.type_id,
+            I_min=args.I_min,
+            I_max=args.I_max,
+            n_I=args.n_I,
+            t_total=args.t_total,
+            window=args.window,
+            dt=args.dt,
+            chirp=args.chirp,
+        )
+        if args.lut:
+            lut = fit_spike_lut(
+                args.model,
+                I_min=args.I_min,
+                I_max=args.I_max,
+                n_I=max(8, args.n_I // 2),
+            )
+            fit = attach_lut(fit, lut)
+        if args.srm:
+            from nrde.fitting.srm import attach_srm, fit_srm_kernels
+
+            fit = attach_srm(fit, fit_srm_kernels(args.model, t_kernel=40.0, dt=0.1))
     out = args.out or str(default_artifact_path(fit))
     path = save_fit(fit, out, skip_if_unchanged=not getattr(args, "force", False))
-    print(
-        json.dumps(
-            {
-                "out": str(path),
-                "r2": fit.r2,
-                "quality": fit.quality,
-                "model": fit.model,
-                "layer": fit.layer,
-                "type_id": fit.type_id,
-                "config_hash": fit.config_hash,
-            }
-        )
-    )
+    payload = {
+        "out": str(path),
+        "r2": fit.r2,
+        "quality": fit.quality,
+        "model": fit.model,
+        "layer": fit.layer,
+        "type_id": fit.type_id,
+        "config_hash": fit.config_hash,
+    }
+    if rounds is not None:
+        payload["rounds"] = rounds
+        payload["fallback_ode"] = bool(fit.fallback_ode)
+        payload["prefer"] = getattr(args, "prefer", "efficiency")
+    print(json.dumps(payload))
     return 0 if fit.quality == "ok" else 1
 
 
@@ -154,6 +188,26 @@ def _add_fit_parser(sub: argparse._SubParsersAction, name: str = "fit") -> None:
     fit.add_argument("--lut", action="store_true")
     fit.add_argument("--srm", action="store_true")
     fit.add_argument("--chirp", action="store_true")
+    fit.add_argument("--auto", action="store_true", help="Climb layers until the gates pass")
+    fit.add_argument(
+        "--prefer",
+        choices=("efficiency", "neutral", "fidelity"),
+        default="efficiency",
+        help="With --auto: stop early (efficiency, default), upgrade only if VP drops (neutral), or climb to --max-layer (fidelity)",
+    )
+    fit.add_argument(
+        "--max-layer",
+        dest="max_layer",
+        choices=("L0", "L1", "L2", "L3"),
+        default="L2",
+        help="Ceiling for --auto (L3 records deferred_v0.2, it does not train FNO)",
+    )
+    fit.add_argument(
+        "--layers",
+        choices=("L0", "L1", "L2", "L1+L2"),
+        default=None,
+        help="One-shot mix; skips --auto densify/climb",
+    )
     fit.add_argument("--force", action="store_true", help="Rewrite even if config_hash matches")
     fit.add_argument(
         "--out",

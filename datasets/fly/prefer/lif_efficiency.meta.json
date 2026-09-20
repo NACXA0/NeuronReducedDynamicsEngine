@@ -1,0 +1,22 @@
+{
+  "schema_version": 2,
+  "type_id": "lif_efficiency",
+  "type_ids": [
+    "lif_efficiency"
+  ],
+  "model": "lif",
+  "params": {},
+  "method": "analytic",
+  "quality": "ok",
+  "r2": 0.9997558178348436,
+  "mse": 0.9967003500598902,
+  "notes": "CubicSpline overshoot or Type-II gap; using PCHIP; R2=0.815 below gate 0.98; n_I=8 r2=0.8147 vp=None action=fit_fi; n_I=16 r2=0.9998 vp=None action=analytic_grid; prefer=efficiency",
+  "layer": "L0",
+  "level_decision": "steady f-I sufficient",
+  "lut_hit_rate": null,
+  "pysr_expr": null,
+  "fallback_ode": false,
+  "git_commit": "ef989a060559786303596f060ebeb57fc3028156",
+  "config_hash": "02a249095d9f2cfe",
+  "created_utc": "2026-09-20T05:51:23.990710+00:00"
+}
