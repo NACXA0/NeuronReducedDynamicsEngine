@@ -7,7 +7,7 @@
 ## 怎么读
 
 1. 先跑通 README 的安装 / 运行 / 测试。
-2. 要自己拟合或换层，看 [拟合 F](quickstart/pipeline.md) 再看 [稀疏传播](quickstart/engine.md)。
+2. 要自己拟合或换层，看 [拟合 F](quickstart/pipeline.md) 再看 [稀疏传播](quickstart/engine.md)。跑通 aCC 烟测后，同一条命令换类型名在该页 §4。
 3. 要把核当基础设施，或加探索维、换掉 \(F\)，看 [自定义管道](quickstart/extend.md)。已发布表不必因脑区/坐标占位而重训。
 4. 冲突：禁止项以 [RFC-001](rfcs/RFC-001.md) 为准；产品面以 [RFC-002](rfcs/RFC-002.md) 为准；终局与工具/探索切分以 [RFC-003](rfcs/RFC-003.md) 为准。中文规格是历史快照。发布、PyPI、数据地址和静态宣传页不在本目录，见仓库根目录 `maintainer/`。宣传页源码在 `maintainer/WEB`（React 19，附 Caddyfile 示例），不是文档站。
 

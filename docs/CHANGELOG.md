@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- P1：`simulate --fit-map TYPE=PATH`、`--type-names`、JSON `bound`；`examples/06_swap_the_types.py`（换类型名，不进 README 安装块）
 - RFC-003：终局意图（范式 → 智慧结构 → 新 AI）、默认少维工具合同、改进阶段 P0–P3；用户摘要 `docs/roadmap.md`
 - 维护者手册 `maintainer/`：Release、PyPI、重做预训练表、主/第二下载地址、Demo 资产。用户文档不再写这些步骤
 - `nrde fetch` 在表缺失时按 `configs/manifests/fly.yaml` 的 `downloads.primary` 再 `downloads.secondary` 拉取 zip；已在且哈希相符则只校验。工作区根目录改为检出或当前目录，不再假定 `site-packages` 往上两级
@@ -22,6 +23,8 @@
 - `scan_fi_curve` 默认批量 Euler；`run_rate(..., backend="torch")` / `NRDE_ENGINE`
 
 ### Changed
+- `nrde run simulate --fit` 改为未点名类型的回退表（README 果蝇烟测命令不变）
+- B 层文档先果蝇烟测，再写换类型名（[engine.md](quickstart/engine.md) §4）
 - README / 文档地图 / 自定义管道 / B 层入口对齐 RFC-003：生物为来源非终点；默认身份维只有类型；自定义维是开关
 - README 收成展示面：介绍、锁定实测、验收摘要、安装/运行/测试分开、文档目录；细节下沉到独立页
 - 文档地图 `docs/index.md` 与 MkDocs 导航对齐当前结构（主线类型表；脑区/坐标为扩展）

@@ -35,6 +35,7 @@ nrde.run(["simulate", "--fit", "artifacts/aCC.npz", "--steps", "50"])
 ## Data and calibration
 
 - `nrde.io.connectome.load_connectome` / `erdos_renyi_graph` — Feather first
+- `nrde.binding.tables_for_graph` / `bind_tables` / `bound_type_ids` / `parse_fit_map` — 类型名 → \(F\)；CLI 单表回退 + `--fit-map`
 - `nrde.calibration.apply_shiu_weights` / `calibrate_alpha` — `W_syn = 0.275 mV`
 - `nrde.validation.validate_single` / `validate_circuit` / `validate_hopkins_flywire`
 
@@ -45,5 +46,7 @@ nrde.run(["simulate", "--fit", "artifacts/aCC.npz", "--steps", "50"])
 - `nrde.adapters.flygym.NRDEFlyGymEnv`
 
 CLI：`nrde demo` / `nrde run simulate` / `nrde offline fit|validate`（legacy：`fit` / `simulate` / `validate`）。
+
+`nrde run simulate --fit PATH` 把该表当作未点名类型的回退（README 果蝇烟测）。`--fit-map TYPE=PATH` 可重复；`--type-names a,b` 只用于随机图。标准输出 JSON 含 `mean_rate`、`n_nodes`、`bound`。
 
 > 实现注记：内部拟合包目录为 `nrde.fitting`（避免与顶层符号 `nrde.offline` 同名冲突）；RFC-002 文中的 `offline/` 目录即此处。

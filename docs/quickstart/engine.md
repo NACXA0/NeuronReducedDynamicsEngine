@@ -1,16 +1,16 @@
 # 稀疏传播（B 层）：怎么开始
 
-实现包是 **`nrde.engine`**。命令是 **`uv run nrde run simulate`**。B 层是可嵌入的步进核：任意带类型的稀疏图 + 类型表 \(F\)。果蝇单位和 MaleCNS 是实例，不是内核定义（[RFC-003](../rfcs/RFC-003.md)）。
+实现包是 **`nrde.engine`**。命令是 **`uv run nrde run simulate`**。先用果蝇发布表确认能查到 \(F\)、能走一步稀疏乘。Hz、纳安、1 ms、MaleCNS 是这套实例的写法。
 
 先有一份拟合好的 F，再在图上做
 
 $$I = W\,(r\,\Delta t) + I_{\mathrm{ext}}, \qquad r = F(I).$$
 
-发布集里 `r` 是 Hz。`W` 是每次脉冲的电流（Shiu 起点 0.0275 nA）。一步默认 1 ms，所以乘上的是这一步的期望脉冲数 `r × 0.001`，不是把 Hz 直接乘到纳安上。无量纲步进是路线图 P1，本页命令仍跑这套单位。
+发布集里 `r` 是 Hz。`W` 是每次脉冲的电流（Shiu 起点 0.0275 nA）。一步默认 1 ms，所以乘上的是这一步的期望脉冲数 `r × 0.001`，不是把 Hz 直接乘到纳安上。
 
-`W` 是连接，`F` 是 [上一步](pipeline.md) 写出的 npz。发布仿真按类型查表。脑区/坐标步默认恒等，不改这些数字。这一步每毫秒乘一次稀疏矩阵，再查表。它不更新 F，没有 epoch，也没有损失曲线。把核当工具时，换图和换类型表即可；加探索维见 [自定义管道](extend.md)。
+`W` 是连接，`F` 是 [上一步](pipeline.md) 写出的 npz。发布仿真按类型查表。脑区/坐标步默认恒等，不改这些数字。这一步每毫秒乘一次稀疏矩阵，再查表。它不更新 F，没有 epoch，也没有损失曲线。加探索维见 [自定义管道](extend.md)。
 
-**不接 TensorBoard，也不接 SwanLab。** 那两个工具记的是训练曲线。这里的标准输出是一行 JSON：`mean_rate` 和 `n_nodes`。α 标定（Shiu 0.275 mV 起点上的一个全局缩放）同样只产出一个系数，不接。
+**不接 TensorBoard，也不接 SwanLab。** 那两个工具记的是训练曲线。这里的标准输出是一行 JSON：`mean_rate`、`n_nodes`、以及 `bound`（图上的类型名 → 表里的 `type_id`）。α 标定（Shiu 0.275 mV 起点上的一个全局缩放）同样只产出一个系数，不接。
 
 默认图是随机图，不是 1.1 GB 的 MaleCNS。全图加载是可选的规模测试，不是示例拟合的一部分。
 
@@ -51,6 +51,8 @@ uv run nrde run simulate \
   --fit datasets/fly/fits/aCC_l0.npz --n 80 --steps 50
 ```
 
+随机图默认类型名是 `type_0` 和 `type_1`。只有一张 `--fit` 时两列都回退到这份表，JSON 里的 `bound` 会写成都指向 `aCC`。图上的类型名和表里的 `type_id` 不必相同。
+
 自己刚拟合的文件同样可以：
 
 ```bash
@@ -85,4 +87,20 @@ NRDE_ENGINE=torch uv run --no-sync nrde run simulate \
 uv run python scripts/download_malecns.py
 ```
 
-类型绑定见 `configs/type_model_map.yaml`。α 起点见 `configs/alpha_defaults.yaml`（Shiu 0.275 mV）。
+类型绑定见 `configs/type_model_map.yaml`。α 起点见 `configs/alpha_defaults.yaml`（Shiu 0.275 mV）。全图若只给一张 `--fit`，未点名的细胞类型同样回退到这一张表。
+
+## 4. 同一条命令，换类型名
+
+跑通上面的 aCC 烟测之后：`--fit` 是回退表，`--fit-map TYPE=PATH` 才按图上的类型名绑不同的 \(F\)。`--type-names` 只改随机图的标签，不能和 `--graph` 一起用。步进仍是数组乘加；Hz / nA / ms 是果蝇实例的读法，不是内核必填字段。
+
+```bash
+uv run nrde run simulate \
+  --fit-map prey=/tmp/nrde_fit/prey.npz \
+  --fit-map predator=/tmp/nrde_fit/predator.npz \
+  --type-names prey,predator \
+  --n 40 --steps 30
+```
+
+未点名的类型必须有 `--fit` 回退，否则非零退出。不要对 `datasets/fly/fits/` 做目录扫描：同一类型有 L0/L1/L2，会绑错层。
+
+这不是群落模拟。Python 里同一核、只换标签：`uv run python examples/06_swap_the_types.py`。

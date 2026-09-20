@@ -37,7 +37,7 @@
 | D27 | `RateOp` 是钩子不是轴 | `docs/quickstart/extend.md` §5 |
 | D28 | 不放松 RFC-001；可学习 \(\Phi\) 另开 RFC | RFC-001 勘误；路线图 P3 |
 | D29 | 探索优先记忆层 / \(W\) / IO | RFC-003 §3 |
-| D30 | 改进阶段 P0–P3；本轮仅 P0 | `docs/roadmap.md` |
+| D30 | 改进阶段 P0–P3；P1 CLI 按类型绑表 | `docs/roadmap.md`；`nrde.binding.bind_tables`；`examples/06_swap_the_types.py` |
 
 本轮无新测试：P0 只改文档。P1+ 的 TC 随实现 PR 补。
 

@@ -89,22 +89,57 @@ def _cmd_fit(args: argparse.Namespace) -> int:
 
 
 def _cmd_simulate(args: argparse.Namespace) -> int:
+    from nrde.binding import bind_tables, bound_type_ids, parse_fit_map, parse_type_names
     from nrde.engine.rate import run_rate
     from nrde.fitting.fit import load_fit
     from nrde.io.connectome import erdos_renyi_graph, load_connectome
     from nrde.progress import progress_session
 
+    fit_specs = getattr(args, "fit_map", None)
+    if not args.fit and not fit_specs:
+        print("simulate needs --fit and/or --fit-map TYPE=PATH", file=sys.stderr)
+        return 2
+    try:
+        type_names = parse_type_names(getattr(args, "type_names", None))
+        path_by_type = parse_fit_map(fit_specs)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    if args.graph and type_names is not None:
+        print("--type-names only applies to the random graph", file=sys.stderr)
+        return 2
+
     with progress_session():
         if args.graph:
             graph = load_connectome(args.graph, annotations_path=args.annotations)
         else:
-            graph = erdos_renyi_graph(args.n, p=args.p, n_types=2, seed=args.seed)
-        fit = load_fit(args.fit)
-        tables = [fit for _ in graph.type_names]
+            names = type_names or ("type_0", "type_1")
+            graph = erdos_renyi_graph(
+                args.n,
+                p=args.p,
+                n_types=len(names),
+                seed=args.seed,
+                type_names=names,
+            )
+        by_name = {name: load_fit(path) for name, path in path_by_type.items()}
+        fallback = load_fit(args.fit) if args.fit else None
+        try:
+            tables = bind_tables(graph, by_name, fallback=fallback)
+        except KeyError as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
         I_ext = np.zeros(graph.n_nodes)
         I_ext[: max(1, graph.n_nodes // 10)] = args.I_ext
         state, _ = run_rate(graph, tables, n_steps=args.steps, I_ext=I_ext, record_trace=False)
-    print(json.dumps({"mean_rate": float(np.mean(state.r)), "n_nodes": graph.n_nodes}))
+    print(
+        json.dumps(
+            {
+                "mean_rate": float(np.mean(state.r)),
+                "n_nodes": graph.n_nodes,
+                "bound": bound_type_ids(graph, tables),
+            }
+        )
+    )
     return 0
 
 
@@ -234,7 +269,24 @@ def _add_simulate_parser(sub: argparse._SubParsersAction, name: str = "simulate"
     sim = sub.add_parser(name, help="Run rate-mode circuit")
     sim.add_argument("--graph", default=None)
     sim.add_argument("--annotations", default=None)
-    sim.add_argument("--fit", required=True)
+    sim.add_argument(
+        "--fit",
+        default=None,
+        help="Fallback F table for types without --fit-map (README smoke path)",
+    )
+    sim.add_argument(
+        "--fit-map",
+        action="append",
+        default=None,
+        metavar="TYPE=PATH",
+        help="Bind a type name to an npz; repeatable. Unmapped types use --fit",
+    )
+    sim.add_argument(
+        "--type-names",
+        dest="type_names",
+        default=None,
+        help="Comma-separated type names for the random graph (default: type_0,type_1)",
+    )
     sim.add_argument("--n", type=int, default=100)
     sim.add_argument("--p", type=float, default=0.05)
     sim.add_argument("--seed", type=int, default=0)
