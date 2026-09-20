@@ -36,8 +36,13 @@ def main(argv: list[str] | None = None) -> int:
     args.out.parent.mkdir(parents=True, exist_ok=True)
 
     manifest = {"files": [], "missing": []}
+    extra = [
+        str(path.relative_to(_ROOT))
+        for path in (_ROOT / "datasets" / "fly").rglob("*")
+        if path.is_file()
+    ]
     with zipfile.ZipFile(args.out, "w", compression=zipfile.ZIP_DEFLATED) as zf:
-        for rel in SEED_FILES:
+        for rel in (*SEED_FILES, *extra):
             path = _ROOT / rel
             if not path.exists():
                 manifest["missing"].append(rel)

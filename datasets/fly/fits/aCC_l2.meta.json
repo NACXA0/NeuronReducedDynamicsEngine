@@ -1,0 +1,22 @@
+{
+  "schema_version": 2,
+  "type_id": "aCC",
+  "type_ids": [
+    "aCC"
+  ],
+  "model": "adexp",
+  "params": {},
+  "method": "pchip",
+  "quality": "ok",
+  "r2": 0.9946975227872065,
+  "mse": 1.3981141088420337,
+  "notes": "CubicSpline overshoot or Type-II gap; using PCHIP; no interior |Z| peak",
+  "layer": "L2",
+  "level_decision": "adaptation/state LUT for adexp",
+  "lut_hit_rate": null,
+  "pysr_expr": null,
+  "fallback_ode": false,
+  "git_commit": "e13523a63fb3b9b4f85cc93ff509e4bdd9ddd566",
+  "config_hash": "dd1874a932032389",
+  "created_utc": "2026-09-20T05:07:06.088176+00:00"
+}

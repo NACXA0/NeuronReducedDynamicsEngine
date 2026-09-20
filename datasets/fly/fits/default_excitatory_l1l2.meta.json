@@ -1,0 +1,22 @@
+{
+  "schema_version": 2,
+  "type_id": "default excitatory",
+  "type_ids": [
+    "default excitatory"
+  ],
+  "model": "explif",
+  "params": {},
+  "method": "pchip",
+  "quality": "ok",
+  "r2": 0.9998260414062675,
+  "mse": 0.4557579250640287,
+  "notes": "CubicSpline overshoot or Type-II gap; using PCHIP",
+  "layer": "L2",
+  "level_decision": "steady f-I sufficient; 2D LUT attached",
+  "lut_hit_rate": 0.52734375,
+  "pysr_expr": null,
+  "fallback_ode": false,
+  "git_commit": "e13523a63fb3b9b4f85cc93ff509e4bdd9ddd566",
+  "config_hash": "3367c7ab3bd02190",
+  "created_utc": "2026-09-20T05:07:09.423342+00:00"
+}

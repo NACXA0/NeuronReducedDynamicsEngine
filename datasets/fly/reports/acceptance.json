@@ -1,0 +1,379 @@
+{
+  "gates": {
+    "1_adexp_fi_chirp": {
+      "pass": true,
+      "r2": 0.9946975227872065,
+      "chirp_bins": 7
+    },
+    "2_nfr5": {
+      "pass": true,
+      "aCC_l1_relative_vp": 0.003953690412440792,
+      "lif_l1_relative_vp": 0.0640404656514462
+    },
+    "3_embodied": {
+      "steps": 100,
+      "returncode": 0,
+      "backend": "mock_when_headless",
+      "pass": true
+    },
+    "4_alpha": {
+      "start": "shiu_w_syn_mv_0.275",
+      "held_out_scale": 3.0,
+      "recovered_scale": 2.999862876273096,
+      "mse": 1.9174325414001517e-06,
+      "relative_rate_error": 5.711589125751195e-05,
+      "pass": true
+    },
+    "5_coverage_pysr": {
+      "pass": true,
+      "coverage": 0.7745,
+      "coverage_gate": 0.7,
+      "tests": "pytest -m 'not pysr and not flygym' exit 0",
+      "pysr": {
+        "status": "retired",
+        "reason": "PySR/Julia not installed in the current venv; recorded exit per RFC-001 \u00a74.5"
+      }
+    },
+    "l3": {
+      "pass": false,
+      "status": "deferred_v0.2",
+      "reason": "FNO / Volterra is not a v0.1 product"
+    }
+  },
+  "fits": {
+    "aCC": {
+      "l0": {
+        "path": "datasets/fly/fits/aCC_l0.npz",
+        "f32": "datasets/fly/precision/aCC_l0_f32.npz",
+        "type_id": "aCC",
+        "model": "adexp",
+        "layer": "L1",
+        "r2": 0.9946975227872065,
+        "quality": "ok",
+        "nfr4_pass": true,
+        "relative_vp": null,
+        "nfr5_pass": null,
+        "config_hash": "756606fb9676f44c",
+        "dtypes": {
+          "fits": "float64",
+          "precision": "float32"
+        },
+        "chirp_bins": 7
+      },
+      "l1": {
+        "path": "datasets/fly/fits/aCC_l1.npz",
+        "f32": "datasets/fly/precision/aCC_l1_f32.npz",
+        "type_id": "aCC",
+        "model": "adexp",
+        "layer": "L1",
+        "r2": 0.9946975227872065,
+        "quality": "ok",
+        "nfr4_pass": true,
+        "relative_vp": 0.003953690412440792,
+        "nfr5_pass": true,
+        "config_hash": "756606fb9676f44c",
+        "dtypes": {
+          "fits": "float64",
+          "precision": "float32"
+        },
+        "chirp_bins": 7
+      },
+      "l2": {
+        "path": "datasets/fly/fits/aCC_l2.npz",
+        "f32": "datasets/fly/precision/aCC_l2_f32.npz",
+        "type_id": "aCC",
+        "model": "adexp",
+        "layer": "L2",
+        "r2": 0.9946975227872065,
+        "quality": "ok",
+        "nfr4_pass": true,
+        "relative_vp": null,
+        "nfr5_pass": null,
+        "config_hash": "dd1874a932032389",
+        "dtypes": {
+          "fits": "float64",
+          "precision": "float32"
+        },
+        "chirp_bins": 7
+      },
+      "l1l2": {
+        "path": "datasets/fly/fits/aCC_l1l2.npz",
+        "f32": "datasets/fly/precision/aCC_l1l2_f32.npz",
+        "type_id": "aCC",
+        "model": "adexp",
+        "layer": "L2",
+        "r2": 0.9946975227872065,
+        "quality": "ok",
+        "nfr4_pass": true,
+        "relative_vp": 0.003953690412440792,
+        "nfr5_pass": true,
+        "config_hash": "dd1874a932032389",
+        "dtypes": {
+          "fits": "float64",
+          "precision": "float32"
+        },
+        "chirp_bins": 7
+      }
+    },
+    "default excitatory": {
+      "l0": {
+        "path": "datasets/fly/fits/default_excitatory_l0.npz",
+        "f32": "datasets/fly/precision/default_excitatory_l0_f32.npz",
+        "type_id": "default excitatory",
+        "model": "explif",
+        "layer": "L0",
+        "r2": 0.9998260414062675,
+        "quality": "ok",
+        "nfr4_pass": true,
+        "relative_vp": null,
+        "nfr5_pass": null,
+        "config_hash": "3f908efce53116d0",
+        "dtypes": {
+          "fits": "float64",
+          "precision": "float32"
+        },
+        "chirp_bins": null
+      },
+      "l1": {
+        "path": "datasets/fly/fits/default_excitatory_l1.npz",
+        "f32": "datasets/fly/precision/default_excitatory_l1_f32.npz",
+        "type_id": "default excitatory",
+        "model": "explif",
+        "layer": "L1",
+        "r2": 0.9998260414062675,
+        "quality": "ok",
+        "nfr4_pass": true,
+        "relative_vp": 0.01977495266024708,
+        "nfr5_pass": true,
+        "config_hash": "e01912f30f3582c7",
+        "dtypes": {
+          "fits": "float64",
+          "precision": "float32"
+        },
+        "chirp_bins": null
+      },
+      "l2": {
+        "path": "datasets/fly/fits/default_excitatory_l2.npz",
+        "f32": "datasets/fly/precision/default_excitatory_l2_f32.npz",
+        "type_id": "default excitatory",
+        "model": "explif",
+        "layer": "L2",
+        "r2": 0.9998260414062675,
+        "quality": "ok",
+        "nfr4_pass": true,
+        "relative_vp": null,
+        "nfr5_pass": null,
+        "config_hash": "3367c7ab3bd02190",
+        "dtypes": {
+          "fits": "float64",
+          "precision": "float32"
+        },
+        "chirp_bins": null
+      },
+      "l1l2": {
+        "path": "datasets/fly/fits/default_excitatory_l1l2.npz",
+        "f32": "datasets/fly/precision/default_excitatory_l1l2_f32.npz",
+        "type_id": "default excitatory",
+        "model": "explif",
+        "layer": "L2",
+        "r2": 0.9998260414062675,
+        "quality": "ok",
+        "nfr4_pass": true,
+        "relative_vp": 0.01977495266024708,
+        "nfr5_pass": true,
+        "config_hash": "3367c7ab3bd02190",
+        "dtypes": {
+          "fits": "float64",
+          "precision": "float32"
+        },
+        "chirp_bins": null
+      }
+    },
+    "default inhibitory": {
+      "l0": {
+        "path": "datasets/fly/fits/default_inhibitory_l0.npz",
+        "f32": "datasets/fly/precision/default_inhibitory_l0_f32.npz",
+        "type_id": "default inhibitory",
+        "model": "lif",
+        "layer": "L0",
+        "r2": 0.9999073555698963,
+        "quality": "ok",
+        "nfr4_pass": true,
+        "relative_vp": null,
+        "nfr5_pass": null,
+        "config_hash": "26d95b05ee2ce4bf",
+        "dtypes": {
+          "fits": "float64",
+          "precision": "float32"
+        },
+        "chirp_bins": null
+      },
+      "l1": {
+        "path": "datasets/fly/fits/default_inhibitory_l1.npz",
+        "f32": "datasets/fly/precision/default_inhibitory_l1_f32.npz",
+        "type_id": "default inhibitory",
+        "model": "lif",
+        "layer": "L1",
+        "r2": 0.9999073555698963,
+        "quality": "ok",
+        "nfr4_pass": true,
+        "relative_vp": 0.0640404656514462,
+        "nfr5_pass": true,
+        "config_hash": "4beeca3ef0ad14b9",
+        "dtypes": {
+          "fits": "float64",
+          "precision": "float32"
+        },
+        "chirp_bins": null
+      },
+      "l2": {
+        "path": "datasets/fly/fits/default_inhibitory_l2.npz",
+        "f32": "datasets/fly/precision/default_inhibitory_l2_f32.npz",
+        "type_id": "default inhibitory",
+        "model": "lif",
+        "layer": "L2",
+        "r2": 0.9999073555698963,
+        "quality": "ok",
+        "nfr4_pass": true,
+        "relative_vp": null,
+        "nfr5_pass": null,
+        "config_hash": "ba0a8b4de5b1ed7c",
+        "dtypes": {
+          "fits": "float64",
+          "precision": "float32"
+        },
+        "chirp_bins": null
+      },
+      "l1l2": {
+        "path": "datasets/fly/fits/default_inhibitory_l1l2.npz",
+        "f32": "datasets/fly/precision/default_inhibitory_l1l2_f32.npz",
+        "type_id": "default inhibitory",
+        "model": "lif",
+        "layer": "L2",
+        "r2": 0.9999073555698963,
+        "quality": "ok",
+        "nfr4_pass": true,
+        "relative_vp": 0.0640404656514462,
+        "nfr5_pass": true,
+        "config_hash": "ba0a8b4de5b1ed7c",
+        "dtypes": {
+          "fits": "float64",
+          "precision": "float32"
+        },
+        "chirp_bins": null
+      }
+    },
+    "T4": {
+      "l0": {
+        "path": "datasets/fly/fits/T4_l0.npz",
+        "f32": "datasets/fly/precision/T4_l0_f32.npz",
+        "type_id": "T4",
+        "model": "adexp",
+        "layer": "L1",
+        "r2": 0.9946975227872065,
+        "quality": "ok",
+        "nfr4_pass": true,
+        "relative_vp": null,
+        "nfr5_pass": null,
+        "config_hash": "676ba1d1399c1d6b",
+        "dtypes": {
+          "fits": "float64",
+          "precision": "float32"
+        },
+        "chirp_bins": 7,
+        "cloned_from": "aCC"
+      },
+      "l1": {
+        "path": "datasets/fly/fits/T4_l1.npz",
+        "f32": "datasets/fly/precision/T4_l1_f32.npz",
+        "type_id": "T4",
+        "model": "adexp",
+        "layer": "L1",
+        "r2": 0.9946975227872065,
+        "quality": "ok",
+        "nfr4_pass": true,
+        "relative_vp": 0.003953690412440792,
+        "nfr5_pass": true,
+        "config_hash": "676ba1d1399c1d6b",
+        "dtypes": {
+          "fits": "float64",
+          "precision": "float32"
+        },
+        "chirp_bins": 7,
+        "cloned_from": "aCC"
+      },
+      "l2": {
+        "path": "datasets/fly/fits/T4_l2.npz",
+        "f32": "datasets/fly/precision/T4_l2_f32.npz",
+        "type_id": "T4",
+        "model": "adexp",
+        "layer": "L2",
+        "r2": 0.9946975227872065,
+        "quality": "ok",
+        "nfr4_pass": true,
+        "relative_vp": null,
+        "nfr5_pass": null,
+        "config_hash": "2bd85c7d182132f4",
+        "dtypes": {
+          "fits": "float64",
+          "precision": "float32"
+        },
+        "chirp_bins": 7,
+        "cloned_from": "aCC"
+      },
+      "l1l2": {
+        "path": "datasets/fly/fits/T4_l1l2.npz",
+        "f32": "datasets/fly/precision/T4_l1l2_f32.npz",
+        "type_id": "T4",
+        "model": "adexp",
+        "layer": "L2",
+        "r2": 0.9946975227872065,
+        "quality": "ok",
+        "nfr4_pass": true,
+        "relative_vp": 0.003953690412440792,
+        "nfr5_pass": true,
+        "config_hash": "2bd85c7d182132f4",
+        "dtypes": {
+          "fits": "float64",
+          "precision": "float32"
+        },
+        "chirp_bins": 7,
+        "cloned_from": "aCC"
+      }
+    }
+  },
+  "circuit": {
+    "n_motor": 69,
+    "n_nodes": 249,
+    "n_edges": 4622,
+    "loaded_nodes": 249,
+    "loaded_edges": 4622
+  },
+  "full_sparse": [
+    {
+      "path": "data/malecns/body-annotations-male-cns-v1.0-minconf-0.5.feather",
+      "sha256": "2177e246113e4cfbf1e7772ec37c6da1955ff22e8063d0b1f833101f99a9a3b2",
+      "bytes": 14483314
+    },
+    {
+      "path": "data/malecns/body-neurotransmitters-male-cns-v1.0.feather",
+      "sha256": "95c9289220663abeb3409f3ad9e5a7f8a53f8093f5139d15502cd08da8879621",
+      "bytes": 43282834
+    },
+    {
+      "path": "data/malecns/connectome-weights-male-cns-v1.0-minconf-0.5.feather",
+      "sha256": "e35da783d1c686b2b58b3b87cd6a403ae43bfcfba8bff28e08ef752c1a56afc1",
+      "bytes": 1051241946
+    }
+  ],
+  "precision": {
+    "activation_table": [
+      "float64",
+      "float32"
+    ],
+    "edge_weight": [
+      "float32",
+      "float64"
+    ]
+  }
+}

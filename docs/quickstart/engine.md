@@ -4,7 +4,9 @@
 
 先有一份拟合好的 F，再在图上做
 
-$$I = W r + I_{\mathrm{ext}}, \qquad r = F(I).$$
+$$I = W\,(r\,\Delta t) + I_{\mathrm{ext}}, \qquad r = F(I).$$
+
+`r` 是 Hz。`W` 是每次脉冲的电流（Shiu 起点 0.0275 nA）。一步默认 1 ms，所以乘上的是这一步的期望脉冲数 `r × 0.001`，不是把 Hz 直接乘到纳安上。
 
 `W` 是连接，`F` 是 [上一步](pipeline.md) 写出的 npz。这一步每毫秒乘一次稀疏矩阵，再查表。它不更新 F，没有 epoch，也没有损失曲线。
 

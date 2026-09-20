@@ -20,6 +20,7 @@ site/
 # Default: ignore npz; allow committed seed artifacts + tests fixtures
 *.npz
 !tests/data/**
+!datasets/fly/**/*.npz
 
 # Data plane: raw connectomes stay local
 data/**

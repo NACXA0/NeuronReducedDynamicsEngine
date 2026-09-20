@@ -1,0 +1,294 @@
+{
+  "preset": "fly",
+  "role": "published_default",
+  "instance": "MaleCNS v1.0 accessory flexor motoneurons",
+  "files": [
+    {
+      "path": "datasets/fly/README.md",
+      "sha256": "c2bf2477eacc3f2d87157c256dcd03bc43966b7efd69f527e7c6beeb53c50541",
+      "bytes": 814
+    },
+    {
+      "path": "datasets/fly/fits/T4_l0.meta.json",
+      "sha256": "6241d18817c0ef20a15878edd568d83c269e531be63d22b319266a27b3c448e9",
+      "bytes": 584
+    },
+    {
+      "path": "datasets/fly/fits/T4_l0.npz",
+      "sha256": "a64d40186add7c7f30203f25dbfba4f2b7bd20fbe9c859973ea12af6e9b5c74e",
+      "bytes": 2175
+    },
+    {
+      "path": "datasets/fly/fits/T4_l1.meta.json",
+      "sha256": "d7a8267b445831f563e875e487be3455db32ad5fbe4769c1979f3fa8d6ea64ec",
+      "bytes": 590
+    },
+    {
+      "path": "datasets/fly/fits/T4_l1.npz",
+      "sha256": "ddf76f9de4517f06efdd429faf0a62806d13505c6bb3f7258f336703e6dde37d",
+      "bytes": 13198
+    },
+    {
+      "path": "datasets/fly/fits/T4_l1l2.meta.json",
+      "sha256": "ffaa32b2ed012e160146407d9636f11632eefb1a65980cba73c4d82ed5387fbb",
+      "bytes": 590
+    },
+    {
+      "path": "datasets/fly/fits/T4_l1l2.npz",
+      "sha256": "7a87c6a8f05839c577ca05f3de7e4279dec868953a5991c8409859eb9b373394",
+      "bytes": 14614
+    },
+    {
+      "path": "datasets/fly/fits/T4_l2.meta.json",
+      "sha256": "6e16dc8e3c322c63dec018d114738e8424717fb47ebaf69a93d670414f33393c",
+      "bytes": 584
+    },
+    {
+      "path": "datasets/fly/fits/T4_l2.npz",
+      "sha256": "7e7ddb188595056c4056cfd29053a0a79bc54df983697b9d6834117809c5aaf0",
+      "bytes": 3591
+    },
+    {
+      "path": "datasets/fly/fits/aCC_l0.meta.json",
+      "sha256": "d874af0ed42ead05aa131a42becad1b64cbf9606c80c104ab7b7453d85a99461",
+      "bytes": 586
+    },
+    {
+      "path": "datasets/fly/fits/aCC_l0.npz",
+      "sha256": "a64d40186add7c7f30203f25dbfba4f2b7bd20fbe9c859973ea12af6e9b5c74e",
+      "bytes": 2175
+    },
+    {
+      "path": "datasets/fly/fits/aCC_l1.meta.json",
+      "sha256": "5e75d595992044251cfd15795fca8b995752af3ae0a2a8a1678e2908b153b6b9",
+      "bytes": 592
+    },
+    {
+      "path": "datasets/fly/fits/aCC_l1.npz",
+      "sha256": "ddf76f9de4517f06efdd429faf0a62806d13505c6bb3f7258f336703e6dde37d",
+      "bytes": 13198
+    },
+    {
+      "path": "datasets/fly/fits/aCC_l1l2.meta.json",
+      "sha256": "e0e0a4adcd431142101c48426556f5c07c3ebf05ac189b65be6696c19d1e05f4",
+      "bytes": 592
+    },
+    {
+      "path": "datasets/fly/fits/aCC_l1l2.npz",
+      "sha256": "7a87c6a8f05839c577ca05f3de7e4279dec868953a5991c8409859eb9b373394",
+      "bytes": 14614
+    },
+    {
+      "path": "datasets/fly/fits/aCC_l2.meta.json",
+      "sha256": "3ad616d21f1696fc96e11c685043738a902c58bd3facfc42a61f8d89529a5bf7",
+      "bytes": 586
+    },
+    {
+      "path": "datasets/fly/fits/aCC_l2.npz",
+      "sha256": "7e7ddb188595056c4056cfd29053a0a79bc54df983697b9d6834117809c5aaf0",
+      "bytes": 3591
+    },
+    {
+      "path": "datasets/fly/fits/default_excitatory_l0.meta.json",
+      "sha256": "b5e1aef9075fa0b096f8036c5dcf35957288a89cd960c9169f881f22d8f60981",
+      "bytes": 586
+    },
+    {
+      "path": "datasets/fly/fits/default_excitatory_l0.npz",
+      "sha256": "0091c3cc678d138f53e43a654dfbb75f32472eda200854148750ec03e529adcd",
+      "bytes": 1726
+    },
+    {
+      "path": "datasets/fly/fits/default_excitatory_l1.meta.json",
+      "sha256": "94a52585f53ed16c88e44682326ffe668b834b0aa9979c2e2a158b77a4bfaa09",
+      "bytes": 609
+    },
+    {
+      "path": "datasets/fly/fits/default_excitatory_l1.npz",
+      "sha256": "bcafc9a7e62708ef3193357d4f03f66d68c2ff3e0902e627bb63c5bac35ca12f",
+      "bytes": 26113
+    },
+    {
+      "path": "datasets/fly/fits/default_excitatory_l1l2.meta.json",
+      "sha256": "96c95eabfa8ecf2124a6f3f58607106fac17d1c8799e44047907917ac7deebe0",
+      "bytes": 609
+    },
+    {
+      "path": "datasets/fly/fits/default_excitatory_l1l2.npz",
+      "sha256": "ac3d5c18df8f5a33a8e75ab63ca5d4209acd873102399c0ebb6af2241f52718a",
+      "bytes": 27530
+    },
+    {
+      "path": "datasets/fly/fits/default_excitatory_l2.meta.json",
+      "sha256": "87bc08f1b6d2b45dcd9486353e03ad029c3f40a18fc74d0ebb2d5416d5f795fc",
+      "bytes": 586
+    },
+    {
+      "path": "datasets/fly/fits/default_excitatory_l2.npz",
+      "sha256": "5141b9e21d9fbd60c16cb541f2b0318ee76182bf823f2944e81148181e10e5be",
+      "bytes": 3143
+    },
+    {
+      "path": "datasets/fly/fits/default_inhibitory_l0.meta.json",
+      "sha256": "e88c0ccb473d2b3e2186dcd1df106f9eef2610065cb08bc7385b35553916746a",
+      "bytes": 584
+    },
+    {
+      "path": "datasets/fly/fits/default_inhibitory_l0.npz",
+      "sha256": "102f002396c2fe4ed607f375b3b381e6338c939a69293fcce245f34a93558a91",
+      "bytes": 1728
+    },
+    {
+      "path": "datasets/fly/fits/default_inhibitory_l1.meta.json",
+      "sha256": "101973a4dee974f03c52a9aafc964a34ebf562b82a5888e3df420ea6e2aa22cc",
+      "bytes": 607
+    },
+    {
+      "path": "datasets/fly/fits/default_inhibitory_l1.npz",
+      "sha256": "a80720c475d362f9c85cc677096d8d6ebfa3a45d1332103385b9acbc11149104",
+      "bytes": 30785
+    },
+    {
+      "path": "datasets/fly/fits/default_inhibitory_l1l2.meta.json",
+      "sha256": "c42222c7d79e0f72b5db4e8624b3efb38842f42eab7b3aeb6dfb4a54d1550030",
+      "bytes": 607
+    },
+    {
+      "path": "datasets/fly/fits/default_inhibitory_l1l2.npz",
+      "sha256": "01fe246f8dcdce7fcc9bd1a186cb60ae7dfb1fc760f1423e54ebcced48b6b01e",
+      "bytes": 32201
+    },
+    {
+      "path": "datasets/fly/fits/default_inhibitory_l2.meta.json",
+      "sha256": "5eaa391f08cbc83bcd9b08fab3fde72c0894674ca2d0f9f7282c12e870840ec9",
+      "bytes": 584
+    },
+    {
+      "path": "datasets/fly/fits/default_inhibitory_l2.npz",
+      "sha256": "a369ab93f0777325c6ad0547ddce387e8a19b935eeb0ef1ae96100962de3e41a",
+      "bytes": 3144
+    },
+    {
+      "path": "datasets/fly/precision/T4_l0_f32.npz",
+      "sha256": "28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53",
+      "bytes": 676
+    },
+    {
+      "path": "datasets/fly/precision/T4_l1_f32.npz",
+      "sha256": "28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53",
+      "bytes": 676
+    },
+    {
+      "path": "datasets/fly/precision/T4_l1l2_f32.npz",
+      "sha256": "28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53",
+      "bytes": 676
+    },
+    {
+      "path": "datasets/fly/precision/T4_l2_f32.npz",
+      "sha256": "28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53",
+      "bytes": 676
+    },
+    {
+      "path": "datasets/fly/precision/aCC_l0_f32.npz",
+      "sha256": "28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53",
+      "bytes": 676
+    },
+    {
+      "path": "datasets/fly/precision/aCC_l1_f32.npz",
+      "sha256": "28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53",
+      "bytes": 676
+    },
+    {
+      "path": "datasets/fly/precision/aCC_l1l2_f32.npz",
+      "sha256": "28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53",
+      "bytes": 676
+    },
+    {
+      "path": "datasets/fly/precision/aCC_l2_f32.npz",
+      "sha256": "28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53",
+      "bytes": 676
+    },
+    {
+      "path": "datasets/fly/precision/default_excitatory_l0_f32.npz",
+      "sha256": "ca7ce11d1ffa8771f643b80889fa9875647ba86a9a1802c0f4a97921464733fc",
+      "bytes": 680
+    },
+    {
+      "path": "datasets/fly/precision/default_excitatory_l1_f32.npz",
+      "sha256": "ca7ce11d1ffa8771f643b80889fa9875647ba86a9a1802c0f4a97921464733fc",
+      "bytes": 680
+    },
+    {
+      "path": "datasets/fly/precision/default_excitatory_l1l2_f32.npz",
+      "sha256": "ca7ce11d1ffa8771f643b80889fa9875647ba86a9a1802c0f4a97921464733fc",
+      "bytes": 680
+    },
+    {
+      "path": "datasets/fly/precision/default_excitatory_l2_f32.npz",
+      "sha256": "ca7ce11d1ffa8771f643b80889fa9875647ba86a9a1802c0f4a97921464733fc",
+      "bytes": 680
+    },
+    {
+      "path": "datasets/fly/precision/default_inhibitory_l0_f32.npz",
+      "sha256": "cab88b3ab44974ca2b358151d571f87e8aa987cf748e193fa820f6373415a47e",
+      "bytes": 677
+    },
+    {
+      "path": "datasets/fly/precision/default_inhibitory_l1_f32.npz",
+      "sha256": "cab88b3ab44974ca2b358151d571f87e8aa987cf748e193fa820f6373415a47e",
+      "bytes": 677
+    },
+    {
+      "path": "datasets/fly/precision/default_inhibitory_l1l2_f32.npz",
+      "sha256": "cab88b3ab44974ca2b358151d571f87e8aa987cf748e193fa820f6373415a47e",
+      "bytes": 677
+    },
+    {
+      "path": "datasets/fly/precision/default_inhibitory_l2_f32.npz",
+      "sha256": "cab88b3ab44974ca2b358151d571f87e8aa987cf748e193fa820f6373415a47e",
+      "bytes": 677
+    },
+    {
+      "path": "datasets/fly/sparse/accessory_mn_annotations.feather",
+      "sha256": "94b2bb73fbcc96744f039b8abb0b3f0fce0243960425eeddfc27866b3b013d96",
+      "bytes": 3930
+    },
+    {
+      "path": "datasets/fly/sparse/accessory_mn_circuit.feather",
+      "sha256": "f07157b8dda98a59a0cafa4d36eb146bbc7390767231d52676e6af01cbe7491f",
+      "bytes": 26042
+    },
+    {
+      "path": "datasets/fly/sparse/shiu_labelled_circuit.npz",
+      "sha256": "2288c9f336f857ab6cca7bc60190538071c8672638381b4f085cb46e4ec7cd40",
+      "bytes": 1423
+    },
+    {
+      "path": "datasets/fly/reports/acceptance.json",
+      "sha256": "935faef3a209aabee5905193ab78b232665bb404cde1ae5c2a287b76b0c199c9",
+      "bytes": 10811
+    },
+    {
+      "path": "datasets/fly/reports/l3.json",
+      "sha256": "773900a76325b3740901419cf3092eff65df1ba5e5d165c49a17e4d78a13e0f7",
+      "bytes": 100
+    }
+  ],
+  "full_sparse": [
+    {
+      "path": "data/malecns/body-annotations-male-cns-v1.0-minconf-0.5.feather",
+      "sha256": "2177e246113e4cfbf1e7772ec37c6da1955ff22e8063d0b1f833101f99a9a3b2",
+      "bytes": 14483314
+    },
+    {
+      "path": "data/malecns/body-neurotransmitters-male-cns-v1.0.feather",
+      "sha256": "95c9289220663abeb3409f3ad9e5a7f8a53f8093f5139d15502cd08da8879621",
+      "bytes": 43282834
+    },
+    {
+      "path": "data/malecns/connectome-weights-male-cns-v1.0-minconf-0.5.feather",
+      "sha256": "e35da783d1c686b2b58b3b87cd6a403ae43bfcfba8bff28e08ef752c1a56afc1",
+      "bytes": 1051241946
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "schema_version": 2,
+  "type_id": "default inhibitory",
+  "type_ids": [
+    "default inhibitory"
+  ],
+  "model": "lif",
+  "params": {},
+  "method": "pchip",
+  "quality": "ok",
+  "r2": 0.9999073555698963,
+  "mse": 0.43756398608723956,
+  "notes": "CubicSpline overshoot or Type-II gap; using PCHIP",
+  "layer": "L0",
+  "level_decision": "steady f-I sufficient",
+  "lut_hit_rate": null,
+  "pysr_expr": null,
+  "fallback_ode": false,
+  "git_commit": "e13523a63fb3b9b4f85cc93ff509e4bdd9ddd566",
+  "config_hash": "26d95b05ee2ce4bf",
+  "created_utc": "2026-09-20T05:07:11.113859+00:00"
+}

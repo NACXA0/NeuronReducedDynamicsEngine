@@ -109,6 +109,26 @@ def test_plan_gpu_rows_fills_budget_not_the_card():
 
 
 @pytest.mark.torch
+def test_chunked_activation_matches_one_shot():
+    if not torch_available():
+        pytest.skip("torch extra not installed")
+    import torch
+
+    from nrde.engine.torch_rate import _eval_rate_torch, _write_rate
+
+    current = torch.linspace(-0.2, 1.2, 80)
+    grid_i = torch.tensor([0.0, 0.25, 0.5, 0.75, 1.0])
+    grid_r = torch.tensor([0.0, 10.0, 40.0, 55.0, 60.0])
+    onset = torch.tensor(0.2)
+    order = torch.randperm(current.numel())
+    direct, oor_direct = _eval_rate_torch(current[order], grid_i, grid_r, onset)
+    scattered = torch.zeros(current.numel())
+    oor_chunk = _write_rate(current, order, scattered, grid_i, grid_r, onset, chunk=7)
+    torch.testing.assert_close(scattered[order], direct)
+    assert int(oor_chunk) == int(oor_direct)
+
+
+@pytest.mark.torch
 def test_split_rows_match_single_device():
     if not torch_available():
         pytest.skip("torch extra not installed")

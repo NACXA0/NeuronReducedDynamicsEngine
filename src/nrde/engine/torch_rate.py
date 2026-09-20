@@ -30,16 +30,26 @@ def _device(torch: Any, device: str | None):
     return torch.device("cpu")
 
 
+# Scratch left free for one activation chunk (index + a handful of float64 gathers).
+_ACTIVATION_SCRATCH = 512 << 20
+# Default chunk: about 1e6 nodes, ~80 MiB of temporaries instead of one buffer per node.
+_ACTIVATION_CHUNK = 1 << 20
+
+
 def gpu_resident_bytes(n_rows: int, nnz: int, n_cols: int) -> int:
-    """Bytes to keep ``n_rows`` of a CSR, plus the full source vector, on one device."""
+    """Bytes to keep ``n_rows`` of a CSR on device, plus one activation chunk.
+
+    The interpolation ``fp[idx]`` materialises a float64 vector the size of the
+    index. That temporary is chunked, so it is a fixed scratch, not ``n_rows``.
+    """
     if n_rows <= 0:
         return 0
     return (
         (n_rows + 1) * 8
         + int(nnz) * 12
         + int(n_cols) * 12
-        + n_rows * 32
-        + (1 << 20)
+        + n_rows * 40
+        + _ACTIVATION_SCRATCH
     )
 
 
@@ -102,7 +112,7 @@ def _interp1d(x, xp, fp):
     return y0 + (x - x0) / denom * (y1 - y0)
 
 
-def _eval_rate_torch(I, I_grid, r_grid, I_onset):
+def _eval_rate_torch_once(I, I_grid, r_grid, I_onset):
     """Match ``FittedActivation.eval_rate`` (float64 onset / interp semantics)."""
     torch = _require_torch()
     oor = ((I < I_grid[0]) | (I > I_grid[-1])).sum()
@@ -113,6 +123,55 @@ def _eval_rate_torch(I, I_grid, r_grid, I_onset):
     if r_grid.numel():
         r = torch.minimum(r, r_grid.max())
     return r, oor
+
+
+def _activation_chunk(n: int, device) -> int:
+    """How many currents to interpolate at once without asking for a full-graph temporary."""
+    n = int(n)
+    if n <= _ACTIVATION_CHUNK:
+        return n
+    torch = _require_torch()
+    if getattr(device, "type", None) != "cuda":
+        return _ACTIVATION_CHUNK
+    free, _total = torch.cuda.mem_get_info(device)
+    # index int64 + several float64 gathers, kept under a fifth of whatever is still free.
+    room = max(int(free) // 5, 8 << 20)
+    return max(1 << 14, min(n, room // 128))
+
+
+def _eval_rate_torch(I, I_grid, r_grid, I_onset):
+    torch = _require_torch()
+    try:
+        return _eval_rate_torch_once(I, I_grid, r_grid, I_onset)
+    except torch.OutOfMemoryError:
+        if int(I.numel()) <= 1024:
+            raise
+        if I.device.type == "cuda":
+            torch.cuda.empty_cache()
+        mid = int(I.shape[0]) // 2
+        r0, o0 = _eval_rate_torch(I[:mid], I_grid, r_grid, I_onset)
+        r1, o1 = _eval_rate_torch(I[mid:], I_grid, r_grid, I_onset)
+        return torch.cat((r0, r1)), o0 + o1
+
+
+def _write_rate(I_total, idx, r_new, I_grid, r_grid, I_onset, chunk: int | None = None):
+    """Evaluate ``F`` at ``idx`` and scatter into ``r_new``, in index-sized pieces."""
+    torch = _require_torch()
+    n = int(idx.numel())
+    if n == 0:
+        return torch.zeros((), dtype=torch.int64, device=I_total.device)
+    step = _activation_chunk(n, I_total.device) if chunk is None else max(1, min(int(chunk), n))
+    if step >= n:
+        rt, n_oor = _eval_rate_torch(I_total[idx], I_grid, r_grid, I_onset)
+        r_new[idx] = rt
+        return n_oor
+    oor = torch.zeros((), dtype=torch.int64, device=I_total.device)
+    for start in range(0, n, step):
+        part = idx[start : start + step]
+        rt, n_oor = _eval_rate_torch(I_total[part], I_grid, r_grid, I_onset)
+        r_new[part] = rt
+        oor = oor + n_oor
+    return oor
 
 
 def _upload_array(values: np.ndarray, torch_dtype, device, label: str, unit: str):
@@ -284,11 +343,14 @@ def step_rate_torch(
     I_ext: Any,
     bundle: dict[str, Any],
     oor: Any,
+    dt: float = 1.0,
 ) -> tuple[Any, Any]:
     torch = _require_torch()
     csr = bundle["csr"]
     # SpMV in float32; promote before F so onset/interp match numpy float64.
-    I_syn = torch.sparse.mm(csr, r.to(dtype=torch.float32).unsqueeze(1)).squeeze(1).to(dtype=torch.float64)
+    # r is Hz; W is nA/spike. Expected spikes in this step = r * dt_ms / 1000.
+    spikes = r * (float(dt) / 1000.0)
+    I_syn = torch.sparse.mm(csr, spikes.to(dtype=torch.float32).unsqueeze(1)).squeeze(1).to(dtype=torch.float64)
     I_total = I_syn + I_ext.to(dtype=torch.float64)
     r_new = torch.zeros(r.shape, dtype=torch.float64, device=r.device)
     for idx, I_grid, r_grid, I_onset in zip(
@@ -296,8 +358,7 @@ def step_rate_torch(
     ):
         if idx.numel() == 0:
             continue
-        rt, n_oor = _eval_rate_torch(I_total[idx], I_grid, r_grid, I_onset)
-        r_new[idx] = rt
+        n_oor = _write_rate(I_total, idx, r_new, I_grid, r_grid, I_onset)
         oor = oor + n_oor
     return r_new, oor
 
@@ -309,15 +370,16 @@ def _as_oor(value: Any) -> int:
     return int(value)
 
 
-def _step_split(r_fast, r_slow, I_fast, I_slow, bundle: dict[str, Any], oor: Any):
+def _step_split(r_fast, r_slow, I_fast, I_slow, bundle: dict[str, Any], oor: Any, dt: float = 1.0):
     """One step with the leading rows on ``r_fast``'s device and the rest in RAM."""
     torch = _require_torch()
     k = int(bundle["n_fast"])
+    scale = float(dt) / 1000.0
     I_syn_f = torch.sparse.mm(
-        bundle["csr_fast"], r_fast.to(dtype=torch.float32).unsqueeze(1)
+        bundle["csr_fast"], (r_fast * scale).to(dtype=torch.float32).unsqueeze(1)
     ).squeeze(1).to(dtype=torch.float64)
     I_syn_s = torch.sparse.mm(
-        bundle["csr_slow"], r_slow.to(dtype=torch.float32).unsqueeze(1)
+        bundle["csr_slow"], (r_slow * scale).to(dtype=torch.float32).unsqueeze(1)
     ).squeeze(1).to(dtype=torch.float64)
     I_f = I_syn_f + I_fast
     I_s = I_syn_s + I_slow
@@ -333,13 +395,9 @@ def _step_split(r_fast, r_slow, I_fast, I_slow, bundle: dict[str, Any], oor: Any
     )
     for idx_f, idx_s, grids_f, grids_s in groups:
         if idx_f.numel():
-            rt, n_oor = _eval_rate_torch(I_f[idx_f], *grids_f)
-            r_new_f[idx_f] = rt
-            oor_i += _as_oor(n_oor)
+            oor_i += _as_oor(_write_rate(I_f, idx_f, r_new_f, *grids_f))
         if idx_s.numel():
-            rt, n_oor = _eval_rate_torch(I_s[idx_s], *grids_s)
-            r_new_s[idx_s] = rt
-            oor_i += _as_oor(n_oor)
+            oor_i += _as_oor(_write_rate(I_s, idx_s, r_new_s, *grids_s))
     synced_fast = torch.empty(r_fast.shape, dtype=torch.float64, device=r_fast.device)
     synced_fast[:k] = r_new_f
     synced_fast[k:] = r_new_s.to(device=r_fast.device)
@@ -360,7 +418,6 @@ def run_rate_torch(
     device: str | None = None,
     vram_budget: int | None = None,
 ) -> tuple[RateState, np.ndarray]:
-    del dt
     torch = _require_torch()
     bundle = prepare_torch_graph(graph, tables, device=device, vram_budget=vram_budget)
     I_np = np.zeros(graph.n_nodes, dtype=np.float64) if I_ext is None else np.asarray(I_ext, dtype=np.float64)
@@ -375,7 +432,7 @@ def run_rate_torch(
         I_slow = torch.as_tensor(I_np[k:], dtype=torch.float64, device="cpu")
         oor: Any = 0
         for t in range(n_steps):
-            r_fast, r_slow, oor = _step_split(r_fast, r_slow, I_fast, I_slow, bundle, oor)
+            r_fast, r_slow, oor = _step_split(r_fast, r_slow, I_fast, I_slow, bundle, oor, dt=dt)
             if record_trace:
                 trace_np[t, :k] = r_fast[:k].detach().cpu().numpy()
                 trace_np[t, k:] = r_slow[k:].detach().cpu().numpy()
@@ -389,7 +446,7 @@ def run_rate_torch(
     r = torch.full((graph.n_nodes,), float(r0), dtype=torch.float64, device=dev)
     oor = torch.zeros((), dtype=torch.int64, device=dev)
     for t in range(n_steps):
-        r, oor = step_rate_torch(r, I_t, bundle, oor)
+        r, oor = step_rate_torch(r, I_t, bundle, oor, dt=dt)
         if record_trace:
             trace_np[t] = r.detach().cpu().numpy()
         progress.tick(t + 1, n_steps, "rate steps", "steps")

@@ -31,3 +31,73 @@ tiers:
       args:
       - --skip-weights
       out_dir: data/malecns
+  pretrained:
+    description: 'Published MaleCNS default: L0-L2 tables, float32 copies, extracted
+      circuit'
+    artifacts:
+    - path: datasets/fly/fits/T4_l0.npz
+      sha256: a64d40186add7c7f30203f25dbfba4f2b7bd20fbe9c859973ea12af6e9b5c74e
+    - path: datasets/fly/fits/T4_l1.npz
+      sha256: ddf76f9de4517f06efdd429faf0a62806d13505c6bb3f7258f336703e6dde37d
+    - path: datasets/fly/fits/T4_l1l2.npz
+      sha256: 7a87c6a8f05839c577ca05f3de7e4279dec868953a5991c8409859eb9b373394
+    - path: datasets/fly/fits/T4_l2.npz
+      sha256: 7e7ddb188595056c4056cfd29053a0a79bc54df983697b9d6834117809c5aaf0
+    - path: datasets/fly/fits/aCC_l0.npz
+      sha256: a64d40186add7c7f30203f25dbfba4f2b7bd20fbe9c859973ea12af6e9b5c74e
+    - path: datasets/fly/fits/aCC_l1.npz
+      sha256: ddf76f9de4517f06efdd429faf0a62806d13505c6bb3f7258f336703e6dde37d
+    - path: datasets/fly/fits/aCC_l1l2.npz
+      sha256: 7a87c6a8f05839c577ca05f3de7e4279dec868953a5991c8409859eb9b373394
+    - path: datasets/fly/fits/aCC_l2.npz
+      sha256: 7e7ddb188595056c4056cfd29053a0a79bc54df983697b9d6834117809c5aaf0
+    - path: datasets/fly/fits/default_excitatory_l0.npz
+      sha256: 0091c3cc678d138f53e43a654dfbb75f32472eda200854148750ec03e529adcd
+    - path: datasets/fly/fits/default_excitatory_l1.npz
+      sha256: bcafc9a7e62708ef3193357d4f03f66d68c2ff3e0902e627bb63c5bac35ca12f
+    - path: datasets/fly/fits/default_excitatory_l1l2.npz
+      sha256: ac3d5c18df8f5a33a8e75ab63ca5d4209acd873102399c0ebb6af2241f52718a
+    - path: datasets/fly/fits/default_excitatory_l2.npz
+      sha256: 5141b9e21d9fbd60c16cb541f2b0318ee76182bf823f2944e81148181e10e5be
+    - path: datasets/fly/fits/default_inhibitory_l0.npz
+      sha256: 102f002396c2fe4ed607f375b3b381e6338c939a69293fcce245f34a93558a91
+    - path: datasets/fly/fits/default_inhibitory_l1.npz
+      sha256: a80720c475d362f9c85cc677096d8d6ebfa3a45d1332103385b9acbc11149104
+    - path: datasets/fly/fits/default_inhibitory_l1l2.npz
+      sha256: 01fe246f8dcdce7fcc9bd1a186cb60ae7dfb1fc760f1423e54ebcced48b6b01e
+    - path: datasets/fly/fits/default_inhibitory_l2.npz
+      sha256: a369ab93f0777325c6ad0547ddce387e8a19b935eeb0ef1ae96100962de3e41a
+    - path: datasets/fly/precision/T4_l0_f32.npz
+      sha256: 28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53
+    - path: datasets/fly/precision/T4_l1_f32.npz
+      sha256: 28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53
+    - path: datasets/fly/precision/T4_l1l2_f32.npz
+      sha256: 28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53
+    - path: datasets/fly/precision/T4_l2_f32.npz
+      sha256: 28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53
+    - path: datasets/fly/precision/aCC_l0_f32.npz
+      sha256: 28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53
+    - path: datasets/fly/precision/aCC_l1_f32.npz
+      sha256: 28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53
+    - path: datasets/fly/precision/aCC_l1l2_f32.npz
+      sha256: 28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53
+    - path: datasets/fly/precision/aCC_l2_f32.npz
+      sha256: 28002d6f549e6408e33519ac99f65eaebfaf86efb43f29610aa6386ecbcf6e53
+    - path: datasets/fly/precision/default_excitatory_l0_f32.npz
+      sha256: ca7ce11d1ffa8771f643b80889fa9875647ba86a9a1802c0f4a97921464733fc
+    - path: datasets/fly/precision/default_excitatory_l1_f32.npz
+      sha256: ca7ce11d1ffa8771f643b80889fa9875647ba86a9a1802c0f4a97921464733fc
+    - path: datasets/fly/precision/default_excitatory_l1l2_f32.npz
+      sha256: ca7ce11d1ffa8771f643b80889fa9875647ba86a9a1802c0f4a97921464733fc
+    - path: datasets/fly/precision/default_excitatory_l2_f32.npz
+      sha256: ca7ce11d1ffa8771f643b80889fa9875647ba86a9a1802c0f4a97921464733fc
+    - path: datasets/fly/precision/default_inhibitory_l0_f32.npz
+      sha256: cab88b3ab44974ca2b358151d571f87e8aa987cf748e193fa820f6373415a47e
+    - path: datasets/fly/precision/default_inhibitory_l1_f32.npz
+      sha256: cab88b3ab44974ca2b358151d571f87e8aa987cf748e193fa820f6373415a47e
+    - path: datasets/fly/precision/default_inhibitory_l1l2_f32.npz
+      sha256: cab88b3ab44974ca2b358151d571f87e8aa987cf748e193fa820f6373415a47e
+    - path: datasets/fly/precision/default_inhibitory_l2_f32.npz
+      sha256: cab88b3ab44974ca2b358151d571f87e8aa987cf748e193fa820f6373415a47e
+    - path: datasets/fly/sparse/shiu_labelled_circuit.npz
+      sha256: 2288c9f336f857ab6cca7bc60190538071c8672638381b4f085cb46e4ec7cd40

@@ -71,9 +71,10 @@ def step_rate(
     dt: float = 1.0,
     type_indices: list[np.ndarray] | None = None,
 ) -> RateState:
-    del dt
+    # W is nA per spike (Shiu). r is Hz, so the step input is the expected spike count.
+    spikes = state.r * (float(dt) / 1000.0)
     csr = get_csr(graph)
-    I_syn = sparse_matvec(graph.edge_index, graph.edge_weight, state.r, graph.n_nodes, csr=csr)
+    I_syn = sparse_matvec(graph.edge_index, graph.edge_weight, spikes, graph.n_nodes, csr=csr)
     I_total = I_syn + np.asarray(I_ext, dtype=np.float64)
     if type_indices is None:
         type_indices = get_type_indices(graph, len(tables))
