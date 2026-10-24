@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "neuron-reduced-dynamics-engine"
-version = "0.1.0"
+version = "1.0.0"
 description = "Connectome-driven neuron engine with type-bound reduced activation functions."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
 classifiers = ["License :: OSI Approved :: Apache Software License"]
-authors = [{ name = "NRDE contributors" }]
+authors = [{ name = "Luis Li", email="1504367540@qq.com" }]
 keywords = ["connectome", "reduced-dynamics", "spiking", "neuron", "drosophila", "flygym"]
 dependencies = [
     "numpy>=1.24",

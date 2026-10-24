@@ -124,6 +124,42 @@ export function Curves({ c }: { c: Copy["curve"] }) {
   );
 }
 
+/** Held-out AdExp and F only. The unified LIF stays on the full chart below. */
+export function FitSpark({ caption, ode, f }: { caption: string; ode: string; f: string }) {
+  const w = 320;
+  const h = 148;
+  const pad = { l: 6, r: 6, t: 10, b: 8 };
+  const odePts = fi.map((row) => [row[0], row[1]] as const);
+  const fitPts = fi.map((row) => [row[0], row[2]] as const);
+  const xmin = Math.min(...fi.map((row) => row[0]));
+  const xmax = Math.max(...fi.map((row) => row[0]));
+  const ymax = Math.max(...fi.flatMap((row) => [row[1], row[2]])) * 1.08;
+  const iw = w - pad.l - pad.r;
+  const ih = h - pad.t - pad.b;
+  const x = (v: number) => pad.l + ((v - xmin) / (xmax - xmin)) * iw;
+  const y = (v: number) => pad.t + (1 - v / ymax) * ih;
+
+  return (
+    <figure className="spark">
+      <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label={caption}>
+        <path className="series series-ode" d={line(odePts, x, y)} />
+        <path className="series series-f" d={line(fitPts, x, y)} />
+      </svg>
+      <figcaption>{caption}</figcaption>
+      <ul className="legend">
+        <li>
+          <i className="swatch ode" />
+          {ode}
+        </li>
+        <li>
+          <i className="swatch f" />
+          {f}
+        </li>
+      </ul>
+    </figure>
+  );
+}
+
 export function Pareto({ c }: { c: Copy["ledger"] }) {
   const w = 720;
   const h = 420;

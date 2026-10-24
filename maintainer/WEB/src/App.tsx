@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
+import flyGif from "../../../assets/demo/demo_seed0.gif";
 import { copy, type Lang } from "./copy";
-import { bench, formatNum, links, quickstart, speedup } from "./data";
-import { Field } from "./Field";
+import { bench, circuit, fill, formatNum, links, quickstart, speedup } from "./data";
 import { Curves, Pareto } from "./Figures";
+import { ResultPanels } from "./Race";
 import "./styles.css";
 
 function initialLang(): Lang {
@@ -41,12 +42,16 @@ export function App() {
   const [lang, setLang] = useState<Lang>(initialLang);
   const [solid, setSolid] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [replay, setReplay] = useState(0);
   const c = copy[lang];
+  const facts = { sample: circuit.odeSampleCells, cells: circuit.cells };
 
   useEffect(() => {
     document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
     document.title = c.metaTitle;
     document.getElementById("meta-desc")?.setAttribute("content", c.metaDescription);
+    document.querySelector('meta[property="og:title"]')?.setAttribute("content", c.metaTitle);
+    document.querySelector('meta[property="og:description"]')?.setAttribute("content", c.metaDescription);
     try {
       localStorage.setItem("nrde-lang", lang);
     } catch {
@@ -79,6 +84,15 @@ export function App() {
     }
   };
 
+  const onRace = () => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.getElementById("race")?.scrollIntoView({
+      behavior: reduce ? "auto" : "smooth",
+      block: "nearest",
+    });
+    setReplay((n) => n + 1);
+  };
+
   const methods = [
     { key: "ode" as const, ...c.ledger.ode, ...bench.ode },
     { key: "nrde" as const, ...c.ledger.nrde, ...bench.nrde },
@@ -97,10 +111,11 @@ export function App() {
             <span>NRDE</span>
           </a>
           <nav className="nav-links" aria-label="NRDE">
-            <a href="#contract">{c.nav.contract}</a>
+            <a href="#race">{c.nav.race}</a>
+            <a href="#instance">{c.nav.instance}</a>
             <a href="#ledger">{c.nav.ledger}</a>
-            <a href="#curve">{c.nav.curve}</a>
             <a href="#close">{c.nav.close}</a>
+            <a href="#faq">{c.nav.faq}</a>
           </nav>
           <div className="nav-end">
             <div className="lang" role="group" aria-label={c.langLabel}>
@@ -121,53 +136,47 @@ export function App() {
 
       <main id="content" tabIndex={-1}>
         <section className="hero" id="top">
-          <Field />
           <div className="wrap hero-inner">
             <div className="hero-copy">
-              <p className="kicker">NRDE · {c.hero.kicker}</p>
-              <h1>
-                <span>{c.hero.titleA}</span>
-                <span>
-                  {c.hero.titleB} <i>F</i> {c.hero.titleC}
-                </span>
-              </h1>
-              <p className="lead">{c.hero.lead}</p>
+              <p className="kicker">{c.hero.kicker}</p>
+              <h1>{c.hero.title}</h1>
               <div className="hero-actions">
-                <a className="btn btn-light" href="#ledger">
+                <button type="button" className="btn btn-light" onClick={onRace}>
                   {c.hero.cta}
-                </a>
+                </button>
                 <a className="btn btn-ghost" href={links.repo} target="_blank" rel="noreferrer">
                   <GitHubIcon />
                   GitHub
                 </a>
               </div>
             </div>
-            <div>
-              <dl className="metrics">
-                <div>
-                  <dt>{c.hero.mRmse}</dt>
-                  <dd>
-                    {formatNum(bench.nrde.rmse, 2)}
-                    <small>Hz</small>
-                  </dd>
-                </div>
-                <div>
-                  <dt>{c.hero.mSpeed}</dt>
-                  <dd>
-                    {speedup}
-                    <small>×</small>
-                  </dd>
-                </div>
-                <div>
-                  <dt>{c.hero.mR2}</dt>
-                  <dd>
-                    {formatNum(bench.nrde.r2, 4)}
-                    <small>R²</small>
-                  </dd>
-                </div>
-              </dl>
-              <p className="fig">{c.hero.fig}</p>
-            </div>
+            <ResultPanels c={c.race} replayToken={replay} />
+          </div>
+        </section>
+
+        <section className="instance" id="instance">
+          <div className="wrap">
+            <header className="sec-head">
+              <div>
+                <h2>{c.instance.title}</h2>
+                <p className="lede">{c.instance.lede}</p>
+                <p className="horizon">{c.instance.horizon}</p>
+              </div>
+            </header>
+            <header className="sec-head follow">
+              <div>
+                <h2>{c.uses.title}</h2>
+                <p className="lede">{c.uses.lede}</p>
+              </div>
+            </header>
+            <ul className="uses">
+              {c.uses.items.map((item) => (
+                <li key={item.h}>
+                  <h3>{item.h}</h3>
+                  <p>{item.p}</p>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 
@@ -240,7 +249,7 @@ export function App() {
               ))}
             </div>
             <Pareto c={c.ledger} />
-            <p className="footnote">{c.ledger.footnote}</p>
+            <p className="footnote">{fill(c.ledger.footnote, facts)}</p>
           </div>
         </section>
 
@@ -274,6 +283,10 @@ export function App() {
                 </li>
               ))}
             </ul>
+            <figure className="fly">
+              <img src={flyGif} alt={c.bounds.flyAlt} />
+              <figcaption>{c.bounds.flyCaption}</figcaption>
+            </figure>
 
             <div className="start">
               <div>
@@ -302,6 +315,35 @@ export function App() {
               </div>
             </div>
             <p className="footnote">{c.start.note}</p>
+            <p className="footnote">{c.start.requires}</p>
+
+            <header className="sec-head follow plain" id="next">
+              <div>
+                <h2>{c.next.title}</h2>
+              </div>
+            </header>
+            <ul className="uses">
+              {c.next.items.map((item) => (
+                <li key={item.h}>
+                  <h3>{item.h}</h3>
+                  <p>{item.p}</p>
+                </li>
+              ))}
+            </ul>
+
+            <header className="sec-head follow plain" id="faq">
+              <div>
+                <h2>{c.faq.title}</h2>
+              </div>
+            </header>
+            <ul className="bounds">
+              {c.faq.items.map((item) => (
+                <li key={item.q}>
+                  <h3>{item.q}</h3>
+                  <p>{item.a}</p>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
       </main>
@@ -309,6 +351,7 @@ export function App() {
       <footer className="foot">
         <div className="wrap">
           <p>{c.footer.line}</p>
+          <p className="license-note">{c.footer.licenseNote}</p>
           <ul className="cites">
             <li>
               <a href={links.shiu} target="_blank" rel="noreferrer">

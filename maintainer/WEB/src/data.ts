@@ -23,6 +23,21 @@ export const bench = {
   lif: { ms: 11.98, rmse: 110.42, r2: -24.25 },
 } as const;
 
+/**
+ * Circuit facts from docs/reports/evidence.md.
+ * Wall clock: 249 nodes, 200 steps, dt = 1 ms.
+ * The ODE time is 8 AdExp cells, linearly scaled to 249.
+ */
+export const circuit = {
+  cells: 249,
+  activityMs: 200,
+  odeSampleCells: 8,
+} as const;
+
+export function fill(template: string, vars: Record<string, number | string>): string {
+  return template.replace(/\{(\w+)\}/g, (_, key: string) => String(vars[key] ?? ""));
+}
+
 /** Held-out midpoints of the aCC f–I grid. Columns: I nA, AdExp Hz, F Hz, unified LIF Hz. */
 export const fi: readonly (readonly [number, number, number, number])[] = [
   [0.0267, 0, 0, 0],
